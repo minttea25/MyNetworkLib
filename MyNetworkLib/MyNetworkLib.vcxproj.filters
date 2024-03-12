@@ -8,6 +8,9 @@
     <Filter Include="Base">
       <UniqueIdentifier>{fdede7a7-f5fa-4fbf-83c0-0f08d6d5d1b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{45ef1cc2-e5ef-4840-8e0f-dadf9ff3c0c5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -22,12 +25,46 @@
     <ClInclude Include="CorePch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CoreGlobal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreMacroDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreTLS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreContainer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
       <Filter>Base</Filter>
     </ClCompile>
     <ClCompile Include="Sample.cpp" />
-    <ClCompile Include="CorePch.cpp" />
+    <ClCompile Include="CorePch.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreGlobal.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreMacroDef.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreTypes.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreTLS.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreDef.cpp" />
+    <ClCompile Include="CoreContainer.cpp" />
   </ItemGroup>
 </Project>
