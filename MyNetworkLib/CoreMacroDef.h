@@ -21,13 +21,19 @@
     #endif                                                              \
 #endif
 
+#define MESSAGE(text) std::cout << #text << std::endl;
+
+#define SHOW(name, value) {                             \
+    std::cout << #name << ": " << value << std::endl;    \
+}                                                       \
+
 
 /*******************************************
 * Crash Check
 ********************************************/
 
 // Note: __analysis_assume does not work at runtime actually.
-#define CRASH(condition)                \
+#define CRASH(text)                \
 {                                       \
     unsigned int* crash = nullptr;      \
     __analysis_assume(crash != nullptr);\

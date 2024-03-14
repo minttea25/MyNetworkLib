@@ -11,6 +11,9 @@
     <Filter Include="Network">
       <UniqueIdentifier>{45ef1cc2-e5ef-4840-8e0f-dadf9ff3c0c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Memory">
+      <UniqueIdentifier>{e7bf0c68-0f8f-42b0-b787-106f185f22f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -43,6 +46,15 @@
     <ClInclude Include="CoreContainer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Memory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryAllocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -64,7 +76,23 @@
     <ClCompile Include="CoreTLS.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="CoreDef.cpp" />
-    <ClCompile Include="CoreContainer.cpp" />
+    <ClCompile Include="MemoryPool.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryAllocator.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreDef.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreContainer.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>
