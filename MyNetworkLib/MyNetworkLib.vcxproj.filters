@@ -43,9 +43,6 @@
     <ClInclude Include="CoreDef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CoreContainer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -53,6 +50,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MemoryPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreSTLContainer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -88,9 +91,7 @@
     <ClCompile Include="CoreDef.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="CoreContainer.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
+    <ClCompile Include="ObjectPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

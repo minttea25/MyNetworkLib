@@ -35,6 +35,14 @@ public:
 	/// </summary>
 	/// <returns>The count of the elements in the pool.</returns>
 	uint32 poolCount() const { return _poolCount.load(); }
+#ifdef TEST
+	static friend std::ostream& operator<<(std::ostream& os, const MemoryPool* ptr)
+	{
+		return os << "MemoryPool(" << "_allocSize: " << ptr->_allocSize 
+			<< ',' << "_useCount: " << ptr->useCount() 
+			<< ',' << "_poolCount:" << ptr->poolCount() << ")";
+	}
+#endif // TEST
 
 private:
 	// Note: Header must come first! (than other members)

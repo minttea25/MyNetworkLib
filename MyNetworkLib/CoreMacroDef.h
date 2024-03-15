@@ -22,6 +22,10 @@
 #endif
 
 #define MESSAGE(text) std::cout << #text << std::endl;
+#define MSG(str)            \
+{   \
+    std::cout << str << std::endl;\
+}   \
 
 #define SHOW(name, value) {                             \
     std::cout << #name << ": " << value << std::endl;    \

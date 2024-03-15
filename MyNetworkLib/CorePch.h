@@ -19,5 +19,7 @@
 
 
 #include "Memory.h"
+#include "CoreSTLContainer.h"
+#include "ObjectPool.h"
 
 
