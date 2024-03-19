@@ -1,24 +1,16 @@
 #pragma once
 
-// extern instance used as global
+NAMESPACE_OPEN(NetCore)
+
+
+extern class Memory* GMemory;
 
 
 class CoreGlobal
 {
 public:
-	CoreGlobal()
-	{
-		// new constructor here
+	CoreGlobal();
+	~CoreGlobal();
+};
 
-		// init method here
-	}
-
-	~CoreGlobal()
-	{
-		// delete here
-		
-		// clear method here
-	}
-} GCoreGlobal;
-
-
+NAMESPACE_CLOSE

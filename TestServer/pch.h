@@ -1,9 +1,10 @@
 #pragma once
 
-#include <iostream>
+
+
+
 
 #ifndef _DEBUG
-
 pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
 
 
