@@ -58,6 +58,27 @@
     <ClInclude Include="ObjectPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IOCPCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IOCPObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IOCPEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketSession.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Connector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Listener.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -88,10 +109,14 @@
     <ClCompile Include="MemoryAllocator.cpp">
       <Filter>Memory</Filter>
     </ClCompile>
-    <ClCompile Include="CoreDef.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
     <ClCompile Include="ObjectPool.cpp" />
+    <ClCompile Include="IOCPCore.cpp" />
+    <ClCompile Include="IOCPObject.cpp" />
+    <ClCompile Include="IOCPEvent.cpp" />
+    <ClCompile Include="Session.cpp" />
+    <ClCompile Include="PacketSession.cpp" />
+    <ClCompile Include="Connector.cpp" />
+    <ClCompile Include="Listener.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

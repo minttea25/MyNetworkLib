@@ -12,6 +12,8 @@
 #define IN
 #define OUT
 
+#define NOT_USE
+
 #define NAMESPACE_OPEN(name) namespace name {
 #define NAMESPACE_CLOSE }
 
@@ -21,6 +23,10 @@
     #endif                                                              \
 #endif
 
+
+/*******************************************
+* DEBUGGING
+********************************************/
 #define MESSAGE(text) std::cout << #text << std::endl;
 #define MSG(str)            \
 {   \
@@ -31,6 +37,15 @@
     std::cout << #name << ": " << value << std::endl;    \
 }                                                       \
 
+#define WARN(text) \
+{   \
+std::cout << "WARNING: " << #text << std::endl;    \
+}   \
+
+#define ERR(code, text) \
+{   \
+std::cerr << code << ": " << #text << std::endl;    \
+}   \
 
 /*******************************************
 * Crash Check

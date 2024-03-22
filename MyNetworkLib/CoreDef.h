@@ -7,3 +7,5 @@
 #define TEST
 
 #define USE_BIG_MEMORY_BLOCK
+
+#define DEBUG
