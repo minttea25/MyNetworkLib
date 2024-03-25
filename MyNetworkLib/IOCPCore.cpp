@@ -7,7 +7,7 @@ NetCore::IOCPCore::IOCPCore()
     // Create new handle
     _iocpHandle = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, 
         nullptr, 0, 0);
-    if (_iocpHandle == NULL)
+    if (_iocpHandle == INVALID_HANDLE_VALUE)
     {
         int32 errorCode = ::GetLastError();
         ERR(errorCode, Failed to create new IO complete port);
@@ -58,14 +58,12 @@ bool NetCore::IOCPCore::GetQueuedCompletionStatus(DWORD dwMilliseconds)
             return false;
         default:
             ERR(errCode, Failed to get queued completion status.);
-            IOCPObject* iocpObject = iocpEvent->GetIOCPObjectRef();
-            iocpObject->Dispatch(iocpEvent, numberOfBytesTransferred);
+            //iocpEvent->GetIOCPObjectRef()->Dispatch(iocpEvent, numberOfBytesTransferred);
             return false;
         }
     }
 
-    IOCPObject* iocpObject = iocpEvent->GetIOCPObjectRef();
-    iocpObject->Dispatch(iocpEvent, numberOfBytesTransferred);
+    iocpEvent->GetIOCPObjectRef()->Dispatch(iocpEvent, numberOfBytesTransferred);
 
 
     return true;

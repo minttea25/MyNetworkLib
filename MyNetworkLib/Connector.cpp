@@ -11,8 +11,6 @@ NetCore::Connector::Connector(SOCKADDR_IN& addr, std::function<Session*()> sessi
 	int32 suc = ::WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ASSERT_CRASH(suc == 0);
 
-	_connectSocket = ::WSASocketW(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
-
 	_initWSockFunctions();
 }
 
@@ -27,9 +25,10 @@ NetCore::Connector::~Connector()
 
 bool NetCore::Connector::Connect(IOCPCore& iocpCore)
 {
+	_session = _session_factory();
+
 	// Create a async IO Socket using Overlapped model.
-	_connectSocket = ::WSASocket(AF_INET, SOCK_STREAM,
-		IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
+	_connectSocket = _session->GetSocket();
 
 	// Check failed
 	ASSERT_CRASH(_connectSocket != INVALID_SOCKET);
@@ -49,10 +48,9 @@ bool NetCore::Connector::Connect(IOCPCore& iocpCore)
 	}
 
 	// register handle
-	_session = _session_factory();
 	ASSERT_CRASH(iocpCore.RegisterIOCP(this) == true);
 
-
+	_connectEvent.Clear();
 	_connectEvent.SetIOCPObjectRef(this);
 
 	/*bool keepalive = true;
@@ -72,6 +70,7 @@ bool NetCore::Connector::Connect(IOCPCore& iocpCore)
 		{
 			// Error
 			ERR(errorCode, Error at ConnectEx);
+			_connectEvent.SetIOCPObjectRef(nullptr);
 			return false;
 		}
 	}
@@ -81,12 +80,13 @@ bool NetCore::Connector::Connect(IOCPCore& iocpCore)
 
 void NetCore::Connector::_initWSockFunctions()
 {
-	ASSERT_CRASH(_connectSocket != INVALID_SOCKET);
+	SOCKET dummy = ::WSASocketW(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
+	ASSERT_CRASH(dummy != INVALID_SOCKET);
 
 	NOT_USE DWORD bytes = 0;
 	GUID t = WSAID_CONNECTEX;
 	// WSAIoctl return 0 if successful.
-	int32 suc = ::WSAIoctl(_connectSocket, SIO_GET_EXTENSION_FUNCTION_POINTER,
+	int32 suc = ::WSAIoctl(dummy, SIO_GET_EXTENSION_FUNCTION_POINTER,
 		&t, sizeof(t),
 		reinterpret_cast<LPVOID*>(&ConnectEx), sizeof(ConnectEx),
 		OUT &bytes, NULL, NULL);
@@ -98,10 +98,13 @@ void NetCore::Connector::_initWSockFunctions()
 	}
 
 	ASSERT_CRASH(suc == 0);
+	::closesocket(dummy);
+	dummy = (~0);
 }
 
 void NetCore::Connector::_processConnect()
 {
+	_connectEvent.SetIOCPObjectRef(nullptr);
 	ASSERT_CRASH(_session != nullptr);
 	_session->SetConnected();
 }

@@ -14,7 +14,7 @@ enum struct EventType : uint8
 	Recv,
 };
 
-class IOCPEvent : public OVERLAPPED
+struct IOCPEvent : public OVERLAPPED
 {
 public:
 	IOCPEvent(EventType eventType) : _eventType(eventType)

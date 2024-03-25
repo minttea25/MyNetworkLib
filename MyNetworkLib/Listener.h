@@ -6,12 +6,12 @@ static LPFN_ACCEPTEX AcceptEx = nullptr;
 
 class Listener : public IOCPObject
 {
-	constexpr static auto MAX_ACCEPT_COUNT = 1;
+	constexpr static auto MAX_ACCEPT_COUNT = 10;
 public:
-	Listener(SOCKADDR_IN& addr);
+	Listener(SOCKADDR_IN& addr, std::function<Session*()> session_factory, IOCPCore& core);
 	~Listener();
 
-	bool StartListen(IOCPCore& iocpCore);
+	bool StartListen();
 public:
 	size_t GetConnectedSessionCount() const { return _accepEvents.size(); }
 private:
@@ -26,20 +26,21 @@ private:
 	SOCKET _listenSocket = INVALID_SOCKET;
 	SOCKADDR_IN _addr;
 	Vector<AcceptEvent*> _accepEvents;
+	std::function<Session* ()> _session_factory;
 
 // TEMP
 public:
 	Vector<Session*> sessions;
-	Session* GetSession(int idx)
+	
+	void BroadCast(const char* msg)
 	{
-		if (sessions.size() == 0) return nullptr;
-		return sessions[idx];
-	}
-	Session* GetNewSession() noexcept
-	{
-		Session* s = xxnew<Session>();
-		sessions.push_back(s);
-		return s;
+		// IT'S TEMP
+		// It must be used with lock
+		for (auto s : sessions)
+		{
+			if(s->IsConnected() == true) 
+				s->Send(msg);
+		}
 	}
 
 	void ReleaseAllSessions()
@@ -50,7 +51,15 @@ public:
 		}
 		sessions.clear();
 	}
-
+private:
+	IOCPCore& _core;
+	Session* _get_new_session()
+	{
+		auto s = _session_factory();
+		sessions.push_back(s);
+		ASSERT_CRASH(_core.RegisterIOCP(s));
+		return s;
+	}
 };
 
 NAMESPACE_CLOSE

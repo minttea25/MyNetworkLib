@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "Listener.h"
 
-NetCore::Listener::Listener(SOCKADDR_IN& addr) : _addr(addr)
+NetCore::Listener::Listener(SOCKADDR_IN& addr, std::function<Session* ()> session_factory, IOCPCore& core) 
+	: _addr(addr), _session_factory(session_factory), _core(core)
 {
 	WSADATA wsaData;
 	// Returns 0 if successful.
@@ -30,12 +31,10 @@ NetCore::Listener::~Listener()
 	ReleaseAllSessions();
 }
 
-bool NetCore::Listener::StartListen(IOCPCore& iocpCore)
+bool NetCore::Listener::StartListen()
 {
 	bool suc = true;
-
-	suc = iocpCore.RegisterIOCP(this);
-	ASSERT_CRASH(suc == true);
+	ASSERT_CRASH(_core.RegisterIOCP(this));
 
 	bool reuse_address = true;
 	suc = SOCKET_ERROR != ::setsockopt(_listenSocket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<char*>(&reuse_address), sizeof(bool));
@@ -68,11 +67,13 @@ bool NetCore::Listener::StartListen(IOCPCore& iocpCore)
 
 void NetCore::Listener::_initWSockFunctions()
 {
+	SOCKET dummy = ::WSASocketW(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
+	ASSERT_CRASH(dummy != INVALID_SOCKET);
 	NOT_USE DWORD bytes = 0;
 	GUID t = WSAID_ACCEPTEX;
 	// WSAIoctl return 0 if successful.
 
-	int32 suc = ::WSAIoctl(_listenSocket, SIO_GET_EXTENSION_FUNCTION_POINTER,
+	int32 suc = ::WSAIoctl(dummy, SIO_GET_EXTENSION_FUNCTION_POINTER,
 		&t, sizeof(t),
 		reinterpret_cast<LPVOID*>(&AcceptEx), sizeof(AcceptEx),
 		OUT & bytes, NULL, NULL);
@@ -82,15 +83,17 @@ void NetCore::Listener::_initWSockFunctions()
 		ERR(errorCode, Failed WSAIoctl at AcceptEx.);
 	}
 	ASSERT_CRASH(suc == 0);
+	::closesocket(dummy);
+	dummy = (~0);
 }
 
 void NetCore::Listener::RegisterAccept(AcceptEvent* acceptEvent)
 {
-	auto s = GetNewSession();
+	auto s = _get_new_session();
 
 	acceptEvent->Clear();
-
 	acceptEvent->SetSessionRef(s);
+
 	auto session = acceptEvent->GetSessionRef();
 	DWORD bytesReceived = 0;
 	BOOL suc = AcceptEx(_listenSocket, session->GetSocket(),
@@ -137,7 +140,6 @@ void NetCore::Listener::ProcessAccept(AcceptEvent* acceptEvent)
 	}
 
 	session->SetConnected();
-	acceptEvent->SetIOCPObjectRef(nullptr);
 
 	RegisterAccept(acceptEvent);
 }

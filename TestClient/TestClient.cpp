@@ -23,13 +23,13 @@ private:
 class ServerSession : public NetCore::Session
 {
 public:
-	void OnConnected() override
+	uint32 OnRecv(const _byte* buffer, const uint32 len) override
 	{
-		std::cout << "OnConnected" << std::endl;
-	}
-	void OnDisconnected(const int32 error = 0) override
-	{
-		std::cout << "OnDisconnected: " << error << std::endl;
+		Session::OnRecv(buffer, len);
+
+		std::cout.write(buffer, len) << std::endl;
+
+		return len;
 	}
 };
 
@@ -70,30 +70,37 @@ int main()
 			std::this_thread::sleep_for(100ms);
 			while (true)
 			{
-				core.GetQueuedCompletionStatus(100);
+				core.GetQueuedCompletionStatus();
+				//this_thread::yield();
+			}
+		}
+	);
+	std::thread th2
+	(
+		[&core]() {
+			std::cout << "T id:" << std::this_thread::get_id() << std::endl;
+			std::this_thread::sleep_for(100ms);
+			while (true)
+			{
+				core.GetQueuedCompletionStatus();
 				//this_thread::yield();
 			}
 		}
 	);
 	{
-		while (true)
+		string msg;
+		std::cin >> msg;
+		if (session_ptr != nullptr)
 		{
-			if (session_ptr != nullptr)
-			{
-				std::cout << session_ptr->IsConnected() << std::endl;
-			}
-			this_thread::sleep_for(10ms);
-
-			/*string msg;
-			std::cin >> msg;
-			if (session_ptr != nullptr)
-			{
-				session_ptr->Send(msg.c_str());
-			}*/
+			session_ptr->Send(msg.c_str());
 		}
 	}
 
 	if (th.joinable()) th.join();
+	if (th2.joinable()) th2.join();
+
+	if (session_ptr != nullptr)
+		delete session_ptr;
 
     return 0;
 }

@@ -28,6 +28,18 @@ NetCore::Session::~Session()
 
 void NetCore::Session::SetConnected()
 {
+	int error = 0;
+	int len = sizeof(error);
+	int result = getsockopt(_socket, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&error), &len);
+	if (result == SOCKET_ERROR)
+	{
+		// Failed to get socket options
+		std::cerr << "getsockopt failed: " << WSAGetLastError() << std::endl;
+		return;
+	}
+
+	if (error != 0) return;
+
 	_connected.store(true);
 
 	OnConnected();
@@ -92,22 +104,25 @@ void NetCore::Session::RegisterSend()
 		return;
 	}
 
+	_sendEvent.Clear();
+	_sendEvent.SetIOCPObjectRef(this);
 
-	{
-		_sendLock.lock();
+	//{
+	//	_sendLock.lock();
 
-		// TODO : processing with queue
+	//	// TODO : processing with queue
 
-		_sendLock.unlock();
-	}
+	//	_sendLock.unlock();
+	//}
 
-	WSABUF sendBuffer{};
+
+	WSABUF sendBuffer;
 	sendBuffer.buf = reinterpret_cast<_byte*>(GetSendBuffer());
 	sendBuffer.len = MAX_BUFFER_SIZE;
 
 	DWORD numberOfBytesSent = 0;
-	int32 res = WSASend(_socket, &sendBuffer, 1,
-		OUT & numberOfBytesSent, 0, &_sendEvent, nullptr);
+	int32 res = ::WSASend(_socket, &sendBuffer, 1,
+		OUT & numberOfBytesSent, 0, &_sendEvent, NULL);
 	if (res == SOCKET_ERROR)
 	{
 		// Check pending
@@ -123,6 +138,8 @@ void NetCore::Session::RegisterSend()
 
 void NetCore::Session::ProcessSend(const int32 numberOfBytesSent)
 {
+	_sendEvent.SetIOCPObjectRef(nullptr);
+
 	if (numberOfBytesSent == 0)
 	{
 		// Error
@@ -143,6 +160,8 @@ void NetCore::Session::RegisterRecv()
 		return;
 	}
 
+	_recvEvent.Clear();
+	_recvEvent.SetIOCPObjectRef(this);
 
 	// TEMP
 	WSABUF recvBuffer {};
@@ -151,9 +170,8 @@ void NetCore::Session::RegisterRecv()
 
 	DWORD numberOfBytesRecvd = 0; // OUT
 	DWORD flags = 0;
-	SHOW(connected, IsConnected());
 	int32 res = ::WSARecv(_socket, &recvBuffer, 1,
-		OUT & numberOfBytesRecvd, OUT & flags, &_recvEvent, nullptr);
+		OUT & numberOfBytesRecvd, OUT & flags, &_recvEvent, NULL);
 	if (res == SOCKET_ERROR)
 	{
 		// Check pending
