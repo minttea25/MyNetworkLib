@@ -9,11 +9,10 @@ constexpr ushort PORT = 8889;
 static void IOCP_WORKER(NetCore::IOCPCore& core)
 {
     std::cout << "T id:" << std::this_thread::get_id() << std::endl;
-    std::this_thread::sleep_for(100ms);
     while (true)
     {
-        core.GetQueuedCompletionStatus(100);
-        this_thread::yield();
+        core.GetQueuedCompletionStatus(10);
+        //this_thread::yield();
     }
 }
 
@@ -27,15 +26,35 @@ int main()
     
 
     NetCore::Listener listener(addr);
-    listener.StartListen();
-
     NetCore::IOCPCore core;
+    listener.StartListen(core);
+
+    
     std::thread th
     (
         [&core]() {
             IOCP_WORKER(core);
         }
     );
+
+    {
+        while (true)
+        {
+            /*auto s = listener.GetSession(0);
+            if (s != nullptr)
+            {
+                std::cout << s->IsConnected() << std::endl;
+            }
+            this_thread::sleep_for(100ms);*/
+            string msg;
+            std::cin >> msg;
+            auto s = listener.GetSession(0);
+            if (s != nullptr)
+            {
+                s->Send(msg.c_str());
+            }
+        }
+    }
 
     if (th.joinable() == true) th.join();
 

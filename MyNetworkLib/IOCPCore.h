@@ -10,7 +10,7 @@ public:
 
 	HANDLE GetHandle() const { return _iocpHandle; }
 
-	bool CreateIOCP(class IOCPObject* iocpObject);
+	bool RegisterIOCP(class IOCPObject* iocpObject);
 	bool GetQueuedCompletionStatus(DWORD dwMilliseconds);
 private:
 	HANDLE _iocpHandle = NULL; // Note: HANDLE is void*

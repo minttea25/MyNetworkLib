@@ -6,12 +6,12 @@ static LPFN_ACCEPTEX AcceptEx = nullptr;
 
 class Listener : public IOCPObject
 {
-	constexpr static auto MAX_ACCEPT_COUNT = 10;
+	constexpr static auto MAX_ACCEPT_COUNT = 1;
 public:
 	Listener(SOCKADDR_IN& addr);
 	~Listener();
 
-	bool StartListen();
+	bool StartListen(IOCPCore& iocpCore);
 public:
 	size_t GetConnectedSessionCount() const { return _accepEvents.size(); }
 private:
@@ -30,6 +30,11 @@ private:
 // TEMP
 public:
 	Vector<Session*> sessions;
+	Session* GetSession(int idx)
+	{
+		if (sessions.size() == 0) return nullptr;
+		return sessions[idx];
+	}
 	Session* GetNewSession() noexcept
 	{
 		Session* s = xxnew<Session>();

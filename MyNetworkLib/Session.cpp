@@ -4,8 +4,14 @@
 NetCore::Session::Session()
 {
 	// Create a async IO Socket using Overlapped model.
-	_socket = ::WSASocket(AF_INET, SOCK_STREAM,
+	_socket = ::WSASocketW(AF_INET, SOCK_STREAM,
 		IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
+
+	if (_socket == INVALID_SOCKET)
+	{
+		int32 errorCode = ::WSAGetLastError();
+		ERR(errorCode, "Failed to create socket.");
+	}
 
 
 	// Check failed
@@ -31,7 +37,16 @@ void NetCore::Session::SetConnected()
 
 bool NetCore::Session::Send(const _byte* buffer)
 {
+	if (_connected == false)
+	{
+		// Stop receiving
+		WARN(Session is already disconnected.);
+		return false;
+	}
+
 	std::copy(buffer, buffer + strlen(buffer) + 1, _sendBuffer);
+
+	RegisterSend();
 
 	return true;
 }
@@ -69,11 +84,11 @@ HANDLE NetCore::Session::GetHandle()
 
 void NetCore::Session::RegisterSend()
 {
-	// Note: NOT _connected.load()
-	// The _connected should be always true after being connected once.
+	// Note: Because _connected is atomic variable, reading just _connected is sames as reading _connected.load().
 	if (_connected == false)
 	{
-		// Stop sending
+		// Stop receiving
+		WARN(Session is already disconnected.);
 		return;
 	}
 
@@ -97,7 +112,7 @@ void NetCore::Session::RegisterSend()
 	{
 		// Check pending
 		int32 errorCode = ::WSAGetLastError();
-		if (errorCode == WSA_IO_PENDING)
+		if (errorCode != WSA_IO_PENDING)
 		{
 			// Error
 			ERR(errorCode, "WSASend Error");
@@ -120,11 +135,11 @@ void NetCore::Session::ProcessSend(const int32 numberOfBytesSent)
 
 void NetCore::Session::RegisterRecv()
 {
-	// Note: NOT _connected.load()
-	// The _connected should be always true after being connected once.
+	// Note: Because _connected is atomic variable, reading just _connected is sames as reading _connected.load().
 	if (_connected == false)
 	{
 		// Stop receiving
+		WARN(Session is already disconnected.);
 		return;
 	}
 
@@ -136,13 +151,14 @@ void NetCore::Session::RegisterRecv()
 
 	DWORD numberOfBytesRecvd = 0; // OUT
 	DWORD flags = 0;
+	SHOW(connected, IsConnected());
 	int32 res = ::WSARecv(_socket, &recvBuffer, 1,
 		OUT & numberOfBytesRecvd, OUT & flags, &_recvEvent, nullptr);
 	if (res == SOCKET_ERROR)
 	{
 		// Check pending
 		int32 errorCode = ::WSAGetLastError();
-		if (errorCode == WSA_IO_PENDING)
+		if (errorCode != WSA_IO_PENDING)
 		{
 			// Error
 			ERR(errorCode, "WSARecv Error");

@@ -30,9 +30,18 @@ NetCore::Listener::~Listener()
 	ReleaseAllSessions();
 }
 
-bool NetCore::Listener::StartListen()
+bool NetCore::Listener::StartListen(IOCPCore& iocpCore)
 {
 	bool suc = true;
+
+	suc = iocpCore.RegisterIOCP(this);
+	ASSERT_CRASH(suc == true);
+
+	bool reuse_address = true;
+	suc = SOCKET_ERROR != ::setsockopt(_listenSocket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<char*>(&reuse_address), sizeof(bool));
+	ASSERT_CRASH(suc);
+
+
 
 	suc = SOCKET_ERROR != ::bind(_listenSocket, reinterpret_cast<PSOCKADDR>(&_addr), sizeof(SOCKADDR_IN));
 	if (suc == false)
@@ -79,17 +88,16 @@ void NetCore::Listener::RegisterAccept(AcceptEvent* acceptEvent)
 {
 	auto s = GetNewSession();
 
+	acceptEvent->Clear();
+
 	acceptEvent->SetSessionRef(s);
 	auto session = acceptEvent->GetSessionRef();
-	auto acceptSocket = session->GetSocket();
-	auto buf = session->GetRecvBuffer();
-	auto ov = acceptEvent->overlapped();
 	DWORD bytesReceived = 0;
-	BOOL suc = AcceptEx(_listenSocket, acceptSocket,
-		buf, 0,
+	BOOL suc = AcceptEx(_listenSocket, session->GetSocket(),
+		session->GetRecvBuffer(), 0,
 		sizeof(SOCKADDR_IN) + 16,
 		sizeof(SOCKADDR_IN) + 16,
-		OUT & bytesReceived, ov);
+		OUT & bytesReceived, acceptEvent->overlapped());
 
 	if (suc == FALSE)
 	{
@@ -110,7 +118,7 @@ void NetCore::Listener::ProcessAccept(AcceptEvent* acceptEvent)
 
 	int suc = ::setsockopt(session->GetSocket(), 
 		SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, 
-		reinterpret_cast<_byte*>(_listenSocket), sizeof(SOCKET));
+		reinterpret_cast<_byte*>(&_listenSocket), sizeof(SOCKET));
 
 	if (suc == SOCKET_ERROR)
 	{
@@ -129,6 +137,9 @@ void NetCore::Listener::ProcessAccept(AcceptEvent* acceptEvent)
 	}
 
 	session->SetConnected();
+	acceptEvent->SetIOCPObjectRef(nullptr);
+
+	RegisterAccept(acceptEvent);
 }
 
 HANDLE NetCore::Listener::GetHandle()

@@ -20,10 +20,10 @@ struct ConnectEvent;
 class Connector : public IOCPObject
 {
 public:
-	Connector(SOCKADDR_IN& addr, Session& session);
+	Connector(SOCKADDR_IN& addr, std::function<Session*()> sessionFactory);
 	~Connector();
 
-	bool Connect();
+	bool Connect(IOCPCore& core);
 public:
 	bool connected() const { return _connected.load(); }
 private:
@@ -39,7 +39,8 @@ private:
 	ConnectEvent _connectEvent;
 	Atomic<bool> _connected = false;
 
-	Session* _session = nullptr;
+	Session* _session;
+	std::function<Session*()> _session_factory ;
 };
 
 NAMESPACE_CLOSE;

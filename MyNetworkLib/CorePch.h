@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <vector>
+#include <functional>
 
 // Core Headers
 #include "CoreDef.h"

@@ -20,43 +20,80 @@ private:
 	int _exp = 0;
 };
 
+class ServerSession : public NetCore::Session
+{
+public:
+	void OnConnected() override
+	{
+		std::cout << "OnConnected" << std::endl;
+	}
+	void OnDisconnected(const int32 error = 0) override
+	{
+		std::cout << "OnDisconnected: " << error << std::endl;
+	}
+};
+
+constexpr PCSTR IP = "127.0.0.1";
+constexpr ushort PORT = 8889;
+
 int main()
 {
-    std::cout << "Hello World!\n";
+	this_thread::sleep_for(1000ms);
+	
+	SOCKADDR_IN addr;
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	::inet_pton(AF_INET, IP, &addr.sin_addr);
+	addr.sin_port = ::htons(PORT);
 
-    Sample sample;
-    sample.PrintHello();
+	ServerSession* session_ptr = nullptr;
+	
+	auto session_factory = [&session_ptr]() -> Session*
+		{
+			session_ptr = new ServerSession();
+			return session_ptr;
+		};
 
-	Vector<TestClass> v(100);
-	SHOW(v.size(): , v.size());
-
-	// object pool test codes
-	// Check memory usage
-	ObjectPool<TestClass> op;
-
-	auto t1 = op.Acquire(100, 10, 50);
-	auto t2 = op.Acquire(200, 10, 50);
-	op.Release(t1);
-	op.Release(t2);
-	SHOW(poolcount, op.poolCount());
-	SHOW(usecount, op.useCount());
-	for (int i = 0; i<1000; ++i)
+	NetCore::Connector connector(addr, session_factory);
+	NetCore::IOCPCore core;
+	if (!connector.Connect(core))
 	{
-		auto t1 = op.Acquire(100, 10, 50);
-		auto t2 = op.Acquire(200, 10, 50);
-
-		SHOW(poolcount, op.poolCount());
-		SHOW(usecount, op.useCount());
-
-		op.Release(t1);
-		op.Release(t2);
-
-		MESSAGE(After release t1 and t2 : );
-		SHOW(poolcount, op.poolCount());
-		SHOW(usecount, op.useCount());
-
-		this_thread::sleep_for(10ms);
+		std::cerr << "Failed to connect." << std::endl;
+		return -1;
 	}
+
+	
+	std::thread th
+	(
+		[&core]() {
+			std::cout << "T id:" << std::this_thread::get_id() << std::endl;
+			std::this_thread::sleep_for(100ms);
+			while (true)
+			{
+				core.GetQueuedCompletionStatus(100);
+				//this_thread::yield();
+			}
+		}
+	);
+	{
+		while (true)
+		{
+			if (session_ptr != nullptr)
+			{
+				std::cout << session_ptr->IsConnected() << std::endl;
+			}
+			this_thread::sleep_for(10ms);
+
+			/*string msg;
+			std::cin >> msg;
+			if (session_ptr != nullptr)
+			{
+				session_ptr->Send(msg.c_str());
+			}*/
+		}
+	}
+
+	if (th.joinable()) th.join();
 
     return 0;
 }

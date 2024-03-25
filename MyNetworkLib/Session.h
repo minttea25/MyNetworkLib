@@ -22,6 +22,8 @@ public:
 	Session();
 	virtual ~Session();
 
+	bool IsConnected() const { return _connected; }
+
 public:
 	void SetConnected();
 
@@ -43,10 +45,10 @@ private:
 	void RegisterDisconnect();
 	void ProcessDisconnect();
 protected: // virtuals
-	virtual void OnConnected() {}
+	virtual void OnConnected() { std::cout << "OnConnected at Session." << std::endl; }
 	virtual void OnSend(const int32 len) {}
 	virtual uint32 OnRecv(const _byte* buffer, const uint32 len) { return 0; }
-	virtual void OnDisconnected(const int32 error = 0) {}
+	virtual void OnDisconnected(const int32 error = DisconnectError::NONE) { std::cout << "OnDisconnected: " << error << std::endl; }
 private:
 	SOCKET _socket = INVALID_SOCKET;
 

@@ -26,21 +26,27 @@ NetCore::IOCPCore::~IOCPCore()
     }
 }
 
-bool NetCore::IOCPCore::CreateIOCP(IOCPObject* iocpObject)
+bool NetCore::IOCPCore::RegisterIOCP(IOCPObject* iocpObject)
 {
-    ::CreateIoCompletionPort(iocpObject->GetHandle(), _iocpHandle, 0, 0);
-
-    return false;
+    auto ret = ::CreateIoCompletionPort(iocpObject->GetHandle(), _iocpHandle, 0, 0);
+    if (ret == NULL)
+    {
+        auto errorCode = ::GetLastError();
+        ERR(errorCode, Failed to CreateIoCompletionPort while registering iocp handle.);
+        return false;
+    }
+    return true;
 }
 
 bool NetCore::IOCPCore::GetQueuedCompletionStatus(DWORD dwMilliseconds)
 {
     DWORD numberOfBytesTransferred = 0;
     IOCPEvent* iocpEvent = nullptr;
+    ULONG_PTR key = 0;
 
     // Atode GetQueuedCompletionStatusEx ni kaemasyo
     BOOL suc = ::GetQueuedCompletionStatus(_iocpHandle,
-        OUT & numberOfBytesTransferred, OUT & _completeionKey,
+        OUT & numberOfBytesTransferred, OUT & key,
         OUT reinterpret_cast<LPOVERLAPPED*>(&iocpEvent), dwMilliseconds);
 
     if (suc == FALSE)
@@ -52,6 +58,8 @@ bool NetCore::IOCPCore::GetQueuedCompletionStatus(DWORD dwMilliseconds)
             return false;
         default:
             ERR(errCode, Failed to get queued completion status.);
+            IOCPObject* iocpObject = iocpEvent->GetIOCPObjectRef();
+            iocpObject->Dispatch(iocpEvent, numberOfBytesTransferred);
             return false;
         }
     }

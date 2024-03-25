@@ -22,6 +22,7 @@ public:
 		_init();
 		//Init();
 	}
+	inline void Clear() { _init(); }
 public: // virtual
 	//virtual void Init() {}
 public: // property
