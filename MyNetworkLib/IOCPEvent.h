@@ -12,9 +12,10 @@ enum struct EventType : uint8
 	Accept,
 	Send,
 	Recv,
+	// ...
 };
 
-struct IOCPEvent : public OVERLAPPED
+struct IOCPEvent : public _OVERLAPPED
 {
 public:
 	IOCPEvent(EventType eventType) : _eventType(eventType)
@@ -30,7 +31,7 @@ public: // property
 	{
 		return _eventType;
 	}
-	IOCPObject* GetIOCPObjectRef() { return _iocpObject; }
+	IOCPObjectSPtr GetIOCPObjectRef() { return _iocpObject; }
 	LPOVERLAPPED overlapped()
 	{
 #ifdef DEBUG
@@ -48,7 +49,7 @@ public: // property
 		return reinterpret_cast<LPOVERLAPPED*>(this);
 	}
 
-	void SetIOCPObjectRef(IOCPObject* obj) noexcept
+	void SetIOCPObjectRef(IOCPObjectSPtr obj) noexcept
 	{
 		_iocpObject = obj;
 	}
@@ -66,7 +67,7 @@ private:
 	}
 private:
 	EventType _eventType;
-	IOCPObject* _iocpObject = nullptr;
+	IOCPObjectSPtr _iocpObject = nullptr;
 };
 
 struct ConnectEvent : public IOCPEvent
@@ -87,16 +88,16 @@ struct AcceptEvent : public IOCPEvent
 public:
 	AcceptEvent() : IOCPEvent(EventType::Accept) {}
 
-	void SetSessionRef(Session* session) noexcept
+	void SetSessionRef(SessionSPtr session) noexcept
 	{
 		_session = session;
 	}
-	Session* GetSessionRef() const 
+	SessionSPtr GetSessionRef() const
 	{ 
 		return _session; 
 	}
 private:
-	Session* _session = nullptr;
+	SessionSPtr _session = nullptr;
 };
 
 struct SendEvent : public IOCPEvent

@@ -2,35 +2,40 @@
 
 NAMESPACE_OPEN(NetCore);
 
-static LPFN_ACCEPTEX AcceptEx = nullptr;
-
+/// <summary>
+/// Listener is a class to wait external connection. (bind / listen)
+/// </summary>
 class Listener : public IOCPObject
 {
-	constexpr static auto MAX_ACCEPT_COUNT = 10;
+	static constexpr auto MAX_ACCEPT_COUNT = 10;
 public:
-	Listener(SOCKADDR_IN& addr, std::function<Session*()> session_factory, IOCPCore& core);
+	Listener(SOCKADDR_IN& addr, std::function<SessionSPtr()> session_factory, IOCPCore& core);
 	~Listener();
 
-	bool StartListen();
+	/// <summary>
+	/// Start to listen.
+	/// </summary>
+	/// <param name="backlog">backlog</param>
+	/// <returns>true if trying to bind and listen successful, false otherwise</returns>
+	bool StartListen(const int32 backlog);
 public:
 	size_t GetConnectedSessionCount() const { return _accepEvents.size(); }
 private:
 	// Inherited via IOCPObject
-	void Dispatch(IOCPEvent* event, int32 numberOfBytes) override;
+	void Process(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred) override;
 	HANDLE GetHandle() override;
 
-	void _initWSockFunctions();
 	void RegisterAccept(AcceptEvent* acceptEvent);
 	void ProcessAccept(AcceptEvent* acceptEvent);
 private:
 	SOCKET _listenSocket = INVALID_SOCKET;
 	SOCKADDR_IN _addr;
 	Vector<AcceptEvent*> _accepEvents;
-	std::function<Session* ()> _session_factory;
+	std::function<SessionSPtr()> _session_factory;
 
 // TEMP
 public:
-	Vector<Session*> sessions;
+	Vector<SessionSPtr> sessions;
 	
 	void BroadCast(const char* msg)
 	{
@@ -45,21 +50,10 @@ public:
 
 	void ReleaseAllSessions()
 	{
-		for (auto s : sessions)
-		{
-			xxdelete(s);
-		}
 		sessions.clear();
 	}
 private:
 	IOCPCore& _core;
-	Session* _get_new_session()
-	{
-		auto s = _session_factory();
-		sessions.push_back(s);
-		ASSERT_CRASH(_core.RegisterIOCP(s));
-		return s;
-	}
 };
 
 NAMESPACE_CLOSE

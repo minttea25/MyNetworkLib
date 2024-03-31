@@ -1,120 +1,78 @@
 #include "pch.h"
 #include "Connector.h"
 
-NetCore::Connector::Connector(SOCKADDR_IN& addr, std::function<Session*()> sessionFactory)
-	: _connected(false),
+NetCore::Connector::Connector(IOCPCore* core, SOCKADDR_IN& addr, std::function<SessionSPtr()> sessionFactory)
+	: _connected(false), _core(core),
 	_addr(addr), _session_factory(sessionFactory)
 {
-	WSADATA wsaData;
-	// Returns 0 if successful.
-	// Do not use ::WSAGetLastError() here to get error.
-	int32 suc = ::WSAStartup(MAKEWORD(2, 2), &wsaData);
-	ASSERT_CRASH(suc == 0);
-
-	_initWSockFunctions();
+	_connectSocket = SocketUtils::CreateSocket();
+	_session = _session_factory();
+	_connectSocket = _session->GetSocket();
 }
 
 NetCore::Connector::~Connector()
 {
-	if (_session != nullptr) xxdelete<Session>(_session);
-
-	// Clear winsock
-	::WSACleanup();
-	_connectSocket = INVALID_SOCKET;
+	// The socket is referrenced from Session.
+	// SocketUtils::Close(_connectSocket);
 }
 
-bool NetCore::Connector::Connect(IOCPCore& iocpCore)
+bool NetCore::Connector::Connect()
 {
-	_session = _session_factory();
+	if (_connected.load() == true) return false;
 
-	// Create a async IO Socket using Overlapped model.
-	_connectSocket = _session->GetSocket();
+	if (_core->RegisterHandle(shared_from_this()) == false) return false;
 
-	// Check failed
-	ASSERT_CRASH(_connectSocket != INVALID_SOCKET);
+	if (SocketUtils::SetReuseAddress(_connectSocket, true) == false) return false;
+	// For ConnectEx fn
+	if (SocketUtils::BindAnyAddress(_connectSocket) == false) return false;
 
-	SOCKADDR_IN bindAddr;
-	memset(&bindAddr, 0, sizeof(bindAddr));
-	bindAddr.sin_family = AF_INET;
-	bindAddr.sin_addr.s_addr = ::htonl(INADDR_ANY);
-	bindAddr.sin_port = ::htons(0); // any port
+	// Init event
+	_connectEvent.Clear();
+	_connectEvent.SetIOCPObjectRef(shared_from_this());
 
-	// bind local
-	if (SOCKET_ERROR == ::bind(_connectSocket, reinterpret_cast<PSOCKADDR>(&bindAddr), sizeof(bindAddr)))
+	NOT_USE DWORD bytesSent = 0;
+	BOOL suc = SocketUtils::ConnectEx(_connectSocket, reinterpret_cast<PSOCKADDR>(&_addr),
+		sizeof(SOCKADDR), nullptr, 0, OUT & bytesSent, &_connectEvent);
+
+	// Note: WSACheckErrorExceptPending return 0 if no error or WSA_IO_PENDING
+	if (int32 errCode = ErrorHandler::WSACheckErrorExceptPending(suc, WSA_CONNECTEX_FAILED) != Errors::NONE)
 	{
-		auto errorCode = ::WSAGetLastError();
-		ERR(errorCode, Failed to bind.);
+		_connectEvent.SetIOCPObjectRef(nullptr);
 		return false;
 	}
 
-	// register handle
-	ASSERT_CRASH(iocpCore.RegisterIOCP(this) == true);
-
-	_connectEvent.Clear();
-	_connectEvent.SetIOCPObjectRef(this);
-
-	/*bool keepalive = true;
-	bool s = SOCKET_ERROR != ::setsockopt(_connectSocket, SOL_SOCKET,
-		SO_KEEPALIVE, reinterpret_cast<char*>(&keepalive), sizeof(bool));
-	ASSERT_CRASH(s);*/
-
-	DWORD bytesSent = 0; // OUT
-	auto suc = ConnectEx(_connectSocket, reinterpret_cast<PSOCKADDR>(&_addr),
-		sizeof(SOCKADDR), nullptr, 0, OUT & bytesSent, &_connectEvent);
-
-	if (suc == FALSE)
-	{
-		// Check if the socket is pending-status
-		auto errorCode = ::WSAGetLastError();
-		if (errorCode != WSA_IO_PENDING)
-		{
-			// Error
-			ERR(errorCode, Error at ConnectEx);
-			_connectEvent.SetIOCPObjectRef(nullptr);
-			return false;
-		}
-	}
+	//if (suc == FALSE)
+	//{
+	//	// Check if the socket is pending-status
+	//	auto errorCode = ::WSAGetLastError();
+	//	if (errorCode != WSA_IO_PENDING)
+	//	{
+	//		// Error
+	//		ERR_CODE(errorCode, Error at ConnectEx);
+	//		_connectEvent.SetIOCPObjectRef(nullptr);
+	//		return false;
+	//	}
+	//}
 
 	return true;
 }
 
-void NetCore::Connector::_initWSockFunctions()
-{
-	SOCKET dummy = ::WSASocketW(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
-	ASSERT_CRASH(dummy != INVALID_SOCKET);
-
-	NOT_USE DWORD bytes = 0;
-	GUID t = WSAID_CONNECTEX;
-	// WSAIoctl return 0 if successful.
-	int32 suc = ::WSAIoctl(dummy, SIO_GET_EXTENSION_FUNCTION_POINTER,
-		&t, sizeof(t),
-		reinterpret_cast<LPVOID*>(&ConnectEx), sizeof(ConnectEx),
-		OUT &bytes, NULL, NULL);
-
-	if (suc != 0)
-	{
-		int32 errorCode = ::WSAGetLastError();
-		ERR(errorCode, Failed WSAIoctl at ConnectEx.);
-	}
-
-	ASSERT_CRASH(suc == 0);
-	::closesocket(dummy);
-	dummy = (~0);
-}
 
 void NetCore::Connector::_processConnect()
 {
+	// Release pointer
 	_connectEvent.SetIOCPObjectRef(nullptr);
-	ASSERT_CRASH(_session != nullptr);
+	_connected.store(true);
 	_session->SetConnected();
 }
 
-void NetCore::Connector::Dispatch(IOCPEvent* event, int32 numberOfBytes)
+void NetCore::Connector::Process(IOCPEvent * overlappedEvent, DWORD numberOfBytesTransferred)
 {
-	switch (event->GetEventType())
+	switch (overlappedEvent->GetEventType())
 	{
 	case EventType::Connect:
-		event->SetIOCPObjectRef(_session);
+		// Change iocp object
+		overlappedEvent->SetIOCPObjectRef(_session);
 		_processConnect();
 		break;
 	default:

@@ -2,16 +2,18 @@
 
 #include <iostream>
 
+using namespace NetCore;
 
 constexpr PCSTR IP = "127.0.0.1";
-constexpr ushort PORT = 8889;
+constexpr ushort PORT = 8900;
+
 
 static void IOCP_WORKER(NetCore::IOCPCore& core)
 {
     std::cout << "T id:" << std::this_thread::get_id() << std::endl;
     while (true)
     {
-        core.GetQueuedCompletionStatus(200);
+        core.ProcessQueuedCompletionStatus(200);
         //this_thread::yield();
     }
 }
@@ -37,11 +39,13 @@ int main()
     addr.sin_port = ::htons(PORT);
     
     NetCore::IOCPCore core;
-    NetCore::Listener listener(addr, []()->NetCore::Session* { return NetCore::xxnew<ClientSession>(); }, core);
+    auto listener = std::make_shared<Listener>(addr, []()->NetCore::SessionSPtr { return std::make_shared<ClientSession>(); }, core);
     
-    if (listener.StartListen() == false) return -1;
+    if (listener->StartListen(10) == false)
+    {
+        return -1;
+    }
 
-    
     std::thread th
     (
         [&core]() {
@@ -58,7 +62,7 @@ int main()
     {
         string msg;
         std::cin >> msg;
-        listener.BroadCast(msg.c_str());
+        listener->BroadCast(msg.c_str());
     }
 
     if (th.joinable() == true) th.join();

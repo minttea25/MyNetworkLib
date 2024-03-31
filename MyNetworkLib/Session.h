@@ -1,6 +1,5 @@
 #pragma once
 
-
 NAMESPACE_OPEN(NetCore);
 
 
@@ -35,7 +34,7 @@ public:
 	_byte* GetSendBuffer() { return _sendBuffer; }
 private:
 	// Inherited via IOCPObject
-	virtual void Dispatch(struct IOCPEvent* event, int32 numberOfBytes) override sealed;
+	virtual void Process(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred) override sealed;
 	HANDLE GetHandle() override;
 private:
 	void RegisterSend();
@@ -53,6 +52,7 @@ private:
 	SOCKET _socket = INVALID_SOCKET;
 
 private:
+	uint32 _sessionId = 0;
 	Mutex _sendLock;
 	Atomic<bool> _connected = false;
 

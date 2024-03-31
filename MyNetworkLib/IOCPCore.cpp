@@ -10,7 +10,7 @@ NetCore::IOCPCore::IOCPCore()
     if (_iocpHandle == INVALID_HANDLE_VALUE)
     {
         int32 errorCode = ::GetLastError();
-        ERR(errorCode, Failed to create new IO complete port);
+        ERR_CODE(errorCode, Failed to create new IO complete port);
         ASSERT_CRASH(_iocpHandle != INVALID_HANDLE_VALUE);
     }
     
@@ -26,19 +26,13 @@ NetCore::IOCPCore::~IOCPCore()
     }
 }
 
-bool NetCore::IOCPCore::RegisterIOCP(IOCPObject* iocpObject)
+bool NetCore::IOCPCore::RegisterHandle(IOCPObjectSPtr iocpObject)
 {
-    auto ret = ::CreateIoCompletionPort(iocpObject->GetHandle(), _iocpHandle, 0, 0);
-    if (ret == NULL)
-    {
-        auto errorCode = ::GetLastError();
-        ERR(errorCode, Failed to CreateIoCompletionPort while registering iocp handle.);
-        return false;
-    }
-    return true;
+    auto res = ::CreateIoCompletionPort(iocpObject->GetHandle(), _iocpHandle, 0, 0);
+    return ErrorHandler::CheckError(res != NULL, Errors::APP_REGISTER_HANDLE_FAILED_IOCP_CORE) == Errors::NONE;
 }
 
-bool NetCore::IOCPCore::GetQueuedCompletionStatus(DWORD dwMilliseconds)
+bool NetCore::IOCPCore::ProcessQueuedCompletionStatus(DWORD dwTimeoutMilliseconds)
 {
     DWORD numberOfBytesTransferred = 0;
     IOCPEvent* iocpEvent = nullptr;
@@ -47,24 +41,22 @@ bool NetCore::IOCPCore::GetQueuedCompletionStatus(DWORD dwMilliseconds)
     // Atode GetQueuedCompletionStatusEx ni kaemasyo
     BOOL suc = ::GetQueuedCompletionStatus(_iocpHandle,
         OUT & numberOfBytesTransferred, OUT & key,
-        OUT reinterpret_cast<LPOVERLAPPED*>(&iocpEvent), dwMilliseconds);
+        OUT reinterpret_cast<LPOVERLAPPED*>(&iocpEvent), dwTimeoutMilliseconds);
 
     if (suc == FALSE)
     {
-        int32 errCode = ::GetLastError();
+        DWORD errCode = ::GetLastError();
         switch (errCode)
         {
         case WAIT_TIMEOUT:
             return false;
         default:
-            ERR(errCode, Failed to get queued completion status.);
-            //iocpEvent->GetIOCPObjectRef()->Dispatch(iocpEvent, numberOfBytesTransferred);
+            ErrorHandler::Err("Failed to get queued completion status.", errCode);
             return false;
         }
     }
 
-    iocpEvent->GetIOCPObjectRef()->Dispatch(iocpEvent, numberOfBytesTransferred);
-
+    iocpEvent->GetIOCPObjectRef()->Process(iocpEvent, numberOfBytesTransferred);
 
     return true;
 }

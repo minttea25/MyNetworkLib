@@ -1,37 +1,41 @@
 #pragma once
 
-#include <WinSock2.h>
-#include <MSWSock.h>
-#include <Windows.h>
-
 #include "Session.h"
 #include "IOCPEvent.h"
 
 NAMESPACE_OPEN(NetCore);
 
-static LPFN_CONNECTEX ConnectEx = nullptr;
-
-
-
-
 class Session;
 struct ConnectEvent;
 
+/// <summary>
+/// Connector is a class to use connecting to other end point.
+/// </summary>
 class Connector : public IOCPObject
 {
 public:
-	Connector(SOCKADDR_IN& addr, std::function<Session*()> sessionFactory);
+	Connector(IOCPCore* core, SOCKADDR_IN& addr, std::function<SessionSPtr()> sessionFactory);
 	~Connector();
 
-	bool Connect(IOCPCore& core);
+	/// <summary>
+	/// Try to connect to address.
+	/// </summary>
+	/// <returns>true if trying to connect is successful, false otherwise.</returns>
+	bool Connect();
 public:
 	bool connected() const { return _connected.load(); }
 private:
-	void _initWSockFunctions();
+	/// <summary>
+	/// Called when the connection 
+	/// </summary>
 	void _processConnect();
 
 	// Inherited via IOCPObject
-	void Dispatch(IOCPEvent* event, int32 numberOfBytes) override;
+	void Process(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred) override;
+	/// <summary>
+	/// Get socket handle;
+	/// </summary>
+	/// <returns>socket handle</returns>
 	HANDLE GetHandle() override;
 private:
 	SOCKET _connectSocket = INVALID_SOCKET;
@@ -39,8 +43,9 @@ private:
 	ConnectEvent _connectEvent;
 	Atomic<bool> _connected = false;
 
-	Session* _session;
-	std::function<Session*()> _session_factory ;
+	SessionSPtr _session = nullptr;
+	std::function<SessionSPtr()> _session_factory ;
+	IOCPCore* _core;
 };
 
 NAMESPACE_CLOSE;

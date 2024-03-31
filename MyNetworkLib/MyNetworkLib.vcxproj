@@ -154,6 +154,7 @@
     <ClInclude Include="CoreSTLContainer.h" />
     <ClInclude Include="CoreTLS.h" />
     <ClInclude Include="CoreTypes.h" />
+    <ClInclude Include="ErrorHandler.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="CoreGlobal.h" />
     <ClInclude Include="IOCPCore.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Sample.h" />
     <ClInclude Include="Session.h" />
+    <ClInclude Include="SocketUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Connector.cpp" />
@@ -176,6 +178,7 @@
     <ClCompile Include="CoreGlobal.cpp" />
     <ClCompile Include="CoreTLS.cpp" />
     <ClCompile Include="CoreTypes.cpp" />
+    <ClCompile Include="ErrorHandler.cpp" />
     <ClCompile Include="IOCPCore.cpp" />
     <ClCompile Include="IOCPEvent.cpp" />
     <ClCompile Include="IOCPObject.cpp" />
@@ -193,6 +196,7 @@
     </ClCompile>
     <ClCompile Include="Sample.cpp" />
     <ClCompile Include="Session.cpp" />
+    <ClCompile Include="SocketUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

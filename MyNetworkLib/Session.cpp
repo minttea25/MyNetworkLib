@@ -3,53 +3,30 @@
 
 NetCore::Session::Session()
 {
-	// Create a async IO Socket using Overlapped model.
-	_socket = ::WSASocketW(AF_INET, SOCK_STREAM,
-		IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
-
-	if (_socket == INVALID_SOCKET)
-	{
-		int32 errorCode = ::WSAGetLastError();
-		ERR(errorCode, "Failed to create socket.");
-	}
-
-
-	// Check failed
-	ASSERT_CRASH(_socket != INVALID_SOCKET);
+	_socket = SocketUtils::CreateSocket();
 }
 
 NetCore::Session::~Session()
 {
-	// Close socket
-	::closesocket(_socket);
-
-	_socket = INVALID_SOCKET;
+	SocketUtils::Close(_socket);
 }
 
 void NetCore::Session::SetConnected()
 {
-	int error = 0;
-	int len = sizeof(error);
-	int result = getsockopt(_socket, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&error), &len);
-	if (result == SOCKET_ERROR)
-	{
-		// Failed to get socket options
-		std::cerr << "getsockopt failed: " << WSAGetLastError() << std::endl;
-		return;
-	}
 
-	if (error != 0) return;
 
 	_connected.store(true);
 
+	// Call virtual method
 	OnConnected();
 
+	// Start to recive data
 	RegisterRecv();
 }
 
 bool NetCore::Session::Send(const _byte* buffer)
 {
-	if (_connected == false)
+	if (_connected== false)
 	{
 		// Stop receiving
 		WARN(Session is already disconnected.);
@@ -68,23 +45,23 @@ void NetCore::Session::Disconnect(uint16 errorCode = DisconnectError::NONE)
 }
 
 
-void NetCore::Session::Dispatch(IOCPEvent* event, int32 numberOfBytes = 0)
+void NetCore::Session::Process(IOCPEvent * overlappedEvent, DWORD numberOfBytesTransferred)
 {
-	SHOW(EventType, (int)event->GetEventType());
-	switch (event->GetEventType())
+	EventType type = overlappedEvent->GetEventType();
+	SHOW(EventType, (int)type);
+	switch (type)
 	{
-	case EventType::Accept:
-		break;
-	case EventType::Connect:
-		break;
 	case EventType::Recv:
-		ProcessRecv(numberOfBytes);
+		ProcessRecv(numberOfBytesTransferred);
 		break;
 	case EventType::Send:
-		ProcessSend(numberOfBytes);
+		ProcessSend(numberOfBytesTransferred);
 		break;
 	case EventType::Disconnect:
 		ProcessDisconnect();
+		break;
+	default:
+		WARN(Received event type was not recv/send/disconnect.);
 		break;
 	}
 }
@@ -105,7 +82,7 @@ void NetCore::Session::RegisterSend()
 	}
 
 	_sendEvent.Clear();
-	_sendEvent.SetIOCPObjectRef(this);
+	_sendEvent.SetIOCPObjectRef(shared_from_this());
 
 	//{
 	//	_sendLock.lock();
@@ -116,28 +93,34 @@ void NetCore::Session::RegisterSend()
 	//}
 
 
-	WSABUF sendBuffer;
+	WSABUF sendBuffer{};
 	sendBuffer.buf = reinterpret_cast<_byte*>(GetSendBuffer());
 	sendBuffer.len = MAX_BUFFER_SIZE;
 
 	DWORD numberOfBytesSent = 0;
 	int32 res = ::WSASend(_socket, &sendBuffer, 1,
 		OUT & numberOfBytesSent, 0, &_sendEvent, NULL);
-	if (res == SOCKET_ERROR)
+
+	if (ErrorHandler::WSACheckErrorExceptPending(res != SOCKET_ERROR, Errors::WSA_SEND_FAILED) != Errors::NONE)
 	{
-		// Check pending
-		int32 errorCode = ::WSAGetLastError();
-		if (errorCode != WSA_IO_PENDING)
-		{
-			// Error
-			ERR(errorCode, "WSASend Error");
-		}
+		// TODO
 	}
 
+	//if (res == SOCKET_ERROR)
+	//{
+	//	// Check pending
+	//	int32 errorCode = ::WSAGetLastError();
+	//	if (errorCode != WSA_IO_PENDING)
+	//	{
+	//		// Error
+	//		ERR_CODE(errorCode, "WSASend Error");
+	//	}
+	//}
 }
 
 void NetCore::Session::ProcessSend(const int32 numberOfBytesSent)
 {
+	// clear to reuse event
 	_sendEvent.SetIOCPObjectRef(nullptr);
 
 	if (numberOfBytesSent == 0)
@@ -161,7 +144,7 @@ void NetCore::Session::RegisterRecv()
 	}
 
 	_recvEvent.Clear();
-	_recvEvent.SetIOCPObjectRef(this);
+	_recvEvent.SetIOCPObjectRef(shared_from_this());
 
 	// TEMP
 	WSABUF recvBuffer {};
@@ -172,20 +155,23 @@ void NetCore::Session::RegisterRecv()
 	DWORD flags = 0;
 	int32 res = ::WSARecv(_socket, &recvBuffer, 1,
 		OUT & numberOfBytesRecvd, OUT & flags, &_recvEvent, NULL);
-	if (res == SOCKET_ERROR)
-	{
-		// Check pending
-		int32 errorCode = ::WSAGetLastError();
-		if (errorCode != WSA_IO_PENDING)
-		{
-			// Error
-			ERR(errorCode, "WSARecv Error");
 
-		}
+	if (ErrorHandler::WSACheckErrorExceptPending(res != SOCKET_ERROR, WSA_RECV_FAILED) != Errors::NONE)
+	{
+		// TODO
 	}
 
-	
+	//if (res == SOCKET_ERROR)
+	//{
+	//	// Check pending
+	//	int32 errorCode = ::WSAGetLastError();
+	//	if (errorCode != WSA_IO_PENDING)
+	//	{
+	//		// Error
+	//		ERR_CODE(errorCode, "WSARecv Error");
 
+	//	}
+	//}
 }
 
 void NetCore::Session::ProcessRecv(const uint32 numberOfBytesRecvd)
