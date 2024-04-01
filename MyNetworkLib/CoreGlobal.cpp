@@ -3,29 +3,30 @@
 
 #include "Memory.h"
 
-
-NAMESPACE_OPEN(NetCore)
-
-CoreGlobal GCoreGlobal;
+NAMESPACE_OPEN(NetCore);
 
 // extern instance used as global
 Memory* GMemory = nullptr;
 
-NAMESPACE_CLOSE
-
-NetCore::CoreGlobal::CoreGlobal()
+class CoreGlobal
 {
-	// new constructor here
-	GMemory = new NetCore::Memory();
+public:
+	CoreGlobal()
+	{
+		// new constructor here
+		GMemory = new NetCore::Memory();
 
-	// init method here
-}
+		// init method here
+		SocketUtils::Init();
+	}
+	~CoreGlobal()
+	{
+		// delete here
+		delete GMemory;
 
-NetCore::CoreGlobal::~CoreGlobal()
-{
-	// delete here
-	delete GMemory;
+		// clear method here
+		SocketUtils::Clear();
+	}
+} GCoreGlobal;
 
-	// clear method here
-
-}
+NAMESPACE_CLOSE;

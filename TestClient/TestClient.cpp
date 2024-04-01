@@ -3,60 +3,106 @@
 
 using namespace NetCore;
 
-class TestClass
+//class TestClass
+//{
+//public:
+//	TestClass() { std::cout << "Constructor: " << _id << std::endl; }
+//	TestClass(uint32 id, int hp, int exp) : _id(id), _hp(hp), _exp(exp) {}
+//	~TestClass() { std::cout << "Destructor: " << _id << std::endl; }
+//public:
+//	static friend std::ostream& operator<<(std::ostream& os, const TestClass& obj)
+//	{
+//		return os << "TestClass_" << obj._id << '(' << obj._hp << ',' << obj._exp << ')';
+//	}
+//private:
+//	uint32 _id = 0;
+//	int _hp = 0;
+//	int _exp = 0;
+//};
+
+class ServerSession : public NetCore::Session
 {
 public:
-	TestClass() { std::cout << "Constructor: " << _id << std::endl; }
-	TestClass(uint32 id, int hp, int exp) : _id(id), _hp(hp), _exp(exp) {}
-	~TestClass() { std::cout << "Destructor: " << _id << std::endl; }
-public:
-	static friend std::ostream& operator<<(std::ostream& os, const TestClass& obj)
+	uint32 OnRecv(const _byte* buffer, const uint32 len) override
 	{
-		return os << "TestClass_" << obj._id << '(' << obj._hp << ',' << obj._exp << ')';
+		Session::OnRecv(buffer, len);
+
+		std::cout.write(buffer, len) << std::endl;
+
+		return len;
 	}
-private:
-	uint32 _id = 0;
-	int _hp = 0;
-	int _exp = 0;
 };
+
+constexpr PCSTR IP = "127.0.0.1";
+constexpr ushort PORT = 8900;
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	SocketUtils::Init();
 
-    Sample sample;
-    sample.PrintHello();
+	SOCKADDR_IN addr;
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	::inet_pton(AF_INET, IP, &addr.sin_addr);
+	addr.sin_port = ::htons(PORT);
 
-	Vector<TestClass> v(100);
-	SHOW(v.size(): , v.size());
+	//this_thread::sleep_for(500ms);
 
-	// object pool test codes
-	// Check memory usage
-	ObjectPool<TestClass> op;
 
-	auto t1 = op.Acquire(100, 10, 50);
-	auto t2 = op.Acquire(200, 10, 50);
-	op.Release(t1);
-	op.Release(t2);
-	SHOW(poolcount, op.poolCount());
-	SHOW(usecount, op.useCount());
-	for (int i = 0; i<1000; ++i)
+	NetCore::IOCPCore core;
+	std::shared_ptr<ServerSession> session_ptr = nullptr;
+	
+	auto session_factory = [&session_ptr]() -> SessionSPtr
+		{
+			session_ptr = std::make_shared<ServerSession>();
+			return session_ptr;
+		};
+
+	
+	auto connector = std::make_shared<Connector>(&core, addr, session_factory);
+	
+	if (!connector->Connect())
 	{
-		auto t1 = op.Acquire(100, 10, 50);
-		auto t2 = op.Acquire(200, 10, 50);
-
-		SHOW(poolcount, op.poolCount());
-		SHOW(usecount, op.useCount());
-
-		op.Release(t1);
-		op.Release(t2);
-
-		MESSAGE(After release t1 and t2 : );
-		SHOW(poolcount, op.poolCount());
-		SHOW(usecount, op.useCount());
-
-		this_thread::sleep_for(10ms);
+		std::cerr << "Failed to connect." << std::endl;
+		return -1;
 	}
+	
+	std::thread th
+	(
+		[&core]() {
+			//std::cout << "T id:" << std::this_thread::get_id() << std::endl;
+			std::this_thread::sleep_for(100ms);
+			while (true)
+			{
+				core.ProcessQueuedCompletionStatus();
+				//this_thread::yield();
+			}
+		}
+	);
+	std::thread th2
+	(
+		[&core]() {
+			//std::cout << "T id:" << std::this_thread::get_id() << std::endl;
+			std::this_thread::sleep_for(100ms);
+			while (true)
+			{
+				core.ProcessQueuedCompletionStatus();
+				//this_thread::yield();
+			}
+		}
+	);
+
+	{
+		string msg;
+		std::cin >> msg;
+		if (session_ptr != nullptr)
+		{
+			session_ptr->Send(msg.c_str());
+		}
+	}
+
+	if (th.joinable()) th.join();
+	if (th2.joinable()) th2.join();
 
     return 0;
 }
