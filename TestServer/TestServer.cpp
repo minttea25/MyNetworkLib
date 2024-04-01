@@ -7,16 +7,8 @@ using namespace NetCore;
 constexpr PCSTR IP = "127.0.0.1";
 constexpr ushort PORT = 8900;
 
+static bool off = false;
 
-static void IOCP_WORKER(NetCore::IOCPCore& core)
-{
-    std::cout << "T id:" << std::this_thread::get_id() << std::endl;
-    while (true)
-    {
-        core.ProcessQueuedCompletionStatus(200);
-        //this_thread::yield();
-    }
-}
 
 class ClientSession : public NetCore::Session
 {
@@ -28,18 +20,21 @@ class ClientSession : public NetCore::Session
 
         return len;
     }
+
+    virtual void OnDisconnected(const int32 error) override
+    {
+        std::cout << "disconnected: " << error << std::endl;
+    }
 };
 
 int main()
 {
-    SOCKADDR_IN addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    ::inet_pton(AF_INET, IP, &addr.sin_addr);
-    addr.sin_port = ::htons(PORT);
+    SOCKADDR_IN addr = AddrUtils::GetTcpAddress(IP, PORT);
     
-    NetCore::IOCPCore core;
-    auto listener = std::make_shared<Listener>(addr, []()->NetCore::SessionSPtr { return std::make_shared<ClientSession>(); }, core);
+    auto core = std::make_shared<IOCPCore>();
+    auto listener = std::make_shared<Listener>(
+        addr, []()->NetCore::SessionSPtr { return std::make_shared<ClientSession>(); },
+        core);
     
     if (listener->StartListen(10) == false)
     {
@@ -48,14 +43,16 @@ int main()
 
     std::thread th
     (
-        [&core]() {
-            IOCP_WORKER(core);
-        }
-    );
-    std::thread th2
-    (
-        [&core]() {
-            IOCP_WORKER(core);
+        [=]() {
+            std::cout << "T id:" << std::this_thread::get_id() << std::endl;
+            while (true)
+            {
+                core->ProcessQueuedCompletionStatus(200);
+                //this_thread::yield();
+
+                if (off)
+                    break;
+            }
         }
     );
 
@@ -63,10 +60,14 @@ int main()
         string msg;
         std::cin >> msg;
         listener->BroadCast(msg.c_str());
+        this_thread::sleep_for(1000ms);
+        off = true;
+        listener->ReleaseAllSessions();
     }
 
     if (th.joinable() == true) th.join();
-    if (th2.joinable() == true) th2.join();
+
+    std::cout << listener.use_count() << std::endl;
 
     return 0;
 }

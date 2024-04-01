@@ -7,9 +7,9 @@ NAMESPACE_OPEN(NetCore);
 /// </summary>
 class Listener : public IOCPObject
 {
-	static constexpr auto MAX_ACCEPT_COUNT = 10;
+	static constexpr auto MAX_ACCEPT_COUNT = 1;
 public:
-	Listener(SOCKADDR_IN& addr, std::function<SessionSPtr()> session_factory, IOCPCore& core);
+	Listener(SOCKADDR_IN& addr, std::function<SessionSPtr()> session_factory, IOCPCoreSPtr core);
 	~Listener();
 
 	/// <summary>
@@ -30,21 +30,19 @@ private:
 private:
 	SOCKET _listenSocket = INVALID_SOCKET;
 	SOCKADDR_IN _addr;
-	Vector<AcceptEvent*> _accepEvents;
+	Vector<AcceptEvent*> _accepEvents; // Managed only by Listener
 	std::function<SessionSPtr()> _session_factory;
+	IOCPCoreSPtr _core;
 
 // TEMP
 public:
-	Vector<SessionSPtr> sessions;
+	Set<SessionSPtr> sessions;
 	
 	void BroadCast(const char* msg)
 	{
-		// IT'S TEMP
-		// It must be used with lock
 		for (auto s : sessions)
 		{
-			if(s->IsConnected() == true) 
-				s->Send(msg);
+			s->Send(msg);
 		}
 	}
 
@@ -52,8 +50,8 @@ public:
 	{
 		sessions.clear();
 	}
-private:
-	IOCPCore& _core;
+	
+	friend class Session;
 };
 
 NAMESPACE_CLOSE

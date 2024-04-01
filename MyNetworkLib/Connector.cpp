@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Connector.h"
 
-NetCore::Connector::Connector(IOCPCore* core, SOCKADDR_IN& addr, std::function<SessionSPtr()> sessionFactory)
+NetCore::Connector::Connector(IOCPCoreSPtr core, SOCKADDR_IN& addr, std::function<SessionSPtr()> sessionFactory)
 	: _connected(false), _core(core),
 	_addr(addr), _session_factory(sessionFactory)
 {
@@ -12,6 +12,13 @@ NetCore::Connector::Connector(IOCPCore* core, SOCKADDR_IN& addr, std::function<S
 
 NetCore::Connector::~Connector()
 {
+	_session_factory = nullptr;
+	_session = nullptr;
+
+#ifdef  TEST
+	MESSAGE(~Connector);
+#endif //  TEST
+
 	// The socket is referrenced from Session.
 	// SocketUtils::Close(_connectSocket);
 }
@@ -28,7 +35,7 @@ bool NetCore::Connector::Connect()
 
 	// Init event
 	_connectEvent.Clear();
-	_connectEvent.SetIOCPObjectRef(shared_from_this());
+	_connectEvent.SetIOCPObjectSPtr(shared_from_this());
 
 	NOT_USE DWORD bytesSent = 0;
 	BOOL suc = SocketUtils::ConnectEx(_connectSocket, reinterpret_cast<PSOCKADDR>(&_addr),
@@ -37,22 +44,9 @@ bool NetCore::Connector::Connect()
 	// Note: WSACheckErrorExceptPending return 0 if no error or WSA_IO_PENDING
 	if (int32 errCode = ErrorHandler::WSACheckErrorExceptPending(suc, WSA_CONNECTEX_FAILED) != Errors::NONE)
 	{
-		_connectEvent.SetIOCPObjectRef(nullptr);
+		_connectEvent.SetIOCPObjectSPtr(nullptr);
 		return false;
 	}
-
-	//if (suc == FALSE)
-	//{
-	//	// Check if the socket is pending-status
-	//	auto errorCode = ::WSAGetLastError();
-	//	if (errorCode != WSA_IO_PENDING)
-	//	{
-	//		// Error
-	//		ERR_CODE(errorCode, Error at ConnectEx);
-	//		_connectEvent.SetIOCPObjectRef(nullptr);
-	//		return false;
-	//	}
-	//}
 
 	return true;
 }
@@ -61,7 +55,7 @@ bool NetCore::Connector::Connect()
 void NetCore::Connector::_processConnect()
 {
 	// Release pointer
-	_connectEvent.SetIOCPObjectRef(nullptr);
+	_connectEvent.ReleaseIOCPObjectSPtr();
 	_connected.store(true);
 	_session->SetConnected();
 }
@@ -72,7 +66,7 @@ void NetCore::Connector::Process(IOCPEvent * overlappedEvent, DWORD numberOfByte
 	{
 	case EventType::Connect:
 		// Change iocp object
-		overlappedEvent->SetIOCPObjectRef(_session);
+		overlappedEvent->SetIOCPObjectSPtr(_session);
 		_processConnect();
 		break;
 	default:

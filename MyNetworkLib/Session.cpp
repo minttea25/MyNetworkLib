@@ -8,13 +8,15 @@ NetCore::Session::Session()
 
 NetCore::Session::~Session()
 {
+#ifdef  TEST
+	MESSAGE(~Session);
+#endif //  TEST
+
 	SocketUtils::Close(_socket);
 }
 
 void NetCore::Session::SetConnected()
 {
-
-
 	_connected.store(true);
 
 	// Call virtual method
@@ -26,7 +28,7 @@ void NetCore::Session::SetConnected()
 
 bool NetCore::Session::Send(const _byte* buffer)
 {
-	if (_connected== false)
+	if (_connected == false)
 	{
 		// Stop receiving
 		WARN(Session is already disconnected.);
@@ -40,10 +42,24 @@ bool NetCore::Session::Send(const _byte* buffer)
 	return true;
 }
 
-void NetCore::Session::Disconnect(uint16 errorCode = DisconnectError::NONE)
+bool NetCore::Session::Disconnect()
 {
+	if (IsConnected() == false) return false;
+
+	return RegisterDisconnect();
 }
 
+
+void NetCore::Session::_disconnect(uint16 errorCode)
+{
+#ifdef TEST
+	SHOW(DisconnectError:, errorCode);
+#endif // TEST
+
+	if (IsConnected() == false) return;
+
+	RegisterDisconnect();
+}
 
 void NetCore::Session::Process(IOCPEvent * overlappedEvent, DWORD numberOfBytesTransferred)
 {
@@ -82,7 +98,7 @@ void NetCore::Session::RegisterSend()
 	}
 
 	_sendEvent.Clear();
-	_sendEvent.SetIOCPObjectRef(shared_from_this());
+	_sendEvent.SetIOCPObjectSPtr(shared_from_this());
 
 	//{
 	//	_sendLock.lock();
@@ -105,28 +121,17 @@ void NetCore::Session::RegisterSend()
 	{
 		// TODO
 	}
-
-	//if (res == SOCKET_ERROR)
-	//{
-	//	// Check pending
-	//	int32 errorCode = ::WSAGetLastError();
-	//	if (errorCode != WSA_IO_PENDING)
-	//	{
-	//		// Error
-	//		ERR_CODE(errorCode, "WSASend Error");
-	//	}
-	//}
 }
 
 void NetCore::Session::ProcessSend(const int32 numberOfBytesSent)
 {
 	// clear to reuse event
-	_sendEvent.SetIOCPObjectRef(nullptr);
+	_sendEvent.ReleaseIOCPObjectSPtr();
 
 	if (numberOfBytesSent == 0)
 	{
 		// Error
-		Disconnect(DisconnectError::SENT_0);
+		_disconnect(DisconnectError::SENT_0);
 		return;
 	}
 
@@ -144,7 +149,7 @@ void NetCore::Session::RegisterRecv()
 	}
 
 	_recvEvent.Clear();
-	_recvEvent.SetIOCPObjectRef(shared_from_this());
+	_recvEvent.SetIOCPObjectSPtr(shared_from_this());
 
 	// TEMP
 	WSABUF recvBuffer {};
@@ -160,18 +165,6 @@ void NetCore::Session::RegisterRecv()
 	{
 		// TODO
 	}
-
-	//if (res == SOCKET_ERROR)
-	//{
-	//	// Check pending
-	//	int32 errorCode = ::WSAGetLastError();
-	//	if (errorCode != WSA_IO_PENDING)
-	//	{
-	//		// Error
-	//		ERR_CODE(errorCode, "WSARecv Error");
-
-	//	}
-	//}
 }
 
 void NetCore::Session::ProcessRecv(const uint32 numberOfBytesRecvd)
@@ -179,7 +172,7 @@ void NetCore::Session::ProcessRecv(const uint32 numberOfBytesRecvd)
 	if (numberOfBytesRecvd == 0)
 	{
 		// Error
-		Disconnect(DisconnectError::RECV_0);
+		_disconnect(DisconnectError::RECV_0);
 		return;
 	}
 
@@ -188,7 +181,7 @@ void NetCore::Session::ProcessRecv(const uint32 numberOfBytesRecvd)
 	if (processLen == 0)
 	{
 		// Error
-		Disconnect(DisconnectError::PROCESS_LEN_0);
+		_disconnect(DisconnectError::PROCESS_LEN_0);
 		return;
 	}
 
@@ -196,10 +189,26 @@ void NetCore::Session::ProcessRecv(const uint32 numberOfBytesRecvd)
 	RegisterRecv();
 }
 
-void NetCore::Session::RegisterDisconnect()
+bool NetCore::Session::RegisterDisconnect()
 {
+	_disconnectEvent.Clear();
+	_disconnectEvent.SetIOCPObjectSPtr(shared_from_this());
+
+	BOOL suc = SocketUtils::DisconnectEx(_socket, &_disconnectEvent, TF_REUSE_SOCKET, 0);
+	if (ErrorHandler::WSACheckErrorExceptPending(suc, Errors::WSA_DISCONNECTEX_FAILED) == false)
+	{
+		return false;
+	}
+	return true;
 }
 
 void NetCore::Session::ProcessDisconnect()
 {
+	_disconnectEvent.ReleaseIOCPObjectSPtr();
+	//if (listener != nullptr) 
+	//	listener->sessions.erase(static_pointer_cast<Session>(shared_from_this()));
+
+	_connected.store(false);
+
+	OnDisconnected();
 }

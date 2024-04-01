@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Listener.h"
 
-NetCore::Listener::Listener(SOCKADDR_IN& addr, std::function<SessionSPtr()> session_factory, IOCPCore& core) 
+NetCore::Listener::Listener(SOCKADDR_IN& addr, std::function<SessionSPtr()> session_factory, IOCPCoreSPtr core)
 	: _addr(addr), _session_factory(session_factory), _core(core)
 {
 	_listenSocket = SocketUtils::CreateSocket();
@@ -9,6 +9,10 @@ NetCore::Listener::Listener(SOCKADDR_IN& addr, std::function<SessionSPtr()> sess
 
 NetCore::Listener::~Listener()
 {
+#ifdef  TEST
+	MESSAGE(~Listener);
+#endif //  TEST
+
 	SocketUtils::Close(_listenSocket);
 
 	for (AcceptEvent* evt : _accepEvents) xxdelete(evt);
@@ -18,7 +22,7 @@ NetCore::Listener::~Listener()
 
 bool NetCore::Listener::StartListen(const int32 backlog)
 {
-	if (_core.RegisterHandle(shared_from_this()) == false) return false;
+	if (_core->RegisterHandle(shared_from_this()) == false) return false;
 
 	if (SocketUtils::SetReuseAddress(_listenSocket, true) == false) return false;
 	if (SocketUtils::Bind(_listenSocket, &_addr) == false) return false;
@@ -27,7 +31,7 @@ bool NetCore::Listener::StartListen(const int32 backlog)
 	for (int i = 0; i < MAX_ACCEPT_COUNT; ++i)
 	{
 		AcceptEvent* evt = xxnew<AcceptEvent>();
-		evt->SetIOCPObjectRef(shared_from_this());
+		evt->SetIOCPObjectSPtr(shared_from_this());
 		_accepEvents.push_back(evt);
 		RegisterAccept(evt);
 	}
@@ -38,8 +42,9 @@ bool NetCore::Listener::StartListen(const int32 backlog)
 void NetCore::Listener::RegisterAccept(AcceptEvent* acceptEvent)
 {
 	auto s = _session_factory();
-	_core.RegisterHandle(s);
-	sessions.push_back(s);
+	if (_core->RegisterHandle(s) == false) 
+		return;
+	sessions.insert(s);
 
 	acceptEvent->Clear();
 	acceptEvent->SetSessionRef(s);
@@ -56,18 +61,6 @@ void NetCore::Listener::RegisterAccept(AcceptEvent* acceptEvent)
 	{
 		RegisterAccept(acceptEvent);
 	}
-
-	//if (suc == FALSE)
-	//{
-	//	const int32 errorCode = ::WSAGetLastError();
-	//	if (errorCode != WSA_IO_PENDING)
-	//	{
-	//		// Error
-	//		ERR_CODE(errorCode, AcceptExFailed);
-	//		
-	//		RegisterAccept(acceptEvent);
-	//	}
-	//}
 }
 
 void NetCore::Listener::ProcessAccept(AcceptEvent* acceptEvent)

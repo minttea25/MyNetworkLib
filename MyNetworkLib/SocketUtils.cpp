@@ -3,6 +3,7 @@
 
 LPFN_CONNECTEX NetCore::SocketUtils::ConnectEx = nullptr;
 LPFN_ACCEPTEX NetCore::SocketUtils::AcceptEx = nullptr;
+LPFN_DISCONNECTEX NetCore::SocketUtils::DisconnectEx = nullptr;
 
 void NetCore::SocketUtils::Init()
 {
@@ -32,6 +33,9 @@ void NetCore::SocketUtils::_load_fn_pointers()
 
 	res = WSAIoctlHelper(s, SIO_GET_EXTENSION_FUNCTION_POINTER, WSAID_ACCEPTEX, reinterpret_cast<LPVOID*>(&AcceptEx));
 	ErrorHandler::WSACheckSocketError(res, Errors::WSAIOCTL_ACCEPTEX_FAILED);
+
+	res = WSAIoctlHelper(s, SIO_GET_EXTENSION_FUNCTION_POINTER, WSAID_DISCONNECTEX, reinterpret_cast<LPVOID*>(&DisconnectEx));
+	ErrorHandler::WSACheckSocketError(res, Errors::WSAIOCTL_DISCONNECTEX_FAILED);
 
 	Close(s);
 }

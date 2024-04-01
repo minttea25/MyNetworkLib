@@ -6,6 +6,7 @@
 NAMESPACE_OPEN(NetCore);
 
 class Session;
+class IOCPCore;
 struct ConnectEvent;
 
 /// <summary>
@@ -14,7 +15,7 @@ struct ConnectEvent;
 class Connector : public IOCPObject
 {
 public:
-	Connector(IOCPCore* core, SOCKADDR_IN& addr, std::function<SessionSPtr()> sessionFactory);
+	Connector(IOCPCoreSPtr core, SOCKADDR_IN& addr, std::function<SessionSPtr()> sessionFactory);
 	~Connector();
 
 	/// <summary>
@@ -45,7 +46,7 @@ private:
 
 	SessionSPtr _session = nullptr;
 	std::function<SessionSPtr()> _session_factory ;
-	IOCPCore* _core;
+	IOCPCoreSPtr _core;
 };
 
 NAMESPACE_CLOSE;

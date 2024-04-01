@@ -161,10 +161,11 @@ public:
 	/// <returns>true if bind is successful, false otherwise.</returns>
 	static bool BindAnyAddress(Socket socket, uint16 port = 0)
 	{
-		SOCKADDR_IN myAddress{};
+		/*SOCKADDR_IN myAddress{};
 		myAddress.sin_family = AF_INET;
 		myAddress.sin_addr.s_addr = ::htonl(INADDR_ANY);
-		myAddress.sin_port = ::htons(port);
+		myAddress.sin_port = ::htons(port);*/
+		SOCKADDR_IN myAddress = AddrUtils::GetMyAddress();
 
 		const int32 res = ::bind(socket, reinterpret_cast<const SOCKADDR*>(&myAddress), sizeof(myAddress));
 		return ErrorHandler::WSACheckSocketError(res, Errors::WSA_BIND_ANYADDRESS_FAILED);
@@ -204,6 +205,10 @@ public:
 	/// AcceptEx pointer to register at runtime.
 	/// </summary>
 	static LPFN_ACCEPTEX AcceptEx;
+	/// <summary>
+	/// Disconnect pointer to register at runtime.
+	/// </summary>
+	static LPFN_DISCONNECTEX DisconnectEx;
 
 private:
 	static void _load_fn_pointers();

@@ -38,28 +38,25 @@ constexpr ushort PORT = 8900;
 
 int main()
 {
-	SocketUtils::Init();
+	SocketUtils::Init(); // temp
 
-	SOCKADDR_IN addr;
-	memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	::inet_pton(AF_INET, IP, &addr.sin_addr);
-	addr.sin_port = ::htons(PORT);
+	SOCKADDR_IN addr = AddrUtils::GetTcpAddress(IP, PORT);
 
-	//this_thread::sleep_for(500ms);
+	this_thread::sleep_for(200ms);
 
 
-	NetCore::IOCPCore core;
+	auto core = std::make_shared<IOCPCore>();
 	std::shared_ptr<ServerSession> session_ptr = nullptr;
 	
-	auto session_factory = [&session_ptr]() -> SessionSPtr
+	auto session_factory = [&]() -> SessionSPtr
 		{
-			session_ptr = std::make_shared<ServerSession>();
-			return session_ptr;
+			auto s = std::make_shared<ServerSession>();
+			session_ptr = s;
+			return s;
 		};
 
 	
-	auto connector = std::make_shared<Connector>(&core, addr, session_factory);
+	auto connector = std::make_shared<Connector>(core, addr, session_factory);
 	
 	if (!connector->Connect())
 	{
@@ -69,25 +66,15 @@ int main()
 	
 	std::thread th
 	(
-		[&core]() {
+		[=]() {
 			//std::cout << "T id:" << std::this_thread::get_id() << std::endl;
 			std::this_thread::sleep_for(100ms);
 			while (true)
 			{
-				core.ProcessQueuedCompletionStatus();
+				core->ProcessQueuedCompletionStatus(1000);
 				//this_thread::yield();
-			}
-		}
-	);
-	std::thread th2
-	(
-		[&core]() {
-			//std::cout << "T id:" << std::this_thread::get_id() << std::endl;
-			std::this_thread::sleep_for(100ms);
-			while (true)
-			{
-				core.ProcessQueuedCompletionStatus();
-				//this_thread::yield();
+				
+				if (session_ptr->IsConnected() == false) break;
 			}
 		}
 	);
@@ -99,11 +86,15 @@ int main()
 		{
 			session_ptr->Send(msg.c_str());
 		}
+
+		this_thread::sleep_for(1000ms);
+		session_ptr->Disconnect();
 	}
 
 	if (th.joinable()) th.join();
-	if (th2.joinable()) th2.join();
-
+	session_ptr = nullptr;
+	std::cout << session_ptr.use_count() << std::endl;
+	std::cout << connector.use_count() << std::endl;
     return 0;
 }
 
