@@ -39,6 +39,40 @@ void xxdelete(Type* ptr)
 	PoolAllocator::Release(ptr);
 }
 
+/// <summary>
+/// Creates a std::shared_ptr with NetCore::xxnew and NetCore::xxdelete.
+/// </summary>
+/// <typeparam name="Type">The type of the object to be managed by the shared_ptr.</typeparam>
+/// <typeparam name="...Args">Types of the arguments used to construct the object.</typeparam>
+/// <param name="...args">Arguments forwarded to the constructor of the managed object.</param>
+/// <returns>A std::shared_ptr with NetCore::xxnew and NetCore::xxdelete.</returns>
+template<typename Type, typename... Args>
+std::shared_ptr<Type> make_shared(Args&&... args)
+{
+	return std::shared_ptr<Type>
+	{
+		xxnew<Type>(std::forward<Args>(args)...), xxdelete<Type>
+	};
+}
+
+
+/// <summary>
+/// Creates a std::unique_ptr with NetCore::xxnew and NetCore::xxdelete.
+/// </summary>
+/// <typeparam name="Type">The type of the object to be managed by the unique_ptr.</typeparam>
+/// <typeparam name="...Args">Types of the arguments used to construct the object.</typeparam>
+/// <param name="...args">Arguments forwarded to the constructor of the managed object.</param>
+/// <returns>A std::unique_ptr with NetCore::xxnew and NetCore::xxdelete.</returns>
+template<typename Type, typename... Args>
+std::unique_ptr<Type, void(*)(Type*)> make_unique(Args&&... args)
+{
+	// 사용자 정의 삭제자를 지정하여 std::unique_ptr를 생성
+	return std::unique_ptr<Type, void(*)(Type*)>
+	{
+		xxnew<Type>(std::forward<Args>(args)...), xxdelete<Type>
+	};
+}
+
 
 /*****************************
 * Memory
