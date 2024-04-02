@@ -31,9 +31,9 @@ int main()
 {
     SOCKADDR_IN addr = AddrUtils::GetTcpAddress(IP, PORT);
     
-    auto core = std::make_shared<IOCPCore>();
-    auto listener = std::make_shared<Listener>(
-        addr, []()->NetCore::SessionSPtr { return std::make_shared<ClientSession>(); },
+    auto core = NetCore::make_shared<IOCPCore>();
+    auto listener = NetCore::make_shared<Listener>(
+        addr, []()->NetCore::SessionSPtr { return NetCore::make_shared<ClientSession>(); },
         core);
     
     if (listener->StartListen(10) == false)
