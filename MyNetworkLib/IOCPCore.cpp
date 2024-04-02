@@ -55,8 +55,8 @@ bool NetCore::IOCPCore::ProcessQueuedCompletionStatus(DWORD dwTimeoutMillisecond
         case WAIT_TIMEOUT:
             return false;
         default:
-            ErrorHandler::Err("Failed to get queued completion status.", errCode);
-            iocpEvent->GetIOCPObjectRef().lock()->Process(iocpEvent, numberOfBytesTransferred);
+            ERR_CODE(errCode, errcode was not wait_timeout);
+            // iocpEvent->GetIOCPObjectRef().lock()->Process(iocpEvent, numberOfBytesTransferred);
             return false;
         }
     }

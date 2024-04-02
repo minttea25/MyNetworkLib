@@ -23,7 +23,7 @@ public:
 	bool IsConnected() const { return _connected; }
 
 public:
-	void SetConnected();
+	void SetConnected(const ServiceSPtr service, const Socket connectedSocket = INVALID_SOCKET);
 
 	bool Send(const _byte* buffer);
 	bool Disconnect();
@@ -32,6 +32,7 @@ public:
 	_byte* GetRecvBuffer() { return _recvBuffer; }
 	_byte* GetSendBuffer() { return _sendBuffer; }
 private:
+	void _set_socket(Socket connectedSocket);
 	void _disconnect(uint16 errorCode = DisconnectError::NONE);
 
 	// Inherited via IOCPObject
@@ -50,6 +51,7 @@ protected: // virtuals
 	virtual uint32 OnRecv(const _byte* buffer, const uint32 len) { std::cout << "Received: " << len << " bytes" << std::endl; return len; }
 	virtual void OnDisconnected(const int32 error = DisconnectError::NONE) { std::cout << "OnDisconnected: " << error << std::endl; }
 private:
+	ServiceSPtr _service = nullptr;
 	SOCKET _socket = INVALID_SOCKET;
 	uint32 _sessionId = 0;
 	Mutex _sendLock;

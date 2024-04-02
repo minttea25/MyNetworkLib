@@ -1,9 +1,11 @@
 #include "pch.h"
 #include "Listener.h"
 
-NetCore::Listener::Listener(SOCKADDR_IN& addr, std::function<SessionSPtr()> session_factory, IOCPCoreSPtr core)
-	: _addr(addr), _session_factory(session_factory), _core(core)
+NetCore::Listener::Listener(ServiceSPtr serverService)
+	: _serverService(serverService)
 {
+	ErrorHandler::AssertCrash(serverService->GetServiceType() == ServiceType::Server, APP_LISTENER_SERVICE_WAS_NOT_SERVER);
+	
 	_listenSocket = SocketUtils::CreateSocket();
 }
 
@@ -16,16 +18,14 @@ NetCore::Listener::~Listener()
 	SocketUtils::Close(_listenSocket);
 
 	for (AcceptEvent* evt : _accepEvents) xxdelete(evt);
-
-	ReleaseAllSessions();
 }
 
 bool NetCore::Listener::StartListen(const int32 backlog)
 {
-	if (_core->RegisterHandle(shared_from_this()) == false) return false;
+	if (_serverService->_iocpCore->RegisterHandle(shared_from_this()) == false) return false;
 
 	if (SocketUtils::SetReuseAddress(_listenSocket, true) == false) return false;
-	if (SocketUtils::Bind(_listenSocket, &_addr) == false) return false;
+	if (SocketUtils::Bind(_listenSocket, &(_serverService->_addr)) == false) return false;
 	if (SocketUtils::Listen(_listenSocket, backlog) == false) return false;
 
 	for (int i = 0; i < MAX_ACCEPT_COUNT; ++i)
@@ -41,10 +41,7 @@ bool NetCore::Listener::StartListen(const int32 backlog)
 
 void NetCore::Listener::RegisterAccept(AcceptEvent* acceptEvent)
 {
-	auto s = _session_factory();
-	if (_core->RegisterHandle(s) == false) 
-		return;
-	sessions.insert(s);
+	auto s = _serverService->AddNewSession();
 
 	acceptEvent->Clear();
 	acceptEvent->SetSessionRef(s);
@@ -84,7 +81,7 @@ void NetCore::Listener::ProcessAccept(AcceptEvent* acceptEvent)
 	}
 
 	
-	session->SetConnected();
+	session->SetConnected(_serverService);
 
 	RegisterAccept(acceptEvent);
 }

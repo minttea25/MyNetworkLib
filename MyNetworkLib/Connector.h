@@ -15,7 +15,7 @@ struct ConnectEvent;
 class Connector : public IOCPObject
 {
 public:
-	Connector(IOCPCoreSPtr core, SOCKADDR_IN& addr, std::function<SessionSPtr()> sessionFactory);
+	Connector(ServiceSPtr clientService);
 	~Connector();
 
 	/// <summary>
@@ -39,14 +39,11 @@ private:
 	/// <returns>socket handle</returns>
 	HANDLE GetHandle() override;
 private:
+	ServiceSPtr _clientService;
+	SessionWPtr _session;
 	SOCKET _connectSocket = INVALID_SOCKET;
-	SOCKADDR_IN _addr;
 	ConnectEvent _connectEvent;
 	Atomic<bool> _connected = false;
-
-	SessionSPtr _session = nullptr;
-	std::function<SessionSPtr()> _session_factory ;
-	IOCPCoreSPtr _core;
 };
 
 NAMESPACE_CLOSE;

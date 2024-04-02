@@ -32,14 +32,16 @@ int main()
     SOCKADDR_IN addr = AddrUtils::GetTcpAddress(IP, PORT);
     
     auto core = NetCore::make_shared<IOCPCore>();
-    auto listener = NetCore::make_shared<Listener>(
-        addr, []()->NetCore::SessionSPtr { return NetCore::make_shared<ClientSession>(); },
-        core);
-    
-    if (listener->StartListen(10) == false)
+    auto server = NetCore::make_shared<ServerService>(
+        core, addr,
+        NetCore::make_shared<ClientSession>,
+        1, 10);
+
+    if (server->Start() == false)
     {
         return -1;
     }
+
 
     std::thread th
     (
@@ -59,15 +61,15 @@ int main()
     {
         string msg;
         std::cin >> msg;
-        listener->BroadCast(msg.c_str());
+        server->Broadcast(msg.c_str());
         this_thread::sleep_for(1000ms);
         off = true;
-        listener->ReleaseAllSessions();
     }
 
     if (th.joinable() == true) th.join();
+    server->Stop();
 
-    std::cout << listener.use_count() << std::endl;
+    std::cout << server.use_count() << std::endl;
 
     return 0;
 }
