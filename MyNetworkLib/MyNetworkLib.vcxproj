@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AddrUtils.h" />
     <ClInclude Include="Connector.h" />
     <ClInclude Include="CoreDef.h" />
     <ClInclude Include="CoreMacroDef.h" />
@@ -172,6 +173,7 @@
     <ClInclude Include="SocketUtils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AddrUtils.cpp" />
     <ClCompile Include="Connector.cpp" />
     <ClCompile Include="CoreMacroDef.cpp" />
     <ClCompile Include="CorePch.cpp" />

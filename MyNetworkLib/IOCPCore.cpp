@@ -18,6 +18,10 @@ NetCore::IOCPCore::IOCPCore()
 
 NetCore::IOCPCore::~IOCPCore()
 {
+#ifdef  TEST
+    MESSAGE(~IOCPCore);
+#endif //  TEST
+
     bool suc = ::CloseHandle(_iocpHandle);
     if (suc == 0)
     {
@@ -52,11 +56,11 @@ bool NetCore::IOCPCore::ProcessQueuedCompletionStatus(DWORD dwTimeoutMillisecond
             return false;
         default:
             ErrorHandler::Err("Failed to get queued completion status.", errCode);
+            iocpEvent->GetIOCPObjectRef().lock()->Process(iocpEvent, numberOfBytesTransferred);
             return false;
         }
     }
-
-    iocpEvent->GetIOCPObjectRef()->Process(iocpEvent, numberOfBytesTransferred);
+    else iocpEvent->GetIOCPObjectRef().lock()->Process(iocpEvent, numberOfBytesTransferred);
 
     return true;
 }

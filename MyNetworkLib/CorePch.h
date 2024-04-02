@@ -29,6 +29,7 @@
 #include "ObjectPool.h"
 
 #include "ErrorHandler.h"
+#include "AddrUtils.h"
 #include "SocketUtils.h"
 
 // Network Headers

@@ -8,6 +8,7 @@ NAMESPACE_OPEN(NetCore);
 class IOCPObject : public enable_shared_from_this<IOCPObject>
 {
 public:
+	virtual ~IOCPObject() {}
 	/// <summary>
 	/// Get IOCP handle.
 	/// </summary>

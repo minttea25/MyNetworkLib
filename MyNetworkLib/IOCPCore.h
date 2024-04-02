@@ -8,7 +8,7 @@ class IOCPObject;
 /// IOCPCore class is a class that wraps I/O Completion Port (IOCP), 
 /// <para>registers a file handle (IOCPObject) with IOCP, and processes completed tasks.</para>
 /// </summary>
-class IOCPCore
+class IOCPCore : public enable_shared_from_this<IOCPCore>
 {
 public:
 	/// <summary>

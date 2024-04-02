@@ -23,33 +23,30 @@ public:
 		_init();
 		//Init();
 	}
+	~IOCPEvent()
+	{
+		ReleaseIOCPObjectSPtr();
+	}
 	inline void Clear() { _init(); }
+	inline void ReleaseIOCPObjectSPtr() {}//_iocpObject = nullptr; }
 public: // virtual
 	//virtual void Init() {}
-public: // property
+public:
 	EventType GetEventType() const
 	{
 		return _eventType;
 	}
-	IOCPObjectSPtr GetIOCPObjectRef() { return _iocpObject; }
+	weak_ptr<IOCPObject> GetIOCPObjectRef() { return _iocpObject; }
 	LPOVERLAPPED overlapped()
 	{
-#ifdef DEBUG
-		auto ret = static_cast<LPOVERLAPPED>(this);
-		return ret;
-#endif // DEBUG
 		return static_cast<LPOVERLAPPED>(this);
 	}
 	LPOVERLAPPED* p_overlapped()
 	{
-#ifdef DEBUG
-		auto ret = reinterpret_cast<LPOVERLAPPED*>(this);
-		return ret;
-#endif // DEBUG
 		return reinterpret_cast<LPOVERLAPPED*>(this);
 	}
 
-	void SetIOCPObjectRef(IOCPObjectSPtr obj) noexcept
+	void SetIOCPObjectSPtr(IOCPObjectSPtr obj) noexcept
 	{
 		_iocpObject = obj;
 	}
@@ -67,7 +64,7 @@ private:
 	}
 private:
 	EventType _eventType;
-	IOCPObjectSPtr _iocpObject = nullptr;
+	weak_ptr<IOCPObject> _iocpObject;
 };
 
 struct ConnectEvent : public IOCPEvent
