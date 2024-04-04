@@ -1,20 +1,19 @@
 #include "pch.h"
 #include "Connector.h"
 
-NetCore::Connector::Connector(IOCPCoreSPtr core, SOCKADDR_IN& addr, std::function<SessionSPtr()> sessionFactory)
-	: _connected(false), _core(core),
-	_addr(addr), _session_factory(sessionFactory)
+NetCore::Connector::Connector(ServiceSPtr clientService)
+	: _connected(false), _clientService(clientService)
 {
+	// Note: Service must be a client service.
+	ErrorHandler::AssertCrash(
+		clientService->GetServiceType() == ServiceType::Client, 
+		Errors::APP_CONNECTOR_SERVICE_WAS_NOT_CLIENT);
+
 	_connectSocket = SocketUtils::CreateSocket();
-	_session = _session_factory();
-	_connectSocket = _session->GetSocket();
 }
 
 NetCore::Connector::~Connector()
 {
-	_session_factory = nullptr;
-	_session = nullptr;
-
 #ifdef  TEST
 	MESSAGE(~Connector);
 #endif //  TEST
@@ -27,7 +26,7 @@ bool NetCore::Connector::Connect()
 {
 	if (_connected.load() == true) return false;
 
-	if (_core->RegisterHandle(shared_from_this()) == false) return false;
+	if (_clientService->_iocpCore->RegisterHandle(shared_from_this()) == false) return false;
 
 	if (SocketUtils::SetReuseAddress(_connectSocket, true) == false) return false;
 	// For ConnectEx fn
@@ -38,8 +37,11 @@ bool NetCore::Connector::Connect()
 	_connectEvent.SetIOCPObjectSPtr(shared_from_this());
 
 	NOT_USE DWORD bytesSent = 0;
-	BOOL suc = SocketUtils::ConnectEx(_connectSocket, reinterpret_cast<PSOCKADDR>(&_addr),
-		sizeof(SOCKADDR), nullptr, 0, OUT & bytesSent, &_connectEvent);
+	BOOL suc = SocketUtils::ConnectEx(
+		_connectSocket, 
+		reinterpret_cast<PSOCKADDR>(&(_clientService->_addr)), sizeof(SOCKADDR), 
+		nullptr, 0, OUT & bytesSent, 
+		&_connectEvent);
 
 	// Note: WSACheckErrorExceptPending return 0 if no error or WSA_IO_PENDING
 	if (int32 errCode = ErrorHandler::WSACheckErrorExceptPending(suc, WSA_CONNECTEX_FAILED) != Errors::NONE)
@@ -57,7 +59,7 @@ void NetCore::Connector::_processConnect()
 	// Release pointer
 	_connectEvent.ReleaseIOCPObjectSPtr();
 	_connected.store(true);
-	_session->SetConnected();
+	_session.lock()->SetConnected(_clientService, _connectSocket);
 }
 
 void NetCore::Connector::Process(IOCPEvent * overlappedEvent, DWORD numberOfBytesTransferred)
@@ -65,8 +67,9 @@ void NetCore::Connector::Process(IOCPEvent * overlappedEvent, DWORD numberOfByte
 	switch (overlappedEvent->GetEventType())
 	{
 	case EventType::Connect:
-		// Change iocp object
-		overlappedEvent->SetIOCPObjectSPtr(_session);
+		// Create a session and change iocp object to it.
+		_session = _clientService->AddNewSession();
+		overlappedEvent->SetIOCPObjectSPtr(_session.lock());
 		_processConnect();
 		break;
 	default:

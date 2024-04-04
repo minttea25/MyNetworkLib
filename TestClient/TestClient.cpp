@@ -3,6 +3,8 @@
 
 using namespace NetCore;
 
+static bool off = false;
+
 class TestClass : public std::enable_shared_from_this<TestClass>
 {
 public:
@@ -43,33 +45,33 @@ constexpr ushort PORT = 8900;
 
 int main()
 {
-	{
-		{
-			auto s_ptr = NetCore::make_shared<TestClass>();
-			s_ptr->SetHpExp(100, 200);
-			std::cout << *s_ptr << std::endl;
-			std::cout << "use_count: " << s_ptr.use_count() << std::endl;
-			weak_ptr<TestClass> w_ptr = s_ptr->shared_from_this();
-			auto s_ptr2 = s_ptr->shared_from_this();
-			std::cout << "use_count: " << s_ptr.use_count() << std::endl;
-		}
+	//{
+	//	{
+	//		auto s_ptr = NetCore::make_shared<TestClass>();
+	//		s_ptr->SetHpExp(100, 200);
+	//		std::cout << *s_ptr << std::endl;
+	//		std::cout << "use_count: " << s_ptr.use_count() << std::endl;
+	//		weak_ptr<TestClass> w_ptr = s_ptr->shared_from_this();
+	//		auto s_ptr2 = s_ptr->shared_from_this();
+	//		std::cout << "use_count: " << s_ptr.use_count() << std::endl;
+	//	}
 
-		{
+	//	{
 
-			auto u_ptr = NetCore::make_unique<TestClass>();
+	//		auto u_ptr = NetCore::make_unique<TestClass>();
 
-			u_ptr->SetHpExp(10, 100);
+	//		u_ptr->SetHpExp(10, 100);
 
-			std::cout << *u_ptr << std::endl;
+	//		std::cout << *u_ptr << std::endl;
 
-			auto u_ptr2 = std::move(u_ptr);
-			//u_ptr->SetHpExp(100, 200); // error (due to u_ptr is nullptr now)
-			std::cout << *u_ptr2 << std::endl;
+	//		auto u_ptr2 = std::move(u_ptr);
+	//		//u_ptr->SetHpExp(100, 200); // error (due to u_ptr is nullptr now)
+	//		std::cout << *u_ptr2 << std::endl;
 
 
-		}
-		return 0;
-	}
+	//	}
+	//	return 0;
+	//}
 	
 	SocketUtils::Init(); // temp
 
@@ -88,15 +90,16 @@ int main()
 			return s;
 		};
 
+	auto client = NetCore::make_shared<ClientService>
+		(
+			core, addr, session_factory
+		);
 	
-	auto connector = NetCore::make_shared<Connector>(core, addr, session_factory);
-	
-	if (!connector->Connect())
+	if (client->Start() == false)
 	{
-		std::cerr << "Failed to connect." << std::endl;
 		return -1;
 	}
-	
+
 	std::thread th
 	(
 		[=]() {
@@ -107,7 +110,7 @@ int main()
 				core->ProcessQueuedCompletionStatus(1000);
 				//this_thread::yield();
 				
-				if (session_ptr->IsConnected() == false) break;
+				if (off) break;
 			}
 		}
 	);
@@ -121,13 +124,17 @@ int main()
 		}
 
 		this_thread::sleep_for(1000ms);
-		session_ptr->Disconnect();
+		if (session_ptr != nullptr) session_ptr->Disconnect();
+		off = true;
 	}
 
 	if (th.joinable()) th.join();
 	session_ptr = nullptr;
+
+	client->Stop();
+
 	std::cout << session_ptr.use_count() << std::endl;
-	std::cout << connector.use_count() << std::endl;
+	std::cout << client.use_count() << std::endl;
     return 0;
 }
 

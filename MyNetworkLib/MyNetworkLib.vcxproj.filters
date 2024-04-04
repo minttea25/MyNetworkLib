@@ -91,6 +91,9 @@
     <ClInclude Include="AddrUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Service.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -154,6 +157,7 @@
     <ClCompile Include="AddrUtils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Service.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

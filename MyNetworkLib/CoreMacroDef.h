@@ -8,10 +8,15 @@
 /***********************************
 * Utils
 ************************************/
-#define IN
-#define OUT
+#define IN /*Parameter IN*/
+#define OUT /*Parameter OUT*/
 
-#define NOT_USE
+#define ABSTRACT /*This is abstract class.*/
+#define PURE_VIRTUAL = 0 /*Pure virtuals. It needs virtual keyword at front.*/
+
+#define NOT_USE /*Not-in-use variable.*/
+
+//#define NOT_NULL /*This parameter should not be null or nullptr.*/
 
 #define NAMESPACE_OPEN(name) namespace name {
 #define NAMESPACE_CLOSE }
@@ -45,7 +50,7 @@ std::cerr << code << ": " << #text << std::endl;    \
 
 #define ERR(text) \
 {   \
-std::cerr << #text << std::endl;    \
+std::cerr << "Error: " << #text << std::endl;    \
 }   \
 
 #define WSA_ERR(code)   \

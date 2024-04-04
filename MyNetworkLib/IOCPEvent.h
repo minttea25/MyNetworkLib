@@ -36,7 +36,7 @@ public:
 	{
 		return _eventType;
 	}
-	weak_ptr<IOCPObject> GetIOCPObjectRef() { return _iocpObject; }
+	IOCPObjectWPtr GetIOCPObjectWPtr() { return _iocpObject; }
 	LPOVERLAPPED overlapped()
 	{
 		return static_cast<LPOVERLAPPED>(this);
@@ -64,7 +64,7 @@ private:
 	}
 private:
 	EventType _eventType;
-	weak_ptr<IOCPObject> _iocpObject;
+	IOCPObjectWPtr _iocpObject;
 };
 
 struct ConnectEvent : public IOCPEvent

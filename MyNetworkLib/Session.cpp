@@ -15,8 +15,12 @@ NetCore::Session::~Session()
 	SocketUtils::Close(_socket);
 }
 
-void NetCore::Session::SetConnected()
+void NetCore::Session::SetConnected(const ServiceSPtr service, Socket connectedSocket)
 {
+	_service = service;
+
+	if (connectedSocket != INVALID_SOCKET) _set_socket(connectedSocket);
+
 	_connected.store(true);
 
 	// Call virtual method
@@ -47,6 +51,16 @@ bool NetCore::Session::Disconnect()
 	if (IsConnected() == false) return false;
 
 	return RegisterDisconnect();
+}
+
+void NetCore::Session::_set_socket(Socket connectedSocket)
+{
+	if (ErrorHandler::CheckError(_service->GetServiceType() == ServiceType::Client, Errors::APP_SESSION_SET_SOCKET_ALLOWED_ONLY_IN_CONNECTOR))
+	{
+		return;
+	}
+
+	_socket = connectedSocket;
 }
 
 
@@ -163,7 +177,7 @@ void NetCore::Session::RegisterRecv()
 
 	if (ErrorHandler::WSACheckErrorExceptPending(res != SOCKET_ERROR, WSA_RECV_FAILED) != Errors::NONE)
 	{
-		// TODO
+
 	}
 }
 
@@ -205,10 +219,14 @@ bool NetCore::Session::RegisterDisconnect()
 void NetCore::Session::ProcessDisconnect()
 {
 	_disconnectEvent.ReleaseIOCPObjectSPtr();
-	//if (listener != nullptr) 
-	//	listener->sessions.erase(static_pointer_cast<Session>(shared_from_this()));
 
 	_connected.store(false);
+
+	// Note: ReleaseSession will return false if this session is already removed in service.
+	// It can occur when the service is stopped.
+	_service->ReleaseSession(static_pointer_cast<Session>(shared_from_this()));
+
+	_service = nullptr;
 
 	OnDisconnected();
 }
