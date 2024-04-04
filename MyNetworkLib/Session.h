@@ -4,11 +4,16 @@ NAMESPACE_OPEN(NetCore);
 
 class Session : public IOCPObject
 {
+	// TEMP size
 	constexpr static uint32 MAX_BUFFER_SIZE = 0b1000000;  // 0x10000;
 
 	enum DisconnectError
 	{
 		NONE,
+
+		SERVER_SERVICE_STOPPED,
+		CLIENT_SERVICE_STOPPED,
+
 		SENT_0,
 
 		RECV_0,
@@ -23,8 +28,6 @@ public:
 	bool IsConnected() const { return _connected; }
 
 public:
-	void SetConnected(const ServiceSPtr service, const Socket connectedSocket = INVALID_SOCKET);
-
 	bool Send(const _byte* buffer);
 	bool Disconnect();
 	SOCKET GetSocket() const { return _socket; }
@@ -32,6 +35,7 @@ public:
 	_byte* GetRecvBuffer() { return _recvBuffer; }
 	_byte* GetSendBuffer() { return _sendBuffer; }
 private:
+	void SetConnected(const ServiceSPtr service, const Socket connectedSocket = INVALID_SOCKET);
 	void _set_socket(Socket connectedSocket);
 	void _disconnect(uint16 errorCode = DisconnectError::NONE);
 
@@ -66,10 +70,7 @@ private:
 
 	friend class Connector;
 	friend class Listener;
-
-
-public: // TEMP
-	//Listener* listener; // temp it can be nullptr later.
+	friend class ServerService;
 };
 
 NAMESPACE_CLOSE;

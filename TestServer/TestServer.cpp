@@ -35,7 +35,7 @@ int main()
     auto server = NetCore::make_shared<ServerService>(
         core, addr,
         NetCore::make_shared<ClientSession>,
-        1, 10);
+        10, 10);
 
     if (server->Start() == false)
     {

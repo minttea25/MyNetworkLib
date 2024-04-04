@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Service.h"
 
-NetCore::Service::Service(ServiceType serviceType, IOCPCoreSPtr iocpCore, SOCKADDR_IN sockAddr, SessionFactory sessionFactory, uint32 sessionCount)
+NetCore::Service::Service(ServiceType serviceType, IOCPCoreSPtr iocpCore, SOCKADDR_IN sockAddr, SessionFactory sessionFactory, const uint32 sessionCount)
 	: _serviceType(serviceType), _iocpCore(iocpCore), _addr(sockAddr), 
 	_sessionFactory(sessionFactory), MAX_SESSION_COUNT(sessionCount)
 {
@@ -110,9 +110,11 @@ NetCore::SessionSPtr NetCore::ClientService::AddNewSession()
 
 bool NetCore::ClientService::ReleaseSession(SessionSPtr session_s_ptr)
 {
-	// TODO
-	_session = nullptr;
-	return true;
+	if (_session == nullptr) return false;
+	else
+	{
+		_session = nullptr; return true;
+	}
 }
 
 void NetCore::ClientService::ReleaseAllSessions()
@@ -124,7 +126,7 @@ void NetCore::ClientService::ReleaseAllSessions()
 
 
 
-NetCore::ServerService::ServerService(IOCPCoreSPtr iocpCore, SOCKADDR_IN addr, SessionFactory sessionFactory, uint32 backlog, uint32 sessionCount)
+NetCore::ServerService::ServerService(IOCPCoreSPtr iocpCore, SOCKADDR_IN addr, SessionFactory sessionFactory, const uint32 backlog, const uint32 sessionCount)
 	: Service(ServiceType::Server, iocpCore, addr, sessionFactory, sessionCount),
 	BACK_LOG(backlog)
 {
@@ -216,5 +218,11 @@ bool NetCore::ServerService::ReleaseSession(SessionSPtr session_s_ptr)
 
 void NetCore::ServerService::ReleaseAllSessions()
 {
+	// Disconnect sessions
+	for (auto& s : _sessions)
+	{
+		if (s->IsConnected() == true) s->_disconnect(Session::DisconnectError::SERVER_SERVICE_STOPPED);
+	}
+
 	_sessions.clear();
 }

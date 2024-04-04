@@ -222,6 +222,10 @@ void NetCore::Session::ProcessDisconnect()
 
 	_connected.store(false);
 
+	// Note: ReleaseSession will return false if this session is already removed in service.
+	// It can occur when the service is stopped.
+	_service->ReleaseSession(static_pointer_cast<Session>(shared_from_this()));
+
 	_service = nullptr;
 
 	OnDisconnected();

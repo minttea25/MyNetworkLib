@@ -40,5 +40,6 @@ SHARED_PTR(Service);
 #define WEAK_PTR(name) using name##WPtr = std::weak_ptr<class name>;
 
 WEAK_PTR(Session);
+WEAK_PTR(IOCPObject);
 
 NAMESPACE_CLOSE;
