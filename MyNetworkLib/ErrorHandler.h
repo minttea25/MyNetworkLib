@@ -37,6 +37,10 @@ enum Errors : DWORD
 	WSAIOCTL_DISCONNECTEX_FAILED = 121,
 	WSA_DISCONNECTEX_FAILED = 122,
 
+	THREAD_LOCK_TIMEOUT = 501,
+	THREAD_LOCK_INVALID_WRITE_UNLOCK_ORDER = 502,
+	THREAD_LOCK_MULTIPLE_READ_UNLOCK = 503,
+
 	APP_REGISTER_HANDLE_FAILED_IOCP_CORE = 1001,
 
 	APP_SERVICE_IOCPCORE_NULLPTR = 2001,
@@ -51,6 +55,7 @@ enum Errors : DWORD
 	APP_LISTENER_SERVICE_WAS_NOT_SERVER = 4001,
 
 	APP_SESSION_SET_SOCKET_ALLOWED_ONLY_IN_CONNECTOR = 5001,
+
 };
 
 class ErrorHandler
@@ -61,13 +66,28 @@ public:
 		return _error.load();
 	}
 
-	static inline void AssertCrash(const bool condition, const Errors errCode)
+	static inline void AssertCrash(const bool condition, const Errors errCode, const char* msg = nullptr)
 	{
 		if (!condition)
 		{
 			ERR(errCode);
-			ASSERT_CRASH(condition);
+
+			if (msg == nullptr)
+			{
+				ASSERT_CRASH(condition);
+			}
+			else ASSERT_CRASH(msg);
 		}
+	}
+
+	static inline void AssertCrash(const Errors errCode, const char* msg = nullptr)
+	{
+		ERR(errCode);
+		if (msg == nullptr)
+		{
+			ASSERT_CRASH(errCode);
+		}
+		else ASSERT_CRASH(msg);
 	}
 
 	static inline DWORD CheckError(const bool condition, const Errors errCode)

@@ -42,4 +42,7 @@ SHARED_PTR(Service);
 WEAK_PTR(Session);
 WEAK_PTR(IOCPObject);
 
+// Lock type
+using Lock = class RWLock;
+
 NAMESPACE_CLOSE;

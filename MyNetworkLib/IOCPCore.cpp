@@ -18,9 +18,7 @@ NetCore::IOCPCore::IOCPCore()
 
 NetCore::IOCPCore::~IOCPCore()
 {
-#ifdef  TEST
     MESSAGE(~IOCPCore);
-#endif //  TEST
 
     bool suc = ::CloseHandle(_iocpHandle);
     if (suc == 0)

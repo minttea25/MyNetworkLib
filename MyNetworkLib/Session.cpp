@@ -8,9 +8,7 @@ NetCore::Session::Session()
 
 NetCore::Session::~Session()
 {
-#ifdef  TEST
 	MESSAGE(~Session);
-#endif //  TEST
 
 	SocketUtils::Close(_socket);
 }
@@ -121,6 +119,14 @@ void NetCore::Session::RegisterSend()
 
 	//	_sendLock.unlock();
 	//}
+
+	{
+		WRITE_LOCK(send);
+		MESSAGE(SendLock);
+
+		// TODO
+		// Check destructor of WriteLock.
+	}
 
 
 	WSABUF sendBuffer{};

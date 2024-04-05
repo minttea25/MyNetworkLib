@@ -17,6 +17,9 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{99e71a7b-8601-4d32-a5cb-127811378a52}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Thread">
+      <UniqueIdentifier>{40b7737a-2d18-465f-996c-02db0a5d76c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -94,6 +97,12 @@
     <ClInclude Include="Service.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RWLock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Lock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -157,7 +166,13 @@
     <ClCompile Include="AddrUtils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Service.cpp" />
+    <ClCompile Include="RWLock.cpp">
+      <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="Service.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Lock.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
