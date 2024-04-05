@@ -17,11 +17,11 @@ constexpr auto UNSIGNED_INVALID = 0;
 
 #define NOT_USE /*Not-in-use variable.*/
 
-#define USE_LOCK Lock _lock
+#define _USE_LOCK Lock _lock
 #define USE_LOCK(name) Lock _##name##Lock
-#define READ_LOCK ReadLock __r_lock(_lock)
+#define _READ_LOCK ReadLock __r_lock(_lock)
 #define READ_LOCK(name) ReadLock __r_lock(_##name##Lock)
-#define WRITE_Lock WriteLock __w_lock(_lock)
+#define _WRITE_Lock WriteLock __w_lock(_lock)
 #define WRITE_LOCK(name) WriteLock __w_lock(_##name##Lock)
 
 #define NAMESPACE_OPEN(name) namespace name {

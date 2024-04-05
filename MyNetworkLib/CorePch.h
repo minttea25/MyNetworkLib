@@ -14,6 +14,7 @@
 #include <iostream>
 #include <vector>
 #include <functional>
+#include <future>
 
 // Base Headers
 #include <WinSock2.h>
@@ -27,6 +28,7 @@
 // Thread Headers
 #include "RWLock.h"
 #include "Lock.h"
+#include "ThreadPool.h"
 
 // Memory Headers
 #include "Memory.h"

@@ -103,6 +103,9 @@
     <ClInclude Include="Lock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ThreadPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -173,6 +176,7 @@
       <Filter>Network</Filter>
     </ClCompile>
     <ClCompile Include="Lock.cpp" />
+    <ClCompile Include="ThreadPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
