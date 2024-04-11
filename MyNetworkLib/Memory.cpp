@@ -58,8 +58,8 @@ void* NetCore::Memory::Allocate(const int32 size) const
 	// -------------------------------------------------------------------------
 
 #ifdef TEST
-	SHOW(pooltable, _poolTable[allocSize]);
-	std::cout << _poolTable[allocSize] << std::endl;
+	//SHOW(pooltable, _poolTable[allocSize]);
+	//std::cout << _poolTable[allocSize] << std::endl;
 #endif // TEST
 
 	return MemoryHeader::AttachHeader(header, allocSize);
@@ -84,8 +84,8 @@ void NetCore::Memory::Release(void* ptr) const
 		_poolTable[allocSize]->Release(header);
 
 #ifdef TEST
-		SHOW(pooltable, _poolTable[allocSize]);
-		std::cout << _poolTable[allocSize] << std::endl;
+		//SHOW(pooltable, _poolTable[allocSize]);
+		//std::cout << _poolTable[allocSize] << std::endl;
 #endif // TEST
 
 	}

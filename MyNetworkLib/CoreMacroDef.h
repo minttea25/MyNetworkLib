@@ -24,6 +24,9 @@ constexpr auto UNSIGNED_INVALID = 0;
 #define _WRITE_Lock WriteLock __w_lock(_lock)
 #define WRITE_LOCK(name) WriteLock __w_lock(_##name##Lock)
 
+#define _USE_COMMON_LOCK Mutex _mutex
+#define _LOCK_GUARD LockGuard _guard(_mutex)
+
 #define NAMESPACE_OPEN(name) namespace name {
 #define NAMESPACE_CLOSE }
 

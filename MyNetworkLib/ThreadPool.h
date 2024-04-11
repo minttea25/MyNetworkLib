@@ -1,12 +1,8 @@
 #pragma once
 
 NAMESPACE_OPEN(NetCore::Thread);
-#define _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING
 
 using namespace NetCore;
-
-using _Task = pair<uint32, std::function<void()>>;
-#define Task(_task) _task##.second
 
 class ThreadPool
 {
@@ -22,7 +18,6 @@ public:
     auto enqueue(F&& f, Args&&... args)
         -> std::future<typename std::invoke_result<F, Args...>::type>
     {
-        using namespace std;
         using return_type = typename std::invoke_result<F, Args...>::type;
 
         auto task = std::make_shared<std::packaged_task<return_type(Args...)>>(
@@ -31,7 +26,10 @@ public:
         auto res = task->get_future();
         {
             std::unique_lock<Mutex> lock(_mutex);
-            if (_stop) throw std::runtime_error("Pool is already stopped.");
+            if (_stop)
+            {
+                throw std::runtime_error("Pool is already stopped.");
+            }
             _waiting_queue.emplace([=]() { (*task)(args...); });
         }
         _condition.notify_one();

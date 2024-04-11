@@ -26,6 +26,7 @@
 #pragma comment(lib, "ws2_32.lib")
 
 // Thread Headers
+#include "TaskManager.h"
 #include "RWLock.h"
 #include "Lock.h"
 #include "ThreadPool.h"
