@@ -28,6 +28,7 @@ using LockGuard = std::lock_guard < std::mutex>;
 using Socket = SOCKET;
 
 using task_id = uint32;
+using count_t = uint32;
 
 #define SHARED_PTR(name) using name##SPtr = std::shared_ptr<class name>;
 

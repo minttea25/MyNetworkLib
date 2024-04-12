@@ -16,25 +16,25 @@ using namespace std;
 
 int main()
 {
+	auto num_cores = std::thread::hardware_concurrency();
+
+	cout << num_cores << endl;
+
+
+	{
+		NetCore::Thread::TaskManager manager;
+		auto id = manager.AddTask([]() { cout << "task 1" << endl; });
+		auto ids = manager.AddTask([]() { while (true) { cout << "infinite task" << endl; this_thread::sleep_for(500ms); }}, 2);
 	
+		
+		cout << "Join? : " << manager.JoinTask(ids.first) << endl;
+		cout << "Join? : " << manager.JoinTask(ids.second) << endl;
 
-	NetCore::Thread::TaskManager manager;
-	auto t1 = manager.AddTask([]() {
-		std::cout << "task 1" << std::endl;
-		});
-	auto t2 =  manager.AddTask([]() {
-		this_thread::sleep_for(500ms);
-		std::cout << "task 2" << std::endl;
-		});
-	auto t3 =  manager.AddTask([]() {
-		std::cout << "task 3" << std::endl;
-		});
-	this_thread::sleep_for(200ms);
-	std::cout << "Task1 end? " << manager.IsRunning(t1) << std::endl;
-	std::cout << "Task2 end? " << manager.IsRunning(t2) << std::endl;
-	std::cout << "Task3 end? " << manager.IsRunning(t3) << std::endl;
+		this_thread::sleep_for(1000ms);
+		cout << "Join? : " << manager.JoinTask(id) << endl;
+	}
 
-	this_thread::sleep_for(1000ms);
+	
 	cout << "end" << endl;
 	return 0;
 }
