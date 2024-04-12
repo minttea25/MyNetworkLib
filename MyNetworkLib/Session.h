@@ -55,10 +55,10 @@ protected: // virtuals
 	virtual uint32 OnRecv(const _byte* buffer, const uint32 len) { std::cout << "Received: " << len << " bytes" << std::endl; return len; }
 	virtual void OnDisconnected(const int32 error = DisconnectError::NONE) { std::cout << "OnDisconnected: " << error << std::endl; }
 private:
+	USE_LOCK(send);
 	ServiceSPtr _service = nullptr;
 	SOCKET _socket = INVALID_SOCKET;
 	uint32 _sessionId = 0;
-	Mutex _sendLock;
 	Atomic<bool> _connected = false;
 
 	SendEvent _sendEvent{ }; // overlapped event used as sending

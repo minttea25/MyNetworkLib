@@ -4,6 +4,7 @@
 * Values
 ************************************/
 
+constexpr auto UNSIGNED_INVALID = 0;
 
 /***********************************
 * Utils
@@ -16,7 +17,15 @@
 
 #define NOT_USE /*Not-in-use variable.*/
 
-//#define NOT_NULL /*This parameter should not be null or nullptr.*/
+#define _USE_LOCK Lock _lock
+#define USE_LOCK(name) Lock _##name##Lock
+#define _READ_LOCK ReadLock __r_lock(_lock)
+#define READ_LOCK(name) ReadLock __r_lock(_##name##Lock)
+#define _WRITE_Lock WriteLock __w_lock(_lock)
+#define WRITE_LOCK(name) WriteLock __w_lock(_##name##Lock)
+
+#define _USE_COMMON_LOCK Mutex _mutex
+#define _LOCK_GUARD LockGuard _guard(_mutex)
 
 #define NAMESPACE_OPEN(name) namespace name {
 #define NAMESPACE_CLOSE }
@@ -32,7 +41,12 @@
 * DEBUGGING
 ********************************************/
 
+#ifdef TEST
 #define MESSAGE(text) std::cout << #text << std::endl;
+#else
+#define MESSAGE(text)
+#endif // TEST
+
 
 #define SHOW(name, value) {                             \
     std::cout << #name << ": " << value << std::endl;    \

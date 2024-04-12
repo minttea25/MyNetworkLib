@@ -10,9 +10,7 @@ NetCore::Service::Service(ServiceType serviceType, IOCPCoreSPtr iocpCore, SOCKAD
 
 NetCore::Service::~Service()
 {
-#ifdef TEST
 	MESSAGE(~Service);
-#endif // TEST
 
 	_iocpCore = nullptr;
 	_sessionFactory = nullptr;
@@ -26,9 +24,7 @@ NetCore::ClientService::ClientService(IOCPCoreSPtr iocpCore, SOCKADDR_IN addr, S
 
 NetCore::ClientService::~ClientService() noexcept
 {
-#ifdef TEST
 	MESSAGE(~ClientService);
-#endif // TEST
 }
 
 
@@ -134,9 +130,7 @@ NetCore::ServerService::ServerService(IOCPCoreSPtr iocpCore, SOCKADDR_IN addr, S
 
 NetCore::ServerService::~ServerService() noexcept
 {
-#ifdef TEST
 	MESSAGE(~ServerService);
-#endif // TEST
 }
 
 bool NetCore::ServerService::Start()

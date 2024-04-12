@@ -27,6 +27,9 @@ using LockGuard = std::lock_guard < std::mutex>;
 
 using Socket = SOCKET;
 
+using task_id = uint32;
+using count_t = uint32;
+
 #define SHARED_PTR(name) using name##SPtr = std::shared_ptr<class name>;
 
 SHARED_PTR(IOCPCore);
@@ -41,5 +44,8 @@ SHARED_PTR(Service);
 
 WEAK_PTR(Session);
 WEAK_PTR(IOCPObject);
+
+// Lock type
+using Lock = class RWLock;
 
 NAMESPACE_CLOSE;

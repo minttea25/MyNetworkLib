@@ -14,9 +14,7 @@ NetCore::Connector::Connector(ServiceSPtr clientService)
 
 NetCore::Connector::~Connector()
 {
-#ifdef  TEST
 	MESSAGE(~Connector);
-#endif //  TEST
 
 	// The socket is referrenced from Session.
 	// SocketUtils::Close(_connectSocket);

@@ -11,9 +11,7 @@ NetCore::Listener::Listener(ServiceSPtr serverService)
 
 NetCore::Listener::~Listener()
 {
-#ifdef  TEST
 	MESSAGE(~Listener);
-#endif //  TEST
 
 	SocketUtils::Close(_listenSocket);
 
