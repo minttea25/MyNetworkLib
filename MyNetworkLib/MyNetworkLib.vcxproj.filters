@@ -20,6 +20,9 @@
     <Filter Include="Thread">
       <UniqueIdentifier>{40b7737a-2d18-465f-996c-02db0a5d76c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Job">
+      <UniqueIdentifier>{6e2a3acd-07a5-409c-a4ec-b93935f419a0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -109,6 +112,18 @@
     <ClInclude Include="TaskManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="JobSerializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Job.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JobSerializerWithTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeJob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -183,6 +198,10 @@
       <Filter>Thread</Filter>
     </ClCompile>
     <ClCompile Include="TaskManager.cpp" />
+    <ClCompile Include="JobSerializer.cpp" />
+    <ClCompile Include="Job.cpp" />
+    <ClCompile Include="JobSerializerWithTimer.cpp" />
+    <ClCompile Include="TimeJob.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

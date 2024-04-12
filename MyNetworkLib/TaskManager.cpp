@@ -39,7 +39,7 @@ pair<NetCore::task_id, NetCore::task_id> NetCore::Thread::TaskManager::AddTask(s
 {
 	_LOCK_GUARD;
 
-	const task_id first = _tasks.size() + 1;
+	const task_id first = static_cast<task_id>(_tasks.size()) + 1;
 
 	for (auto i = 0; i < count; ++i)
 	{
