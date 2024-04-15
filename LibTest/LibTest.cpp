@@ -14,58 +14,78 @@ pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
 
 using namespace std;
 
-class A : public NetCore::JobSerializer
+class C : public enable_shared_from_this<C>
 {
 public:
-	A(int v) : _a(v) {}
-	~A() { std::cout << "~A" << std::endl; }
-	void Multifly(const int x)
+	C() : _id(-1) {}
+	C(int v) : _id(v) {}
+	void Print() const
 	{
-		_a *= x;
-		std::cout << "now a:" << _a << std::endl;
+		cout << "C: " << _id << endl;
 	}
+	int Id() const { return _id; }
 private:
-	int _a;
-};
-
-class B : public NetCore::JobSerializerWithTimer
-{
-public:
-	B(int v) : _b(v) {}
-	~B() { std::cout << "~B" << std::endl; }
-	void Multifly(const int x)
-	{
-		_b *= x;
-		std::cout << "now b:" << _b << std::endl;
-	}
-private:
-	int _b;
+	const int _id;
 };
 
 int main()
 {
 	auto num_cores = std::thread::hardware_concurrency();
-
 	cout << num_cores << endl;
-
 	{
-		shared_ptr<A> serializer = NetCore::make_shared<A>(10);
-		serializer->PushJob([]() { cout << "task1" << endl; });
-		serializer->PushJob(&A::Multifly, 10);
-		serializer->PushJob(&A::Multifly, 200);
-
-		while (serializer->IsEmpty() == false)
 		{
-			serializer->DoOneTask();
-		}
-	}
-	{
-		shared_ptr<B> serializer = NetCore::make_shared<B>(20);
-		serializer->ReserveJob([]() { cout << "task2" << endl; }, 1000);
-		serializer->ReserveJob(1500, &B::Multifly, 10);
-		serializer->ReserveJob(200, &B::Multifly, 100);
+			NetCore::LockQueue<C> queue;
 
-		serializer->DoWork();
+			NetCore::Thread::TaskManager manager;
+			manager.AddTask([&queue]() {
+				cout << "Producer: " << NetCore::TLS_Id << endl;
+				for (int i = 0; i < 50; ++i)
+				{
+					queue.Push(C(i));
+					this_thread::sleep_for(50ms);
+				}
+				});
+
+			manager.AddTask([&queue]() {
+				cout << "Consumer: " <<  NetCore::TLS_Id << endl;
+				for (int i = 0; i < 50; ++i)
+				{
+					auto t = queue.Pop();
+					if (t.Id() == -1) i--;
+					else t.Print();
+					this_thread::sleep_for(60ms);
+				}
+				});
+
+			manager.JoinAllTasks();
+		}
+		cout << "----------------------------------------------------" << endl;
+		{
+			NetCore::LockStack<C> stack;
+
+			NetCore::Thread::TaskManager manager;
+			manager.AddTask([&stack]() {
+				cout << "Producer: " << NetCore::TLS_Id << endl;
+				for (int i = 0; i < 50; ++i)
+				{
+					stack.Push(C(i));
+					this_thread::sleep_for(50ms);
+				}
+				});
+
+			manager.AddTask([&stack]() {
+				cout << "Consumer: " << NetCore::TLS_Id << endl;
+				for (int i = 0; i < 50; ++i)
+				{
+					auto t = stack.Pop();
+					if (t.Id() == -1) i--;
+					else t.Print();
+					this_thread::sleep_for(60ms);
+				}
+				});
+
+			manager.JoinAllTasks();
+		}
 	}
 
 	

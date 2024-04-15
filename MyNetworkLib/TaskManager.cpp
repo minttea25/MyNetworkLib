@@ -2,6 +2,8 @@
 #include "TaskManager.h"
 #include "TaskManager.h"
 
+NetCore::Atomic<NetCore::task_id> NetCore::Thread::TaskManager::_taskId = 0; // Starts at 0 (main thread)
+
 NetCore::Thread::TaskManager::TaskManager()
 {
 	// For main thread.
@@ -86,6 +88,7 @@ bool NetCore::Thread::TaskManager::JoinTask(const task_id id)
 
 void NetCore::Thread::TaskManager::InitTLS()
 {
+	TLS_Id = _taskId.fetch_add(1);
 }
 
 void NetCore::Thread::TaskManager::ClearTLS()

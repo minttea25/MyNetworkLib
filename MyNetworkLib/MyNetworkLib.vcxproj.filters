@@ -124,6 +124,12 @@
     <ClInclude Include="TimeJob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LockQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LockStack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
