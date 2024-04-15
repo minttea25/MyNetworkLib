@@ -42,6 +42,11 @@ public:
 	/// <returns>True if successful, false if the task is not done or not joinable.</returns>
 	bool JoinTask(const task_id id);
 
+	void JoinAllTasks()
+	{
+		_join_all_tasks();
+	}
+
 public: // virtuals
 	
 	/// <summary>
@@ -63,6 +68,8 @@ private:
 private:
 	_USE_COMMON_LOCK;
 	std::unordered_map<task_id, pair<std::thread, bool>> _tasks;
+	static Atomic<task_id> _taskId;
 };
+
 
 NAMESPACE_CLOSE;

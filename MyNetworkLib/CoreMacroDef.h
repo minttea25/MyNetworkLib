@@ -21,7 +21,7 @@ constexpr auto UNSIGNED_INVALID = 0;
 #define USE_LOCK(name) Lock _##name##Lock
 #define _READ_LOCK ReadLock __r_lock(_lock)
 #define READ_LOCK(name) ReadLock __r_lock(_##name##Lock)
-#define _WRITE_Lock WriteLock __w_lock(_lock)
+#define _WRITE_LOCK WriteLock __w_lock(_lock)
 #define WRITE_LOCK(name) WriteLock __w_lock(_##name##Lock)
 
 #define _USE_COMMON_LOCK Mutex _mutex

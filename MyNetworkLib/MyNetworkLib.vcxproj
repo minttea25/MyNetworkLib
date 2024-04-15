@@ -166,6 +166,8 @@
     <ClInclude Include="JobSerializerWithTimer.h" />
     <ClInclude Include="Listener.h" />
     <ClInclude Include="Lock.h" />
+    <ClInclude Include="LockQueue.h" />
+    <ClInclude Include="LockStack.h" />
     <ClInclude Include="RWLock.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="MemoryAllocator.h" />
