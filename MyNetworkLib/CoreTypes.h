@@ -39,6 +39,8 @@ SHARED_PTR(Session);
 SHARED_PTR(Connector);
 SHARED_PTR(Listener);
 SHARED_PTR(Service);
+SHARED_PTR(Job);
+SHARED_PTR(TimeJob);
 
 #define WEAK_PTR(name) using name##WPtr = std::weak_ptr<class name>;
 

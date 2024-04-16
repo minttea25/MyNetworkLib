@@ -32,6 +32,7 @@
 #include "ThreadPool.h"
 #include "LockQueue.h"
 #include "LockStack.h"
+#include "LockPriorityQueue.h"
 
 // Memory Headers
 #include "Memory.h"

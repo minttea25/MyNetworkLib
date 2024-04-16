@@ -130,6 +130,9 @@
     <ClInclude Include="LockStack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LockPriorityQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -199,15 +202,24 @@
     <ClCompile Include="Service.cpp">
       <Filter>Network</Filter>
     </ClCompile>
-    <ClCompile Include="Lock.cpp" />
     <ClCompile Include="ThreadPool.cpp">
       <Filter>Thread</Filter>
     </ClCompile>
-    <ClCompile Include="TaskManager.cpp" />
-    <ClCompile Include="JobSerializer.cpp" />
-    <ClCompile Include="Job.cpp" />
-    <ClCompile Include="JobSerializerWithTimer.cpp" />
-    <ClCompile Include="TimeJob.cpp" />
+    <ClCompile Include="Job.cpp">
+      <Filter>Job</Filter>
+    </ClCompile>
+    <ClCompile Include="JobSerializer.cpp">
+      <Filter>Job</Filter>
+    </ClCompile>
+    <ClCompile Include="JobSerializerWithTimer.cpp">
+      <Filter>Job</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeJob.cpp">
+      <Filter>Job</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskManager.cpp">
+      <Filter>Thread</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

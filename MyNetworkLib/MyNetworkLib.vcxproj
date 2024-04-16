@@ -166,6 +166,7 @@
     <ClInclude Include="JobSerializerWithTimer.h" />
     <ClInclude Include="Listener.h" />
     <ClInclude Include="Lock.h" />
+    <ClInclude Include="LockPriorityQueue.h" />
     <ClInclude Include="LockQueue.h" />
     <ClInclude Include="LockStack.h" />
     <ClInclude Include="RWLock.h" />
@@ -199,7 +200,6 @@
     <ClCompile Include="JobSerializer.cpp" />
     <ClCompile Include="JobSerializerWithTimer.cpp" />
     <ClCompile Include="Listener.cpp" />
-    <ClCompile Include="Lock.cpp" />
     <ClCompile Include="RWLock.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
