@@ -3,7 +3,7 @@
 NAMESPACE_OPEN(NetCore);
 
 template<typename T>
-class LockQueue
+class LockPriorityQueue
 {
 public:
 	/// <summary>
@@ -13,7 +13,7 @@ public:
 	void Push(T item)
 	{
 		_WRITE_LOCK;
-		_queue.push(item);
+		_pq.push(item);
 	}
 
 	/// <summary>
@@ -25,11 +25,11 @@ public:
 	{
 		_WRITE_LOCK;
 
-		if (_queue.empty()) return T();
+		if (_pq.empty()) return T();
 
-		T front = _queue.front();
-		_queue.pop();
-		return front;
+		T top = _pq.top();
+		_pq.pop();
+		return top;
 	}
 
 	/// <summary>
@@ -41,42 +41,41 @@ public:
 	{
 		_WRITE_LOCK;
 
-		if (_queue.empty()) return false;
+		if (_pq.empty()) return false;
 		else
 		{
-			item = _queue.front();
-			_queue.pop();
+			item = _pq.front();
+			_pq.pop();
 			return true;
 		}
 	}
 
 	/// <summary>
-	/// Get front item of queue.
+	/// Get top item of queue.
 	/// <para>Note: It returns T() if queue is empty.</para>
 	/// </summary>
-	/// <returns>Front item of queue if successful, T() if queue is empty.</returns>
-	T Front()
+	/// <returns>Top item of queue if successful, T() if queue is empty.</returns>
+	T Peek() 
 	{
 		_READ_LOCK;
 
-		if (_queue.empty()) return T();
-
-		return _queue.front();
+		if (_pq.empty()) return T();
+		else return _pq.front();
 	}
 
 	/// <summary>
-	/// Try to get front item of queue.
+	/// Try to get top item of queue.
 	/// </summary>
-	/// <param name="front">[OUT] Front item of queue if successful.</param>
+	/// <param name="front">[OUT] Top item of queue if successful.</param>
 	/// <returns>True if successful, false if queue is empty.</returns>
-	bool TryPeek(OUT T& front)
+	bool TryPeek(OUT T& top)
 	{
 		_READ_LOCK;
 
-		if (_queue.empty()) return false;
+		if (_pq.empty()) return false;
 		else
 		{
-			front = _queue.front();;
+			top = _pq.top();
 			return true;
 		}
 	}
@@ -87,9 +86,9 @@ public:
 	void Clear()
 	{
 		_WRITE_LOCK;
-		while (_queue.empty() == false)
+		while (_pq.empty() == false)
 		{
-			_queue.pop();
+			_pq.pop();
 		}
 	}
 
@@ -97,10 +96,10 @@ public:
 	/// Pop all items from queue and push them to popped.
 	/// </summary>
 	/// <param name="popped">[OUT] The vector of popped items.</param>
-	void Clear(OUT Vector<T>& popped)
+	void Clear(OUT Vector<T>& elements)
 	{
 		_WRITE_LOCK;
-		while (T& element = Pop()) popped.push_back(element);
+		while (T element = Pop()) elements.push_back(element);
 	}
 
 	/// <summary>
@@ -110,11 +109,11 @@ public:
 	void SetNew()
 	{
 		_WRITE_LOCK;
-		_queue = Queue<T>();
+		_pq = PriorityQueue<T>();
 	}
 private:
 	_USE_LOCK;
-	Queue<T> _queue;
+	PriorityQueue<T> _pq;
 };
 
 NAMESPACE_CLOSE;

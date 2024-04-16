@@ -16,6 +16,7 @@ constexpr auto UNSIGNED_INVALID = 0;
 #define PURE_VIRTUAL = 0 /*Pure virtuals. It needs virtual keyword at front.*/
 
 #define NOT_USE /*Not-in-use variable.*/
+#define DISCARD /*Not-use return value.*/
 
 #define _USE_LOCK Lock _lock
 #define USE_LOCK(name) Lock _##name##Lock

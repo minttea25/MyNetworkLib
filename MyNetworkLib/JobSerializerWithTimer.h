@@ -2,6 +2,9 @@
 
 NAMESPACE_OPEN(NetCore);
 
+/// <summary>
+/// JobSerializer which executes job at reserved tick time.
+/// </summary>
 ABSTRACT class JobSerializerWithTimer : public enable_shared_from_this<JobSerializerWithTimer>
 {
 public:
@@ -12,44 +15,50 @@ public:
 #endif // TEST
 	}
 
-	shared_ptr<TimeJob> ReserveJob(std::function<void()> func, const uint64 tickAfter)
+	TimeJobSPtr ReserveJob(std::function<void()>&& func, const uint64 tickAfter)
 	{
-		shared_ptr<TimeJob> jobSPtr = NetCore::make_shared<TimeJob>(tickAfter, std::move(func));
-		_jobs.push(jobSPtr);
+		TimeJobSPtr jobSPtr = NetCore::make_shared<TimeJob>(tickAfter, std::move(func));
+		_push(jobSPtr);
 		return static_pointer_cast<TimeJob>(jobSPtr->shared_from_this());
 	}
 
 	template<typename T, typename Ret, typename... Args>
-	shared_ptr<TimeJob> ReserveJob(const uint64 tickAfter, Ret(T::* pfunc)(Args...), Args&&... args)
+	TimeJobSPtr ReserveJob(const uint64 tickAfter, Ret(T::* pfunc)(Args...), Args&&... args)
 	{
 		shared_ptr<T> ptr = static_pointer_cast<T>(shared_from_this());
-		shared_ptr<TimeJob> jobSPtr = NetCore::make_shared<TimeJob>(tickAfter, ptr, pfunc, std::forward<Args>(args)...);
+		TimeJobSPtr jobSPtr = NetCore::make_shared<TimeJob>(tickAfter, ptr, pfunc, std::forward<Args>(args)...);
 		
-		
-		_jobs.push(jobSPtr);
+		_push(jobSPtr);
 		return static_pointer_cast<TimeJob>(jobSPtr->shared_from_this());
 	}
 
-	// TEMP
-	void DoWork()
+	/// <summary>
+	/// Execute jobs if the execution time of job is reached.
+	/// <para>If there is no more job to execute now, returns.</para>
+	/// </summary>
+	void Flush()
 	{
-		// assume it is single-thread now
-		// And all jobs are reserved before.
-
+		while (true)
 		{
-			while (_jobs.empty() == false)
+			uint64 now = ::GetTickCount64();
+
+			TimeJobSPtr job = nullptr;
 			{
-				const auto& job = _jobs.top();
-				if (::GetTickCount64() > job->GetExecTick())
-				{
-					job->Execute();
-					_jobs.pop();
-				}
+				if (_jobs.TryPeek(OUT job) == false) return;
+				if (job->GetExecTick() >= now) return;
+				DISCARD _jobs.Pop();
 			}
+			job->Execute();
 		}
 	}
 private:
-	PriorityQueue<shared_ptr<TimeJob>> _jobs;
+	void _push(TimeJobSPtr job)
+	{
+		_jobs.Push(job);
+	}
+private:
+	_USE_LOCK;
+	LockPriorityQueue<TimeJobSPtr> _jobs;
 };
 
 NAMESPACE_CLOSE;

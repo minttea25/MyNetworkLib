@@ -2,10 +2,20 @@
 
 NAMESPACE_OPEN(NetCore);
 
+/// <summary>
+/// Job class which has execution tick time for JobSerializerWithTimer.
+/// </summary>
 class TimeJob : public enable_shared_from_this<TimeJob>
 {
 public:
-	TimeJob(const uint64 tickAfter, std::function<void()> func) : _task(func)
+	~TimeJob()
+	{
+#ifdef TEST
+		MESSAGE(~TimeJob);
+#endif // TEST
+	}
+
+	TimeJob(const uint64 tickAfter, std::function<void()>&& func) : _task(std::move(func))
 	{
 		_execTick = ::GetTickCount64() + tickAfter;
 	}
@@ -21,10 +31,7 @@ public:
 			};
 	}
 
-	uint64 GetExecTick() const
-	{
-		return _execTick;
-	}
+	uint64 GetExecTick() const { return _execTick; }
 
 	inline bool operator<(const TimeJob& other) const
 	{
