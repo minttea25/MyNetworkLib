@@ -12,6 +12,8 @@ NetCore::Thread::TaskManager::TaskManager()
 
 NetCore::Thread::TaskManager::~TaskManager()
 {
+	DESTRUCTOR(TaskManager);
+
 	_join_all_tasks();
 
 	// For main thread
@@ -43,7 +45,7 @@ pair<NetCore::task_id, NetCore::task_id> NetCore::Thread::TaskManager::AddTask(s
 
 	const task_id first = static_cast<task_id>(_tasks.size()) + 1;
 
-	for (auto i = 0; i < count; ++i)
+	for (uint32 i = 0; i < count; ++i)
 	{
 		task_id id = _tasks.size() + 1;
 		auto th = std::thread([=]() {

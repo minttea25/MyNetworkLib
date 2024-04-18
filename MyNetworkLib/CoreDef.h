@@ -8,6 +8,9 @@
 
 #ifdef _DEBUG
 #define TEST
+#define CHECK_DESTRUCTOR
+
+
 #define DEBUG
 #else
 

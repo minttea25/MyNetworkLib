@@ -18,7 +18,7 @@ NetCore::IOCPCore::IOCPCore()
 
 NetCore::IOCPCore::~IOCPCore()
 {
-    MESSAGE(~IOCPCore);
+    DESTRUCTOR(~IOCPCore);
 
     bool suc = ::CloseHandle(_iocpHandle);
     if (suc == 0)

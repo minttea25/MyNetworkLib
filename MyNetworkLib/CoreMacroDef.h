@@ -13,20 +13,20 @@ constexpr auto UNSIGNED_INVALID = 0;
 #define OUT /*Parameter OUT*/
 
 #define ABSTRACT /*This is abstract class.*/
-#define PURE_VIRTUAL = 0 /*Pure virtuals. It needs virtual keyword at front.*/
+#define PURE_VIRTUAL = 0 /*Pure virtuals. It needs virtual keyword at the end.*/
 
 #define NOT_USE /*Not-in-use variable.*/
 #define DISCARD /*Not-use return value.*/
 
-#define _USE_LOCK Lock _lock
-#define USE_LOCK(name) Lock _##name##Lock
-#define _READ_LOCK ReadLock __r_lock(_lock)
-#define READ_LOCK(name) ReadLock __r_lock(_##name##Lock)
-#define _WRITE_LOCK WriteLock __w_lock(_lock)
-#define WRITE_LOCK(name) WriteLock __w_lock(_##name##Lock)
+#define _USE_LOCK Lock __lock
+#define USE_LOCK(name) Lock __##name##Lock
+#define _READ_LOCK ReadLock __r_lock(__lock)
+#define READ_LOCK(name) ReadLock __r_lock(__##name##Lock)
+#define _WRITE_LOCK WriteLock __w_lock(__lock)
+#define WRITE_LOCK(name) WriteLock __w_lock(__##name##Lock)
 
-#define _USE_COMMON_LOCK Mutex _mutex
-#define _LOCK_GUARD LockGuard _guard(_mutex)
+#define _USE_COMMON_LOCK Mutex __mutex
+#define _LOCK_GUARD LockGuard __guard(__mutex)
 
 #define NAMESPACE_OPEN(name) namespace name {
 #define NAMESPACE_CLOSE }
@@ -47,6 +47,12 @@ constexpr auto UNSIGNED_INVALID = 0;
 #else
 #define MESSAGE(text)
 #endif // TEST
+
+#ifdef CHECK_DESTRUCTOR
+#define DESTRUCTOR(name) std::cout << '~' << #name << std::endl;
+#else
+#define DESTRUCTOR(name)
+#endif // CHECK_DESTRUCTOR
 
 
 #define SHOW(name, value) {                             \

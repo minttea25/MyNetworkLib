@@ -8,7 +8,7 @@ NetCore::Session::Session()
 
 NetCore::Session::~Session()
 {
-	MESSAGE(~Session);
+	DESTRUCTOR(Session);
 
 	SocketUtils::Close(_socket);
 }

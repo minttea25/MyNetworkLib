@@ -5,7 +5,7 @@ NAMESPACE_OPEN(NetCore);
 /// <summary>
 /// It is a class that contains IOCP handle and how to process the completed tasks.
 /// </summary>
-class IOCPObject : public enable_shared_from_this<IOCPObject>
+ABSTRACT class IOCPObject : public enable_shared_from_this<IOCPObject>
 {
 public:
 	virtual ~IOCPObject() {}

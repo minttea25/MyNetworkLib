@@ -11,7 +11,7 @@ NetCore::Listener::Listener(ServiceSPtr serverService)
 
 NetCore::Listener::~Listener()
 {
-	MESSAGE(~Listener);
+	DESTRUCTOR(Listener);
 
 	SocketUtils::Close(_listenSocket);
 

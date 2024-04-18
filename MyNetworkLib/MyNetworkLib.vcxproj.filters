@@ -5,9 +5,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Base">
-      <UniqueIdentifier>{fdede7a7-f5fa-4fbf-83c0-0f08d6d5d1b8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Network">
       <UniqueIdentifier>{45ef1cc2-e5ef-4840-8e0f-dadf9ff3c0c5}</UniqueIdentifier>
     </Filter>
@@ -23,136 +20,133 @@
     <Filter Include="Job">
       <UniqueIdentifier>{6e2a3acd-07a5-409c-a4ec-b93935f419a0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pch">
+      <UniqueIdentifier>{0cd6d235-3b69-44a4-8311-db0a6faa4def}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{fdede7a7-f5fa-4fbf-83c0-0f08d6d5d1b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Sample.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CorePch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreGlobal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreMacroDef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreTLS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreDef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Memory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MemoryAllocator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MemoryPool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CoreSTLContainer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjectPool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IOCPCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IOCPObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IOCPEvent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Session.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PacketSession.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Connector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Listener.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ErrorHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SocketUtils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AddrUtils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Service.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RWLock.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Lock.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadPool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TaskManager.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Job.h">
+      <Filter>Job</Filter>
     </ClInclude>
     <ClInclude Include="JobSerializer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Job.h">
-      <Filter>Header Files</Filter>
+      <Filter>Job</Filter>
     </ClInclude>
     <ClInclude Include="JobSerializerWithTimer.h">
-      <Filter>Header Files</Filter>
+      <Filter>Job</Filter>
     </ClInclude>
     <ClInclude Include="TimeJob.h">
-      <Filter>Header Files</Filter>
+      <Filter>Job</Filter>
     </ClInclude>
-    <ClInclude Include="LockQueue.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="CoreDef.h">
+      <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="LockStack.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="CoreGlobal.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreMacroDef.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="CorePch.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreSTLContainer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreTLS.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreTypes.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryAllocator.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryPool.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectPool.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>pch</Filter>
+    </ClInclude>
+    <ClInclude Include="RWLock.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskManager.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadPool.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="Service.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketSession.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Connector.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="IOCPCore.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="IOCPEvent.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="IOCPObject.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="AddrUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorHandler.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Lock.h">
+      <Filter>Thread</Filter>
     </ClInclude>
     <ClInclude Include="LockPriorityQueue.h">
-      <Filter>Header Files</Filter>
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="LockQueue.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="LockStack.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="Listener.h">
+      <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pch.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
     <ClCompile Include="Sample.cpp" />
     <ClCompile Include="CorePch.cpp">
-      <Filter>Base</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="CoreGlobal.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreMacroDef.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
-    <ClCompile Include="CoreTypes.cpp">
-      <Filter>Base</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="CoreTLS.cpp">
-      <Filter>Base</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="MemoryPool.cpp">
       <Filter>Memory</Filter>
@@ -193,9 +187,6 @@
     <ClCompile Include="SocketUtils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="AddrUtils.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="RWLock.cpp">
       <Filter>Thread</Filter>
     </ClCompile>
@@ -219,6 +210,9 @@
     </ClCompile>
     <ClCompile Include="TaskManager.cpp">
       <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>pch</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

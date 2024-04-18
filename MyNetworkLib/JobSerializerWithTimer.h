@@ -10,9 +10,7 @@ ABSTRACT class JobSerializerWithTimer : public enable_shared_from_this<JobSerial
 public:
 	virtual ~JobSerializerWithTimer()
 	{
-#ifdef TEST
-		MESSAGE(~JobSerializerWithTimer);
-#endif // TEST
+		DESTRUCTOR(JobSerializerWithTimer);
 	}
 
 	TimeJobSPtr ReserveJob(std::function<void()>&& func, const uint64 tickAfter)

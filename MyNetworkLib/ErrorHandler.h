@@ -63,7 +63,7 @@ class ErrorHandler
 public:
 	static inline DWORD GetLastError()
 	{
-		return _error.load();
+		return _app_last_error.load();
 	}
 
 	static inline void AssertCrash(const bool condition, const Errors errCode, const char* msg = nullptr)
@@ -107,12 +107,12 @@ public:
 			const int32 wsaErr = ::WSAGetLastError();
 			WSA_ERR(wsaErr);
 
-			_error.store(errCode);
+			_app_last_error.store(errCode);
 
 			if (crash)
 			{
 				// TODO : change later with other function
-				std::cerr << "Last error was " << _error.load() << std::endl;
+				std::cerr << "Last error was " << _app_last_error.load() << std::endl;
 				ASSERT_CRASH("WSALastError was SOCKET_ERROR");
 			}
 			return false;
@@ -127,12 +127,12 @@ public:
 			const int32 wsaErr = ::WSAGetLastError();
 			WSA_ERR(wsaErr);
 
-			_error.store(errCode);
+			_app_last_error.store(errCode);
 
 			if (crash)
 			{
 				// TODO : change later with other function
-				std::cerr << "Last error was " << _error.load() << std::endl;
+				std::cerr << "Last error was " << _app_last_error.load() << std::endl;
 				ASSERT_CRASH("WSALastError was INVALID_SOCKET");
 			}
 			return false;
@@ -148,7 +148,7 @@ public:
 			if (err == WSA_IO_PENDING) return Errors::NONE;
 			else
 			{
-				_error.store(errorCode);
+				_app_last_error.store(errorCode);
 				ERR(errorCode);
 				return err;
 			}
@@ -157,7 +157,7 @@ public:
 	}
 
 private:
-	static Atomic<DWORD> _error;
+	static Atomic<DWORD> _app_last_error;
 };
 
 template<typename T>

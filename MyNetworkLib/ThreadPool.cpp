@@ -26,6 +26,8 @@ NetCore::Thread::ThreadPool::ThreadPool(const uint32 maxPoolCount)
 
 NetCore::Thread::ThreadPool::~ThreadPool()
 {
+	DESTRUCTOR(ThreadPool);
+
 	{
 		std::unique_lock<Mutex> lock(_mutex);
 	}

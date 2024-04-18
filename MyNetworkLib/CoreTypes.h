@@ -31,10 +31,10 @@ using task_id = uint32;
 using count_t = uint32;
 
 #define SHARED_PTR(name) using name##SPtr = std::shared_ptr<class name>;
-
+#define SHARED_PTR_S(name) using name##SPtr = std::shared_ptr<struct name>;
 SHARED_PTR(IOCPCore);
 SHARED_PTR(IOCPObject);
-SHARED_PTR(IOCPEvent);
+SHARED_PTR_S(IOCPEvent);
 SHARED_PTR(Session);
 SHARED_PTR(Connector);
 SHARED_PTR(Listener);

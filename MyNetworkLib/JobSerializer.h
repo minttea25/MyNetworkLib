@@ -12,9 +12,7 @@ ABSTRACT class JobSerializer : public enable_shared_from_this<JobSerializer>
 public:
 	virtual ~JobSerializer()
 	{
-#ifdef TEST
-		MESSAGE(~JobSerializer);
-#endif // TEST
+		DESTRUCTOR(JobSerializer);
 	}
 
 	void PushJob(std::function<void()>&& func)

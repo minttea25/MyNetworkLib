@@ -10,7 +10,7 @@ NetCore::Service::Service(ServiceType serviceType, IOCPCoreSPtr iocpCore, SOCKAD
 
 NetCore::Service::~Service()
 {
-	MESSAGE(~Service);
+	DESTRUCTOR(Service);
 
 	_iocpCore = nullptr;
 	_sessionFactory = nullptr;

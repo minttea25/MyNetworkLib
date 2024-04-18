@@ -185,13 +185,10 @@
     <ClInclude Include="TimeJob.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AddrUtils.cpp" />
     <ClCompile Include="Connector.cpp" />
-    <ClCompile Include="CoreMacroDef.cpp" />
     <ClCompile Include="CorePch.cpp" />
     <ClCompile Include="CoreGlobal.cpp" />
     <ClCompile Include="CoreTLS.cpp" />
-    <ClCompile Include="CoreTypes.cpp" />
     <ClCompile Include="ErrorHandler.cpp" />
     <ClCompile Include="IOCPCore.cpp" />
     <ClCompile Include="IOCPEvent.cpp" />

@@ -15,13 +15,12 @@ enum struct EventType : uint8
 	// ...
 };
 
-struct IOCPEvent : public _OVERLAPPED
+ABSTRACT struct IOCPEvent : public _OVERLAPPED
 {
 public:
 	IOCPEvent(EventType eventType) : _eventType(eventType)
 	{
 		_init();
-		//Init();
 	}
 	~IOCPEvent()
 	{
@@ -30,7 +29,6 @@ public:
 	inline void Clear() { _init(); }
 	inline void ReleaseIOCPObjectSPtr() {}//_iocpObject = nullptr; }
 public: // virtual
-	//virtual void Init() {}
 public:
 	EventType GetEventType() const
 	{

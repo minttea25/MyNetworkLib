@@ -14,7 +14,7 @@ NetCore::Connector::Connector(ServiceSPtr clientService)
 
 NetCore::Connector::~Connector()
 {
-	MESSAGE(~Connector);
+	DESTRUCTOR(Connector);
 
 	// The socket is referrenced from Session.
 	// SocketUtils::Close(_connectSocket);
