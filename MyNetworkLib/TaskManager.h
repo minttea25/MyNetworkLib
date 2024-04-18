@@ -64,6 +64,10 @@ private:
 	{
 		_tasks.at(id).second = true;
 	}
+	inline task_id _get_new_task_id()
+	{
+		return _taskId.fetch_add(1);
+	}
 	void _join_all_tasks();
 private:
 	_USE_COMMON_LOCK;

@@ -87,7 +87,7 @@ void NetCore::ClientService::Broadcast(const char* msg)
 	}
 }
 
-NetCore::uint32 NetCore::ClientService::GetCurrentSessionCount() const
+size_t NetCore::ClientService::GetCurrentSessionCount() const
 {
 	if (_session == nullptr || _session->IsConnected() == false) return 0;
 	else return 1;

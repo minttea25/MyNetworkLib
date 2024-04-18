@@ -124,8 +124,6 @@ void NetCore::Session::RegisterSend()
 		WRITE_LOCK(send);
 		MESSAGE(SendLock);
 
-		// TODO
-		// Check destructor of WriteLock.
 	}
 
 

@@ -23,6 +23,13 @@ public:
 
 		s_pool.Release(MemoryHeader::DetachHeader(obj));
 	}
+
+	template<typename... Args>
+	static std::shared_ptr<Type> make_shared(Args... args)
+	{
+		return std::shared_ptr<Type> { Acquire(std::forward<Args>(args)...), Release };
+	}
+
 	uint32 poolCount() const { return s_pool.poolCount(); }
 	uint32 useCount() const { return s_pool.useCount(); }
 private:
@@ -35,5 +42,6 @@ int32 ObjectPool<Type>::s_allocSize = sizeof(Type) + sizeof(MemoryHeader);
 
 template<typename Type>
 MemoryPool ObjectPool<Type>::s_pool{ s_allocSize };
+
 
 NAMESPACE_CLOSE

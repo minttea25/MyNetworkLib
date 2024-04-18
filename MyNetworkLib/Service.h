@@ -34,7 +34,7 @@ public:
 	inline uint32 GetMaxSessionCount() const { return MAX_SESSION_COUNT; }
 	inline SOCKADDR_IN GetAddr() const { return _addr; }
 
-	virtual uint32 GetCurrentSessionCount() const PURE_VIRTUAL;
+	virtual size_t GetCurrentSessionCount() const PURE_VIRTUAL;
 	virtual SessionSPtr AddNewSession() PURE_VIRTUAL;
 protected:
 	virtual bool ReleaseSession(SessionSPtr session_s_ptr) PURE_VIRTUAL;
@@ -84,7 +84,7 @@ public:
 	/// </summary>
 	/// <param name="msg">Message to send.</param>
 	void Broadcast(const char* msg) override;
-	uint32 GetCurrentSessionCount() const override;
+	size_t GetCurrentSessionCount() const override;
 	/// <summary>
 	/// Create a new session with session factory and register its handle in iocp core.
 	/// </summary>
@@ -125,7 +125,7 @@ public:
 	/// </summary>
 	/// <param name="msg">Message to send.</param>
 	void Broadcast(const char* msg) override;
-	uint32 GetCurrentSessionCount() const override { return _sessions.size(); }
+	size_t GetCurrentSessionCount() const override { return _sessions.size(); }
 	/// <summary>
 	/// Create a new session with session factory and register its handle in iocp core.
 	/// </summary>

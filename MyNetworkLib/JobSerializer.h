@@ -18,14 +18,16 @@ public:
 	void PushJob(std::function<void()>&& func)
 	{
 		// TODO : Change make_shared to ObjectPool::make_shared
-		_push(NetCore::make_shared<Job>(std::move(func)));
+		//_push(NetCore::make_shared<Job>(std::move(func)));
+		_push(NetCore::ObjectPool<Job>::make_shared(std::move(func)));
 	}
 
 	template<typename T, typename Ret, typename... Args>
 	void PushJob(Ret(T::*pfunc)(Args...), Args&&... args)
 	{
 		shared_ptr<T> ptr = static_pointer_cast<T>(shared_from_this());
-		_push(NetCore::make_shared<Job>(ptr, pfunc, std::forward<Args>(args)...));
+		//_push(NetCore::make_shared<Job>(ptr, pfunc, std::forward<Args>(args)...));
+		_push(NetCore::ObjectPool<Job>::make_shared(ptr, pfunc, std::forward<Args>(args)...));
 	}
 
 	/// <summary>

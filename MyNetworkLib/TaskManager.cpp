@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "TaskManager.h"
-#include "TaskManager.h"
 
 NetCore::Atomic<NetCore::task_id> NetCore::Thread::TaskManager::_taskId = 0; // Starts at 0 (main thread)
 
@@ -8,6 +7,8 @@ NetCore::Thread::TaskManager::TaskManager()
 {
 	// For main thread.
 	InitTLS();
+
+	TLS_Id = _get_new_task_id();
 }
 
 NetCore::Thread::TaskManager::~TaskManager()
@@ -26,9 +27,12 @@ NetCore::task_id NetCore::Thread::TaskManager::AddTask(std::function<void()> tas
 {
 	_LOCK_GUARD;
 
-	task_id id = _tasks.size() + 1;
+	task_id id = _get_new_task_id();
 	auto th = std::thread([=]() {
 		InitTLS();
+
+		TLS_Id = id;
+
 		task();
 
 		ClearTLS();
@@ -41,15 +45,24 @@ NetCore::task_id NetCore::Thread::TaskManager::AddTask(std::function<void()> tas
 
 pair<NetCore::task_id, NetCore::task_id> NetCore::Thread::TaskManager::AddTask(std::function<void()> task, const count_t count)
 {
+	if (count == 1)
+	{
+		auto id = AddTask(task);
+		return { id, id };
+	}
+
 	_LOCK_GUARD;
 
-	const task_id first = static_cast<task_id>(_tasks.size()) + 1;
+	const task_id first = _taskId.load();
 
 	for (uint32 i = 0; i < count; ++i)
 	{
-		task_id id = _tasks.size() + 1;
+		task_id id = _get_new_task_id();
 		auto th = std::thread([=]() {
 			InitTLS();
+
+			TLS_Id = id;
+
 			task();
 
 			ClearTLS();
@@ -58,7 +71,7 @@ pair<NetCore::task_id, NetCore::task_id> NetCore::Thread::TaskManager::AddTask(s
 		_tasks.insert(make_pair(id, make_pair(std::move(th), false)));
 	}
 
-	const task_id second = _tasks.size();
+	const task_id second = _taskId.load() - 1;
 
 	return { first, second };
 }
@@ -90,7 +103,6 @@ bool NetCore::Thread::TaskManager::JoinTask(const task_id id)
 
 void NetCore::Thread::TaskManager::InitTLS()
 {
-	TLS_Id = _taskId.fetch_add(1);
 }
 
 void NetCore::Thread::TaskManager::ClearTLS()

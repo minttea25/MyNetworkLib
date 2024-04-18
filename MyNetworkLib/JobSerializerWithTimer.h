@@ -15,7 +15,8 @@ public:
 
 	TimeJobSPtr ReserveJob(std::function<void()>&& func, const uint64 tickAfter)
 	{
-		TimeJobSPtr jobSPtr = NetCore::make_shared<TimeJob>(tickAfter, std::move(func));
+		//TimeJobSPtr jobSPtr = NetCore::make_shared<TimeJob>(tickAfter, std::move(func));
+		TimeJobSPtr jobSPtr = NetCore::ObjectPool<TimeJob>::make_shared(tickAfter, std::move(func));
 		_push(jobSPtr);
 		return static_pointer_cast<TimeJob>(jobSPtr->shared_from_this());
 	}
@@ -24,7 +25,8 @@ public:
 	TimeJobSPtr ReserveJob(const uint64 tickAfter, Ret(T::* pfunc)(Args...), Args&&... args)
 	{
 		shared_ptr<T> ptr = static_pointer_cast<T>(shared_from_this());
-		TimeJobSPtr jobSPtr = NetCore::make_shared<TimeJob>(tickAfter, ptr, pfunc, std::forward<Args>(args)...);
+		//TimeJobSPtr jobSPtr = NetCore::make_shared<TimeJob>(tickAfter, ptr, pfunc, std::forward<Args>(args)...);
+		TimeJobSPtr jobSPtr = NetCore::ObjectPool<TimeJob>::make_shared(tickAfter, ptr, pfunc, std::forward<Args>(args)...);
 		
 		_push(jobSPtr);
 		return static_pointer_cast<TimeJob>(jobSPtr->shared_from_this());
