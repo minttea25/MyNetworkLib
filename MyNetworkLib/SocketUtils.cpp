@@ -7,6 +7,8 @@ LPFN_DISCONNECTEX NetCore::SocketUtils::DisconnectEx = nullptr;
 
 void NetCore::SocketUtils::Init()
 {
+	MESSAGE(SocketUtils::Init());
+
 	// See: https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsastartup
 
 	WSADATA wsaData{};

@@ -28,12 +28,11 @@ public:
 	bool IsConnected() const { return _connected; }
 
 public:
-	bool Send(const _byte* buffer);
+	void Send(const _byte* buffer);
 	bool Disconnect();
 	SOCKET GetSocket() const { return _socket; }
 
 	_byte* GetRecvBuffer() { return _recvBuffer; }
-	_byte* GetSendBuffer() { return _sendBuffer; }
 private:
 	void SetConnected(const ServiceSPtr service, const Socket connectedSocket = INVALID_SOCKET);
 	void _set_socket(Socket connectedSocket);
@@ -66,7 +65,9 @@ private:
 	DisconnectEvent _disconnectEvent{ }; // overlapped event used as disconnecting
 
 	_byte _recvBuffer[MAX_BUFFER_SIZE] = { 0, };
-	_byte _sendBuffer[MAX_BUFFER_SIZE] = { 0, };
+	//_byte _sendBuffer[MAX_BUFFER_SIZE] = { 0, };
+	Queue<std::shared_ptr<SendBufferSegment>> _sendQueue;
+	Atomic<bool> _sending = false;
 
 	friend class Connector;
 	friend class Listener;

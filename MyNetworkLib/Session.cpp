@@ -28,20 +28,34 @@ void NetCore::Session::SetConnected(const ServiceSPtr service, Socket connectedS
 	RegisterRecv();
 }
 
-bool NetCore::Session::Send(const _byte* buffer)
+void NetCore::Session::Send(const _byte* buffer)
 {
 	if (_connected == false)
 	{
 		// Stop receiving
 		WARN(Session is already disconnected.);
-		return false;
 	}
 
-	std::copy(buffer, buffer + strlen(buffer) + 1, _sendBuffer);
+	bool sendFlag = false;
 
-	RegisterSend();
+	const auto size = strlen(buffer);
+	/// TLS
+	auto pos = TLS_SendBuffer->Write(size);
+	std::copy(buffer, buffer + size, pos);
+	// ------------
+	{
+		WRITE_LOCK(send);
+		auto seg = SendBufferSegment(TLS_SendBuffer->shared_from_this(), pos, size);
+		_sendQueue.push(seg.shared_from_this());
 
-	return true;
+		if (_sending.exchange(true) == false)
+		{
+			sendFlag = true;
+		}
+
+	}
+
+	if (sendFlag) RegisterSend();
 }
 
 bool NetCore::Session::Disconnect()
@@ -112,32 +126,40 @@ void NetCore::Session::RegisterSend()
 	_sendEvent.Clear();
 	_sendEvent.SetIOCPObjectSPtr(shared_from_this());
 
-	//{
-	//	_sendLock.lock();
-
-	//	// TODO : processing with queue
-
-	//	_sendLock.unlock();
-	//}
-
 	{
 		WRITE_LOCK(send);
-		MESSAGE(SendLock);
 
+		// get msgs from queue
+		while (_sendQueue.empty() == false)
+		{
+			auto segment = _sendQueue.front();
+			_sendQueue.pop();
+
+			_sendEvent._segments.push_back(segment);
+		}
 	}
 
-
-	WSABUF sendBuffer{};
-	sendBuffer.buf = reinterpret_cast<_byte*>(GetSendBuffer());
-	sendBuffer.len = MAX_BUFFER_SIZE;
+	Vector<WSABUF> wsaSendBuffers;
+	wsaSendBuffers.reserve(_sendEvent._segments.size());
+	for (auto buffer : _sendEvent._segments)
+	{
+		WSABUF wsaBuf{};
+		wsaBuf.buf = reinterpret_cast<char*>(buffer->GetBufferSegment());
+		wsaBuf.len = static_cast<ULONG>(buffer->GetSize());
+		wsaSendBuffers.push_back(wsaBuf);
+	}
 
 	DWORD numberOfBytesSent = 0;
-	int32 res = ::WSASend(_socket, &sendBuffer, 1,
+	int32 res = ::WSASend(_socket, wsaSendBuffers.data(),
+		static_cast<DWORD>(wsaSendBuffers.size()),
 		OUT & numberOfBytesSent, 0, &_sendEvent, NULL);
 
 	if (ErrorHandler::WSACheckErrorExceptPending(res != SOCKET_ERROR, Errors::WSA_SEND_FAILED) != Errors::NONE)
 	{
 		// TODO
+		_sendEvent.ReleaseIOCPObjectSPtr(); // ?
+		_sendEvent._segments.clear();
+		_sending.store(false);
 	}
 }
 

@@ -45,39 +45,12 @@ constexpr ushort PORT = 8900;
 
 int main()
 {
-	//{
-	//	{
-	//		auto s_ptr = NetCore::make_shared<TestClass>();
-	//		s_ptr->SetHpExp(100, 200);
-	//		std::cout << *s_ptr << std::endl;
-	//		std::cout << "use_count: " << s_ptr.use_count() << std::endl;
-	//		weak_ptr<TestClass> w_ptr = s_ptr->shared_from_this();
-	//		auto s_ptr2 = s_ptr->shared_from_this();
-	//		std::cout << "use_count: " << s_ptr.use_count() << std::endl;
-	//	}
-
-	//	{
-
-	//		auto u_ptr = NetCore::make_unique<TestClass>();
-
-	//		u_ptr->SetHpExp(10, 100);
-
-	//		std::cout << *u_ptr << std::endl;
-
-	//		auto u_ptr2 = std::move(u_ptr);
-	//		//u_ptr->SetHpExp(100, 200); // error (due to u_ptr is nullptr now)
-	//		std::cout << *u_ptr2 << std::endl;
-
-
-	//	}
-	//	return 0;
-	//}
 	
-	SocketUtils::Init(); // temp
+	//SocketUtils::Init(); // temp
 
 	SOCKADDR_IN addr = AddrUtils::GetTcpAddress(IP, PORT);
 
-	this_thread::sleep_for(200ms);
+	this_thread::sleep_for(300ms);
 
 
 	auto core = NetCore::make_shared<IOCPCore>();
@@ -94,41 +67,49 @@ int main()
 		(
 			core, addr, session_factory
 		);
-	
+
 	if (client->Start() == false)
 	{
 		return -1;
 	}
 
-	std::thread th
-	(
+	NetCore::Thread::TaskManager manager;
+	manager.AddTask(
 		[=]() {
-			//std::cout << "T id:" << std::this_thread::get_id() << std::endl;
-			std::this_thread::sleep_for(100ms);
+			std::cout << "T id:" << TLS_Id << std::endl;
+			this_thread::sleep_for(100ms);
 			while (true)
 			{
-				core->ProcessQueuedCompletionStatus(1000);
-				//this_thread::yield();
-				
+				core->ProcessQueuedCompletionStatus(200);
+
 				if (off) break;
 			}
-		}
-	);
+		});
 
+	while (true)
 	{
-		string msg;
-		std::cin >> msg;
-		if (session_ptr != nullptr)
 		{
-			session_ptr->Send(msg.c_str());
-		}
+			string msg;
+			std::cin >> msg;
+			if (strcmp(msg.c_str(), "stop") == 0)
+			{
+				if (session_ptr != nullptr) session_ptr->Disconnect();
+				off = true;
+			}
+			else
+			{
+				if (session_ptr != nullptr)
+				{
+					session_ptr->Send(msg.c_str());
+				}
+			}
 
-		this_thread::sleep_for(1000ms);
-		if (session_ptr != nullptr) session_ptr->Disconnect();
-		off = true;
+			this_thread::sleep_for(500ms);
+		}
 	}
 
-	if (th.joinable()) th.join();
+	manager.JoinAllTasks();
+
 	session_ptr = nullptr;
 
 	client->Stop();

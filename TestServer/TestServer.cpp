@@ -42,31 +42,39 @@ int main()
         return -1;
     }
 
+    NetCore::Thread::TaskManager manager;
 
-    std::thread th
-    (
+    manager.AddTask(
         [=]() {
-            std::cout << "T id:" << std::this_thread::get_id() << std::endl;
+            std::cout << "T id:" << TLS_Id << std::endl;
             while (true)
             {
                 core->ProcessQueuedCompletionStatus(200);
-                //this_thread::yield();
 
-                if (off)
-                    break;
+                if (off) break;
+            }
+        }, 5);
+
+    while (true)
+    {
+        {
+            string msg;
+            std::cin >> msg;
+
+            if (strcmp(msg.c_str(), "stop") == 0)
+            {
+                off = true;
+                break;
+            }
+            else
+            {
+                server->Broadcast(msg.c_str());
             }
         }
-    );
-
-    {
-        string msg;
-        std::cin >> msg;
-        server->Broadcast(msg.c_str());
-        this_thread::sleep_for(1000ms);
-        off = true;
     }
+    this_thread::sleep_for(500ms);
 
-    if (th.joinable() == true) th.join();
+    manager.JoinAllTasks();
     server->Stop();
 
     std::cout << server.use_count() << std::endl;

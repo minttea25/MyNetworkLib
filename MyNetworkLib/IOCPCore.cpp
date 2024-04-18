@@ -45,6 +45,10 @@ bool NetCore::IOCPCore::ProcessQueuedCompletionStatus(DWORD dwTimeoutMillisecond
         OUT & numberOfBytesTransferred, OUT & key,
         OUT reinterpret_cast<LPOVERLAPPED*>(&iocpEvent), dwTimeoutMilliseconds);
 
+    DWORD errCode = ::GetLastError();
+    std::cout << errCode << std::endl;
+    if (iocpEvent != nullptr) std::cout << (int)(iocpEvent->GetEventType()) << std::endl;
+
     if (suc == FALSE)
     {
         DWORD errCode = ::GetLastError();

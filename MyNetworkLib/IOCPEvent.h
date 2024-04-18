@@ -21,6 +21,7 @@ public:
 	IOCPEvent(EventType eventType) : _eventType(eventType)
 	{
 		_init();
+		Init();
 	}
 	~IOCPEvent()
 	{
@@ -29,6 +30,7 @@ public:
 	inline void Clear() { _init(); }
 	inline void ReleaseIOCPObjectSPtr() {}//_iocpObject = nullptr; }
 public: // virtual
+	virtual void Init() {};
 public:
 	EventType GetEventType() const
 	{
@@ -99,6 +101,13 @@ struct SendEvent : public IOCPEvent
 {
 public:
 	SendEvent() : IOCPEvent(EventType::Send) {}
+	void Init() override
+	{
+		_segments.clear();
+	}
+private:
+	Vector<std::shared_ptr<SendBufferSegment>> _segments;
+	friend class Session;
 };
 
 struct RecvEvent : public IOCPEvent

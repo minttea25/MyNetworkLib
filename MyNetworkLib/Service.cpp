@@ -187,6 +187,7 @@ void NetCore::ServerService::Broadcast(const char* msg)
 		if (session->IsConnected())
 		{
 			session->Send(msg);
+			MESSAGE(Sent);
 		}
 	}
 }
