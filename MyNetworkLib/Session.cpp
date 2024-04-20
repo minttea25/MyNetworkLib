@@ -45,8 +45,8 @@ void NetCore::Session::Send(const _byte* buffer)
 	// ------------
 	{
 		WRITE_LOCK(send);
-		auto seg = SendBufferSegment(TLS_SendBuffer->shared_from_this(), pos, size);
-		_sendQueue.push(seg.shared_from_this());
+		auto seg = NetCore::make_shared<SendBufferSegment>(TLS_SendBuffer->shared_from_this(), pos, size);
+		_sendQueue.push(seg);
 
 		if (_sending.exchange(true) == false)
 		{
@@ -132,7 +132,7 @@ void NetCore::Session::RegisterSend()
 		// get msgs from queue
 		while (_sendQueue.empty() == false)
 		{
-			auto segment = _sendQueue.front();
+			std::shared_ptr<SendBufferSegment> segment = _sendQueue.front();
 			_sendQueue.pop();
 
 			_sendEvent._segments.push_back(segment);
@@ -158,9 +158,9 @@ void NetCore::Session::RegisterSend()
 	{
 		// TODO
 		_sendEvent.ReleaseIOCPObjectSPtr(); // ?
-		_sendEvent._segments.clear();
-		_sending.store(false);
 	}
+	_sendEvent._segments.clear();
+	_sending.store(false);
 }
 
 void NetCore::Session::ProcessSend(const int32 numberOfBytesSent)

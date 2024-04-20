@@ -12,6 +12,10 @@ public:
 	{
 
 	}
+	~SendBufferSegment()
+	{
+		DESTRUCTOR(SendBufferSegment);
+	}
 
 	_ubyte* GetBufferSegment() const { return _bufferPos; }
 	uint32 GetSize() const { return _size; }
@@ -40,7 +44,7 @@ public:
 		if (size > MAX_BUFFER_SIZE)
 		{
 			// TODO : Use errorhandler later
-			ASSERT_CRASH("The write size is over than MAX_BUFFER_SIZE.")
+			ASSERT_CRASH("The write size is bigger than MAX_BUFFER_SIZE.")
 		}
 		
 		if (size > FreeSize()) _usedSize = 0;

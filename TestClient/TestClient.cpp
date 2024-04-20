@@ -86,7 +86,7 @@ int main()
 			}
 		});
 
-	while (true)
+	while (!off)
 	{
 		{
 			string msg;

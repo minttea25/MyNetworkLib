@@ -55,7 +55,7 @@ int main()
             }
         }, 5);
 
-    while (true)
+    while (!off)
     {
         {
             string msg;

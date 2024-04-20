@@ -103,6 +103,7 @@ bool NetCore::Thread::TaskManager::JoinTask(const task_id id)
 
 void NetCore::Thread::TaskManager::InitTLS()
 {
+	TLS_SendBuffer = NetCore::make_shared<SendBuffer>();
 }
 
 void NetCore::Thread::TaskManager::ClearTLS()

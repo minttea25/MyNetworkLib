@@ -15,13 +15,15 @@ enum struct EventType : uint8
 	// ...
 };
 
+/// <summary>
+/// Note: DO NOT USE VIRTUAL IN IOCPEVENT!
+/// </summary>
 ABSTRACT struct IOCPEvent : public _OVERLAPPED
 {
 public:
 	IOCPEvent(EventType eventType) : _eventType(eventType)
 	{
 		_init();
-		Init();
 	}
 	~IOCPEvent()
 	{
@@ -29,8 +31,6 @@ public:
 	}
 	inline void Clear() { _init(); }
 	inline void ReleaseIOCPObjectSPtr() {}//_iocpObject = nullptr; }
-public: // virtual
-	virtual void Init() {};
 public:
 	EventType GetEventType() const
 	{
@@ -71,7 +71,7 @@ struct ConnectEvent : public IOCPEvent
 {
 public:
 	ConnectEvent() : IOCPEvent(EventType::Connect) {}
-	// no overrides
+
 };
 
 struct DisconnectEvent : public IOCPEvent
@@ -100,8 +100,11 @@ private:
 struct SendEvent : public IOCPEvent
 {
 public:
-	SendEvent() : IOCPEvent(EventType::Send) {}
-	void Init() override
+	SendEvent() : IOCPEvent(EventType::Send)
+	{
+		Init();
+	}
+	void Init()
 	{
 		_segments.clear();
 	}
