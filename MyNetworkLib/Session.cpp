@@ -38,7 +38,8 @@ void NetCore::Session::Send(const _byte* buffer)
 
 	bool sendFlag = false;
 
-	const auto size = strlen(buffer);
+	const uint32 size = static_cast<uint32>(strlen(buffer));
+
 	/// TLS
 	auto pos = TLS_SendBuffer->Write(size);
 	std::copy(buffer, buffer + size, pos);
