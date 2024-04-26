@@ -71,7 +71,7 @@ std::cerr << code << ": " << #text << std::endl;    \
 
 #define ERR(text) \
 {   \
-std::cerr << "Error: " << #text << std::endl;    \
+std::cerr << "Error: " << text << std::endl;    \
 }   \
 
 #define WSA_ERR(code)   \

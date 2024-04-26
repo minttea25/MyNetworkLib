@@ -2,6 +2,7 @@
 #include "Session.h"
 
 NetCore::Session::Session()
+	:_connected(false)
 {
 	_socket = SocketUtils::CreateSocket();
 }
@@ -28,7 +29,7 @@ void NetCore::Session::SetConnected(const ServiceSPtr service, Socket connectedS
 	RegisterRecv();
 }
 
-void NetCore::Session::Send(const _byte* buffer)
+void NetCore::Session::SendRaw(const _byte* buffer)
 {
 	if (_connected == false)
 	{
@@ -47,7 +48,7 @@ void NetCore::Session::Send(const _byte* buffer)
 	{
 		WRITE_LOCK(send);
 		auto seg = NetCore::make_shared<SendBufferSegment>(TLS_SendBuffer->shared_from_this(), pos, size);
-		_sendQueue.push(seg);
+		_sendQueue.push_back(seg);
 
 		if (_sending.exchange(true) == false)
 		{
@@ -56,6 +57,25 @@ void NetCore::Session::Send(const _byte* buffer)
 
 	}
 
+	if (sendFlag) RegisterSend();
+}
+
+void NetCore::Session::_send(Vector<std::shared_ptr<SendBufferSegment>>& buffers)
+{
+	if (buffers.size() == 0) return;
+
+	bool sendFlag = false;
+	{
+		WRITE_LOCK(send);
+
+		_sendQueue.reserve(buffers.size());
+		std::move(buffers.begin(), buffers.end(), std::back_inserter(_sendQueue));
+
+		if (_sending.exchange(true) == false)
+		{
+			sendFlag = true;
+		}
+	}
 	if (sendFlag) RegisterSend();
 }
 
@@ -88,7 +108,7 @@ void NetCore::Session::_disconnect(uint16 errorCode)
 	RegisterDisconnect();
 }
 
-void NetCore::Session::Process(IOCPEvent * overlappedEvent, DWORD numberOfBytesTransferred)
+void NetCore::Session::Process(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred)
 {
 	EventType type = overlappedEvent->GetEventType();
 	SHOW(EventType, (int)type);
@@ -104,7 +124,7 @@ void NetCore::Session::Process(IOCPEvent * overlappedEvent, DWORD numberOfBytesT
 		ProcessDisconnect();
 		break;
 	default:
-		WARN(Received event type was not recv/send/disconnect.);
+		WARN(Received event type was not recv / send / disconnect.);
 		break;
 	}
 }
@@ -130,14 +150,8 @@ void NetCore::Session::RegisterSend()
 	{
 		WRITE_LOCK(send);
 
-		// get msgs from queue
-		while (_sendQueue.empty() == false)
-		{
-			std::shared_ptr<SendBufferSegment> segment = _sendQueue.front();
-			_sendQueue.pop();
-
-			_sendEvent._segments.push_back(segment);
-		}
+		std::move(_sendQueue.begin(), _sendQueue.end(), back_inserter(_sendEvent._segments));
+		_sendQueue.clear();
 	}
 
 	Vector<WSABUF> wsaSendBuffers;
@@ -193,7 +207,7 @@ void NetCore::Session::RegisterRecv()
 	_recvEvent.SetIOCPObjectSPtr(shared_from_this());
 
 	// TEMP
-	WSABUF recvBuffer {};
+	WSABUF recvBuffer{};
 	recvBuffer.buf = reinterpret_cast<_byte*>(GetRecvBuffer());
 	recvBuffer.len = MAX_BUFFER_SIZE;
 

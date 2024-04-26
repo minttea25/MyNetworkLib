@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "TaskManager.h"
 
-NetCore::Atomic<NetCore::task_id> NetCore::Thread::TaskManager::_taskId = 0; // Starts at 0 (main thread)
+// Note: TLS_Id must not be 0, because of RWLock flag (0 means empty flag).
+// Task Id (=TLS_Id) starts at 1. (Main thread has TLS_Id 1.)
+NetCore::Atomic<NetCore::task_id> NetCore::Thread::TaskManager::_taskId = 1; 
 
 NetCore::Thread::TaskManager::TaskManager()
 {

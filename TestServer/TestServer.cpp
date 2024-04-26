@@ -10,31 +10,42 @@ constexpr ushort PORT = 8900;
 static bool off = false;
 
 
-class ClientSession : public NetCore::Session
+class ClientSession : public NetCore::PacketSession
 {
-    uint32 OnRecv(const _byte* buffer, const uint32 len) override
+    void OnConnected() override
     {
-        Session::OnRecv(buffer, len);
-
-        std::cout.write(buffer, len) << std::endl;
-
-        return len;
+        std::cout << "OnConnected" << endl;
     }
 
-    virtual void OnDisconnected(const int32 error) override
+    void OnRecvPacket(const _byte* buffer, const int32 len) override
+    {
+        std::cout.write(buffer, len) << std::endl;
+    }
+
+    void OnDisconnected(const int32 error) override
     {
         std::cout << "disconnected: " << error << std::endl;
     }
 };
 
+
+
 int main()
 {
+    mutex m;
+    vector<shared_ptr<ClientSession>> sessions;
+
     SOCKADDR_IN addr = AddrUtils::GetTcpAddress(IP, PORT);
-    
+
     auto core = NetCore::make_shared<IOCPCore>();
     auto server = NetCore::make_shared<ServerService>(
         core, addr,
-        NetCore::make_shared<ClientSession>,
+        [=, &sessions, &m]() {
+            LockGuard lg(m);
+            auto s = NetCore::make_shared<ClientSession>();
+            sessions.push_back(s);
+            return s;
+        },
         10, 10);
 
     if (server->Start() == false)
@@ -52,8 +63,34 @@ int main()
                 core->ProcessQueuedCompletionStatus(200);
 
                 if (off) break;
+
+                this_thread::yield();
             }
-        }, 5);
+        }, 3);
+
+    manager.AddTask(
+        [=, &sessions, &m]() {
+            this_thread::sleep_for(200ms);
+            std::cout << "flush T id:" << TLS_Id << std::endl;
+            while (true)
+            {
+                LockGuard lg(m);
+                for (auto& s : sessions)
+                {
+                    if (s->IsConnected())
+                        s->Flush();
+                }
+
+                if (off)
+                {
+                    sessions.clear();
+                    break;
+                }
+
+                this_thread::yield();
+            }
+        }
+    );
 
     while (!off)
     {

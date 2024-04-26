@@ -27,16 +27,16 @@ private:
 	int _exp = 0;
 };
 
-class ServerSession : public NetCore::Session
+class ServerSession : public NetCore::PacketSession
 {
 public:
-	uint32 OnRecv(const _byte* buffer, const uint32 len) override
+	void OnRecvPacket(const _byte* buffer, const int32 len) override
 	{
-		Session::OnRecv(buffer, len);
-
 		std::cout.write(buffer, len) << std::endl;
-
-		return len;
+	}
+	virtual void OnDisconnected(const int32 error) override
+	{
+		std::cout << "disconnected: " << error << std::endl;
 	}
 };
 
@@ -45,7 +45,7 @@ constexpr ushort PORT = 8900;
 
 int main()
 {
-	
+
 	//SocketUtils::Init(); // temp
 
 	SOCKADDR_IN addr = AddrUtils::GetTcpAddress(IP, PORT);
@@ -55,12 +55,11 @@ int main()
 
 	auto core = NetCore::make_shared<IOCPCore>();
 	std::shared_ptr<ServerSession> session_ptr = nullptr;
-	
-	auto session_factory = [&]() -> SessionSPtr
-		{
-			auto s = NetCore::make_shared<ServerSession>();
-			session_ptr = s;
-			return s;
+
+	auto session_factory = [&]() -> SessionSPtr {
+		auto s = NetCore::make_shared<ServerSession>();
+		session_ptr = s;
+		return s;
 		};
 
 	auto client = NetCore::make_shared<ClientService>
@@ -76,15 +75,34 @@ int main()
 	NetCore::Thread::TaskManager manager;
 	manager.AddTask(
 		[=]() {
-			std::cout << "T id:" << TLS_Id << std::endl;
+			std::cout << "IOCP T id:" << TLS_Id << std::endl;
 			this_thread::sleep_for(100ms);
 			while (true)
 			{
 				core->ProcessQueuedCompletionStatus(200);
 
 				if (off) break;
+
+				this_thread::yield();
 			}
 		});
+	manager.AddTask(
+		[&]() {
+			std::cout << "Session Flush T id:" << TLS_Id << std::endl;
+			this_thread::sleep_for(200ms);
+			while (true)
+			{
+				if (session_ptr != nullptr && session_ptr->IsConnected())
+				{
+					session_ptr->Flush();
+				}
+
+				if (off) break;
+
+				this_thread::yield();
+			}
+		}
+	);
 
 	while (!off)
 	{
@@ -116,6 +134,6 @@ int main()
 
 	std::cout << session_ptr.use_count() << std::endl;
 	std::cout << client.use_count() << std::endl;
-    return 0;
+	return 0;
 }
 
