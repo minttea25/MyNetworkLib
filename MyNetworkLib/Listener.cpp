@@ -22,6 +22,7 @@ bool NetCore::Listener::StartListen(const int32 backlog)
 {
 	if (_serverService->_iocpCore->RegisterHandle(shared_from_this()) == false) return false;
 
+	if (SocketUtils::SetLinger(_listenSocket, 0, 0) == false) return false;
 	if (SocketUtils::SetReuseAddress(_listenSocket, true) == false) return false;
 	if (SocketUtils::Bind(_listenSocket, &(_serverService->_addr)) == false) return false;
 	if (SocketUtils::Listen(_listenSocket, backlog) == false) return false;

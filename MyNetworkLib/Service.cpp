@@ -2,7 +2,7 @@
 #include "Service.h"
 
 NetCore::Service::Service(ServiceType serviceType, IOCPCoreSPtr iocpCore, SOCKADDR_IN sockAddr, SessionFactory sessionFactory, const uint32 sessionCount)
-	: _serviceType(serviceType), _iocpCore(iocpCore), _addr(sockAddr), 
+	: _serviceType(serviceType), _iocpCore(iocpCore), _addr(sockAddr),
 	_sessionFactory(sessionFactory), MAX_SESSION_COUNT(sessionCount)
 {
 
@@ -83,7 +83,7 @@ void NetCore::ClientService::Broadcast(const char* msg)
 {
 	if (_session != nullptr && _session->IsConnected())
 	{
-		_session->Send(msg);
+		_session->SendRaw(msg);
 	}
 }
 
@@ -182,7 +182,7 @@ bool NetCore::ServerService::Stop()
 
 void NetCore::ServerService::Broadcast(const char* msg)
 {
-	for (auto& session : _sessions)
+	for (const auto& session : _sessions)
 	{
 		if (session->IsConnected())
 		{

@@ -41,6 +41,7 @@ SHARED_PTR(Listener);
 SHARED_PTR(Service);
 SHARED_PTR(Job);
 SHARED_PTR(TimeJob);
+SHARED_PTR(SendBuffer);
 
 #define WEAK_PTR(name) using name##WPtr = std::weak_ptr<class name>;
 

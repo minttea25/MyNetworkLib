@@ -42,6 +42,9 @@
 #include "AddrUtils.h"
 #include "SocketUtils.h"
 
+// Network Buffers
+#include "SendBuffer.h"
+
 // Network Headers
 #include "IOCPEvent.h"
 #include "IOCPObject.h"

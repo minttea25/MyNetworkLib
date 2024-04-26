@@ -26,6 +26,9 @@
     <Filter Include="Core">
       <UniqueIdentifier>{fdede7a7-f5fa-4fbf-83c0-0f08d6d5d1b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network\Buffer">
+      <UniqueIdentifier>{528859f2-82c9-45a5-9306-22c0269da8d4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -136,6 +139,9 @@
     <ClInclude Include="Listener.h">
       <Filter>Network</Filter>
     </ClInclude>
+    <ClInclude Include="SendBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sample.cpp" />
@@ -214,6 +220,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>pch</Filter>
     </ClCompile>
+    <ClCompile Include="SendBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

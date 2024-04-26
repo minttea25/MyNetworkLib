@@ -2,6 +2,7 @@
 #include "Session.h"
 
 NetCore::Session::Session()
+	:_connected(false)
 {
 	_socket = SocketUtils::CreateSocket();
 }
@@ -28,20 +29,54 @@ void NetCore::Session::SetConnected(const ServiceSPtr service, Socket connectedS
 	RegisterRecv();
 }
 
-bool NetCore::Session::Send(const _byte* buffer)
+void NetCore::Session::SendRaw(const _byte* buffer)
 {
 	if (_connected == false)
 	{
 		// Stop receiving
 		WARN(Session is already disconnected.);
-		return false;
 	}
 
-	std::copy(buffer, buffer + strlen(buffer) + 1, _sendBuffer);
+	bool sendFlag = false;
 
-	RegisterSend();
+	const uint32 size = static_cast<uint32>(strlen(buffer));
 
-	return true;
+	/// TLS
+	auto pos = TLS_SendBuffer->Write(size);
+	std::copy(buffer, buffer + size, pos);
+	// ------------
+	{
+		WRITE_LOCK(send);
+		auto seg = NetCore::make_shared<SendBufferSegment>(TLS_SendBuffer->shared_from_this(), pos, size);
+		_sendQueue.push_back(seg);
+
+		if (_sending.exchange(true) == false)
+		{
+			sendFlag = true;
+		}
+
+	}
+
+	if (sendFlag) RegisterSend();
+}
+
+void NetCore::Session::_send(Vector<std::shared_ptr<SendBufferSegment>>& buffers)
+{
+	if (buffers.size() == 0) return;
+
+	bool sendFlag = false;
+	{
+		WRITE_LOCK(send);
+
+		_sendQueue.reserve(buffers.size());
+		std::move(buffers.begin(), buffers.end(), std::back_inserter(_sendQueue));
+
+		if (_sending.exchange(true) == false)
+		{
+			sendFlag = true;
+		}
+	}
+	if (sendFlag) RegisterSend();
 }
 
 bool NetCore::Session::Disconnect()
@@ -73,7 +108,7 @@ void NetCore::Session::_disconnect(uint16 errorCode)
 	RegisterDisconnect();
 }
 
-void NetCore::Session::Process(IOCPEvent * overlappedEvent, DWORD numberOfBytesTransferred)
+void NetCore::Session::Process(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred)
 {
 	EventType type = overlappedEvent->GetEventType();
 	SHOW(EventType, (int)type);
@@ -89,7 +124,7 @@ void NetCore::Session::Process(IOCPEvent * overlappedEvent, DWORD numberOfBytesT
 		ProcessDisconnect();
 		break;
 	default:
-		WARN(Received event type was not recv/send/disconnect.);
+		WARN(Received event type was not recv / send / disconnect.);
 		break;
 	}
 }
@@ -112,33 +147,35 @@ void NetCore::Session::RegisterSend()
 	_sendEvent.Clear();
 	_sendEvent.SetIOCPObjectSPtr(shared_from_this());
 
-	//{
-	//	_sendLock.lock();
-
-	//	// TODO : processing with queue
-
-	//	_sendLock.unlock();
-	//}
-
 	{
 		WRITE_LOCK(send);
-		MESSAGE(SendLock);
 
+		std::move(_sendQueue.begin(), _sendQueue.end(), back_inserter(_sendEvent._segments));
+		_sendQueue.clear();
 	}
 
-
-	WSABUF sendBuffer{};
-	sendBuffer.buf = reinterpret_cast<_byte*>(GetSendBuffer());
-	sendBuffer.len = MAX_BUFFER_SIZE;
+	Vector<WSABUF> wsaSendBuffers;
+	wsaSendBuffers.reserve(_sendEvent._segments.size());
+	for (auto buffer : _sendEvent._segments)
+	{
+		WSABUF wsaBuf{};
+		wsaBuf.buf = reinterpret_cast<char*>(buffer->GetBufferSegment());
+		wsaBuf.len = static_cast<ULONG>(buffer->GetSize());
+		wsaSendBuffers.push_back(wsaBuf);
+	}
 
 	DWORD numberOfBytesSent = 0;
-	int32 res = ::WSASend(_socket, &sendBuffer, 1,
+	int32 res = ::WSASend(_socket, wsaSendBuffers.data(),
+		static_cast<DWORD>(wsaSendBuffers.size()),
 		OUT & numberOfBytesSent, 0, &_sendEvent, NULL);
 
 	if (ErrorHandler::WSACheckErrorExceptPending(res != SOCKET_ERROR, Errors::WSA_SEND_FAILED) != Errors::NONE)
 	{
 		// TODO
+		_sendEvent.ReleaseIOCPObjectSPtr(); // ?
 	}
+	_sendEvent._segments.clear();
+	_sending.store(false);
 }
 
 void NetCore::Session::ProcessSend(const int32 numberOfBytesSent)
@@ -170,7 +207,7 @@ void NetCore::Session::RegisterRecv()
 	_recvEvent.SetIOCPObjectSPtr(shared_from_this());
 
 	// TEMP
-	WSABUF recvBuffer {};
+	WSABUF recvBuffer{};
 	recvBuffer.buf = reinterpret_cast<_byte*>(GetRecvBuffer());
 	recvBuffer.len = MAX_BUFFER_SIZE;
 

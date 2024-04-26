@@ -4,5 +4,6 @@
 NAMESPACE_OPEN(NetCore);
 
 thread_local uint32 TLS_Id = UNSIGNED_INVALID;
+thread_local SendBufferSPtr TLS_SendBuffer;
 
 NAMESPACE_CLOSE;
