@@ -1,0 +1,6 @@
+<lib>
+<name>flatbuffers</name>
+<version>24.3.7</version>
+<url>https://github.com/google/flatbuffers/releases/tag/v24.3.7</url>
+<note>CMAKE BUILD</note>
+</lib>

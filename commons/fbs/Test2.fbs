@@ -1,0 +1,24 @@
+// example IDL file
+
+include "Test.fbs";
+
+namespace Test;
+
+union Jobs { Magician, Warrior }
+
+table Player {
+  name: string;
+  pos: Vec3;
+
+  job: Jobs;
+}
+
+table Magician {
+  magic: int;
+}
+
+table Warrior {
+  attack: short;
+}
+
+root_type Player;

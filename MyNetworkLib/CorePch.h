@@ -1,5 +1,13 @@
 #pragma once
 
+#ifndef _DEBUG
+#pragma comment(lib, "flatbuffers\\Release\\flatbuffers.lib")
+
+#else
+#pragma comment(lib, "flatbuffers\\Debug\\flatbuffers.lib")
+
+#endif // !_DEBUG
+
 // TEST
 #include "Sample.h"
 
