@@ -24,9 +24,15 @@ public:
 			ASSERT_CRASH("The write size is bigger than MAX_BUFFER_SIZE.")
 		}
 
+		// TEMP
 		if (size > FreeSize()) _usedSize = 0;
 
-		return &_buffer[_usedSize];
+		::memset(&_buffer[_usedSize], 0, size);
+
+		uint32 ret = _usedSize;
+		_usedSize += size;
+
+		return &_buffer[ret];
 	}
 
 	inline uint32 FreeSize() const { return _buffer.size() - _usedSize; }
@@ -35,25 +41,25 @@ private:
 	uint32 _usedSize = 0;
 };
 
-class SendBufferSegment : public enable_shared_from_this<SendBufferSegment>
-{
-public:
-	SendBufferSegment(SendBufferSPtr buffer, _ubyte* bufferPos, uint32 size)
-		: _size(size), _buffer(buffer), _bufferPos(bufferPos)
-	{
-	}
-	~SendBufferSegment()
-	{
-		DESTRUCTOR(SendBufferSegment);
-	}
-
-	_ubyte* GetBufferSegment() const { return _bufferPos; }
-	uint32 GetSize() const { return _size; }
-private:
-	const uint32 _size;
-	SendBufferSPtr _buffer = nullptr;
-	_ubyte* _bufferPos;
-};
+//class SendBufferSegment : public enable_shared_from_this<SendBufferSegment>
+//{
+//public:
+//	SendBufferSegment(SendBufferSPtr buffer, _ubyte* bufferPos, uint32 size)
+//		: _size(size), _buffer(buffer), _bufferPos(bufferPos)
+//	{
+//	}
+//	~SendBufferSegment()
+//	{
+//		DESTRUCTOR(SendBufferSegment);
+//	}
+//
+//	_ubyte* GetBufferSegment() const { return _bufferPos; }
+//	uint32 GetSize() const { return _size; }
+//private:
+//	const uint32 _size;
+//	SendBufferSPtr _buffer = nullptr;
+//	_ubyte* _bufferPos;
+//};
 
 
 

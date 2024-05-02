@@ -2,49 +2,47 @@
 
 NAMESPACE_OPEN(NetCore);
 
+#pragma pack(push, 2)
 struct PacketHeader
 {
 public:
 	PacketHeader(const ushort id, const ushort size) : _id(id), _size(size) {}
-private:
-	const ushort _id;
-	const ushort _size;
-};
 
-class PacketBody
-{
-public:
+	ushort size() const { return _size; }
+	ushort id() const { return _id; }
+private:
+	ushort _size;
+	ushort _id;
+
+	// TODO: Check verifyed values. (after reinterpret_cast)
 };
+#pragma pack(pop)
 
 
 
 class PacketWrapper
 {
 public:
-	/*template<typename Data>
-	[[nodiscard]]
-	static std::shared_ptr<Data> Serialize(_ubyte* ptr, const uint32 size)
+	static WSABUF Serialize(const ushort id, _ubyte* dataPtr, const ushort dataSize)
 	{
-		const Data* root = flatbuffers::GetRoot<Data>(ptr);
+		const uint16 size = sizeof(PacketHeader) + dataSize;
 
-	}*/
+		// Get memory from SendBuffer
+		_ubyte* buffer = TLS_SendBuffer->Write(size);
 
-	// NEED TO BE CHECKED
-	std::pair<WSABUF, WSABUF> Serialize(const ushort id,_ubyte* dataPtr, const ushort len)
-	{
-		PacketHeader h(id, len);
-		WSABUF header{};
-		header.buf = reinterpret_cast<char*>(&h);
-		header.len = sizeof(PacketHeader);
+		// Allocate PacketHeader at buffer.
+		new(buffer)PacketHeader(id, size);
 
-		WSABUF body{};
-		body.buf = reinterpret_cast<char*>(dataPtr);
-		body.len = len;
+		// Copy serialized data after PacketHeader
+		::memcpy(buffer + sizeof(PacketHeader), dataPtr, dataSize);
 
-
-		return { header, body };
+		WSABUF buf // len, buf
+		{
+			size,
+			reinterpret_cast<char*>(buffer)
+		};
+		return buf;
 	}
-
 };
 
 NAMESPACE_CLOSE;

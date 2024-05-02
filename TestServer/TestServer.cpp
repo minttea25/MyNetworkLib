@@ -1,6 +1,9 @@
 #include "pch.h"
 
 #include <iostream>
+#include "flatbuffers/flatbuffers.h";
+#include "flatbuffers/util.h"
+#include "fbs/Packet_generated.h"
 
 using namespace NetCore;
 
@@ -17,9 +20,12 @@ class ClientSession : public NetCore::PacketSession
         std::cout << "OnConnected" << endl;
     }
 
-    void OnRecvPacket(const _byte* buffer, const int32 len) override
+    void OnRecvPacket(const _byte* buffer, const ushort id) override
     {
-        std::cout.write(buffer, len) << std::endl;
+        auto testPkt = Test::GetTestPacket(buffer);
+        cout << "Msg: " << testPkt->msg()->c_str() << '\n';
+        cout << "Number: " << testPkt->number() << '\n';
+        cout << endl;
     }
 
     void OnDisconnected(const int32 error) override
@@ -28,7 +34,18 @@ class ClientSession : public NetCore::PacketSession
     }
 };
 
+static pair< uint8_t*, ushort> GetTestPacket(const string& msg)
+{
+    const ushort id = 1; // fixed;
 
+    NetCore::FBAllocator allocator;
+    flatbuffers::FlatBufferBuilder builder(128, &allocator);
+    auto msg_os = builder.CreateString(msg);
+    auto pkt = Test::CreateTestPacket(builder, msg_os, 100);
+    builder.Finish(pkt);
+
+    return { builder.GetBufferPointer(), builder.GetSize() };
+}
 
 int main()
 {
@@ -105,7 +122,9 @@ int main()
             }
             else
             {
-                server->Broadcast(msg.c_str());
+                //server->Broadcast(msg.c_str());
+                auto pkt = GetTestPacket(msg);
+                server->Broadcast(1, pkt.first, pkt.second);
             }
         }
     }

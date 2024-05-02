@@ -23,13 +23,6 @@ using namespace std;
 
 using fbb = flatbuffers::FlatBufferBuilder;
 
-// TEMP
-class CreaturePacket
-{
-public:
-	CreaturePacket()
-
-};
 
 static string ColorToString(Test::Color color)
 {

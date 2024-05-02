@@ -25,7 +25,6 @@ public:
 public:
 	virtual bool Start() PURE_VIRTUAL;
 	virtual bool Stop() PURE_VIRTUAL;
-	virtual void Broadcast(const char* msg) PURE_VIRTUAL;
 
 	
 	inline IOCPCoreSPtr GetIOCPCore() const { return _iocpCore; }
@@ -83,7 +82,7 @@ public:
 	/// Send a message to connected address.
 	/// </summary>
 	/// <param name="msg">Message to send.</param>
-	void Broadcast(const char* msg) override;
+	void Send_(const ushort id, _ubyte* ptr, const ushort size);
 	size_t GetCurrentSessionCount() const override;
 	/// <summary>
 	/// Create a new session with session factory and register its handle in iocp core.
@@ -120,11 +119,14 @@ public:
 	/// </summary>
 	/// <returns>true if successful, false otherwise.</returns>
 	bool Stop() override;
+	
 	/// <summary>
 	/// Send msg to all connected sessions.
 	/// </summary>
-	/// <param name="msg">Message to send.</param>
-	void Broadcast(const char* msg) override;
+	/// <param name="id">packet id</param>
+	/// <param name="ptr">pointer of serialized data</param>
+	/// <param name="size">size of serialized data</param>
+	void Broadcast(const ushort id, _ubyte* ptr, const ushort size);
 	size_t GetCurrentSessionCount() const override { return _sessions.size(); }
 	/// <summary>
 	/// Create a new session with session factory and register its handle in iocp core.

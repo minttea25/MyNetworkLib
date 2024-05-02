@@ -13,6 +13,7 @@ NetCore::PacketSession::~PacketSession()
 
 void NetCore::PacketSession::Send(const _byte* buffer)
 {
+	// TEMP : deprecated
 	if (buffer == nullptr) return;
 
 	const uint32 size = static_cast<uint32>(strlen(buffer));
@@ -22,11 +23,25 @@ void NetCore::PacketSession::Send(const _byte* buffer)
 	{
 		_WRITE_LOCK;
 
-		_reserved.push_back(NetCore::make_shared<SendBufferSegment>(
+		/*_reserved.push_back(NetCore::make_shared<SendBufferSegment>(
 			TLS_SendBuffer->shared_from_this(),
 			pos,
-			size));
+			size));*/
+		
 		_reservedSendBytes += size;
+	}
+}
+
+void NetCore::PacketSession::Send_(const ushort id, _ubyte* ptr, const ushort size)
+{
+	if (ptr == nullptr) return;
+
+	auto buf = NetCore::PacketWrapper::Serialize(id, ptr, size);
+	{
+		_WRITE_LOCK;
+		_reserved.push_back(buf);
+
+		_reservedSendBytes += (size + sizeof(PacketHeader));
 	}
 }
 
@@ -37,7 +52,7 @@ void NetCore::PacketSession::Flush()
 	if (dt < FLUSH_SEND_MIN_INTERVAL_TICK
 		&& _reservedSendBytes < FLUSH_SEND_MIN_RESERVED_BYTE_LENGTH) return;
 
-	Vector<std::shared_ptr<SendBufferSegment>> list;
+	Vector<WSABUF> list;
 	{
 		_WRITE_LOCK;
 		const size_t size = _reserved.size();
@@ -59,9 +74,30 @@ void NetCore::PacketSession::Flush()
 
 NetCore::uint32 NetCore::PacketSession::OnRecv(const _byte* buffer, const uint32 len)
 {
-	// TEMP : 한번에 출력중...
-	OnRecvPacket(buffer, len);
+	SHOW(Received Total Len : , len);
 
-	return len;
+	int n = 0;
+	uint32 processed = 0;
+	while (processed < len)
+	{
+		// 1: size, 2: id
+		
+		auto ptr = buffer + processed;
+		const PacketHeader* header = reinterpret_cast<const PacketHeader*>(ptr);
+
+		const ushort size = header->size(); // total size of packet
+		const ushort id = header->id();
+
+		cout << "Received: " << n << '\n';
+		cout << "Size: " << size << '\n';
+		cout << "Id: " << id << '\n' << '\n';
+
+		OnRecvPacket(ptr + sizeof(PacketHeader), id);
+
+		processed += size;
+		n++;
+	}
+
+	return processed;
 }
 
