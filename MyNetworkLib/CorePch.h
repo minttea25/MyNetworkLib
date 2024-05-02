@@ -69,4 +69,10 @@
 #include "TimeJob.h"
 #include "JobSerializerWithTimer.h"
 
+// flatbuffers lib Headers
+#include "flatbuffers/flatbuffers.h"
+#include "flatbuffers/util.h"
 
+// flatbuffers Headers
+#include "FBAllocator.h"
+#include "PacketWrapper.h"

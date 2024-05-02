@@ -1,0 +1,16 @@
+namespace NetCore.Packet;
+
+struct PacketInfo {
+  id: ushort;
+  size: ushort;
+}
+
+table TestPacket {
+  info: PacketInfo;
+  msg: string;
+}
+
+table Packet {
+}
+
+root_type Packet;

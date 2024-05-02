@@ -160,6 +160,7 @@
     <ClInclude Include="CoreTLS.h" />
     <ClInclude Include="CoreTypes.h" />
     <ClInclude Include="ErrorHandler.h" />
+    <ClInclude Include="FBAllocator.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="CoreGlobal.h" />
     <ClInclude Include="IOCPCore.h" />
@@ -173,6 +174,7 @@
     <ClInclude Include="LockPriorityQueue.h" />
     <ClInclude Include="LockQueue.h" />
     <ClInclude Include="LockStack.h" />
+    <ClInclude Include="PacketWrapper.h" />
     <ClInclude Include="RWLock.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="MemoryAllocator.h" />
@@ -202,6 +204,7 @@
     <ClCompile Include="JobSerializer.cpp" />
     <ClCompile Include="JobSerializerWithTimer.cpp" />
     <ClCompile Include="Listener.cpp" />
+    <ClCompile Include="PacketWrapper.cpp" />
     <ClCompile Include="RWLock.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
