@@ -109,7 +109,8 @@ public:
 		_segments.clear();
 	}
 private:
-	Vector<std::shared_ptr<SendBufferSegment>> _segments;
+	//Vector<std::shared_ptr<SendBufferSegment>> _segments;
+	Vector<WSABUF> _segments;
 	friend class Session;
 };
 

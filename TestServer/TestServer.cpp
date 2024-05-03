@@ -1,7 +1,5 @@
 #include "pch.h"
 
-#include <iostream>
-
 using namespace NetCore;
 
 constexpr PCSTR IP = "127.0.0.1";
@@ -10,28 +8,23 @@ constexpr ushort PORT = 8900;
 static bool off = false;
 
 
-class ClientSession : public NetCore::PacketSession
+static pair< uint8_t*, ushort> GetTestPacket(const string& msg)
 {
-    void OnConnected() override
-    {
-        std::cout << "OnConnected" << endl;
-    }
+    const ushort id = 1; // fixed;
 
-    void OnRecvPacket(const _byte* buffer, const int32 len) override
-    {
-        std::cout.write(buffer, len) << std::endl;
-    }
+    NetCore::FBAllocator allocator;
+    flatbuffers::FlatBufferBuilder builder(128, &allocator);
+    auto msg_os = builder.CreateString(msg);
+    auto pkt = Test::CreateTestPacket(builder, msg_os, 100);
+    builder.Finish(pkt);
 
-    void OnDisconnected(const int32 error) override
-    {
-        std::cout << "disconnected: " << error << std::endl;
-    }
-};
-
-
+    return { builder.GetBufferPointer(), builder.GetSize() };
+}
 
 int main()
 {
+    GPacketManager = new PacketManager();
+
     mutex m;
     vector<shared_ptr<ClientSession>> sessions;
 
@@ -105,7 +98,8 @@ int main()
             }
             else
             {
-                server->Broadcast(msg.c_str());
+                auto pkt = GetTestPacket(msg);
+                server->Broadcast(1, pkt.first, pkt.second);
             }
         }
     }
@@ -114,7 +108,7 @@ int main()
     manager.JoinAllTasks();
     server->Stop();
 
-    std::cout << server.use_count() << std::endl;
+    delete GPacketManager;
 
     return 0;
 }

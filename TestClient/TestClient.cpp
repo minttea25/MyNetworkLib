@@ -1,52 +1,29 @@
 #include "pch.h"
-#include <iostream>
+
 
 using namespace NetCore;
 
 static bool off = false;
 
-class TestClass : public std::enable_shared_from_this<TestClass>
+static pair< uint8_t*, ushort> GetTestPacket(const string& msg)
 {
-public:
-	TestClass() { std::cout << "Constructor: " << _id << std::endl; }
-	TestClass(uint32 id, int hp, int exp) : _id(id), _hp(hp), _exp(exp) {}
-	~TestClass() { std::cout << "Destructor: " << _id << std::endl; }
-public:
-	void SetHpExp(const int hp, const int exp)
-	{
-		_hp = hp;
-		_exp = exp;
-	}
-	static friend std::ostream& operator<<(std::ostream& os, const TestClass& obj)
-	{
-		return os << "TestClass_" << obj._id << '(' << obj._hp << ',' << obj._exp << ')';
-	}
-private:
-	uint32 _id = 0;
-	int _hp = 0;
-	int _exp = 0;
-};
+	const ushort id = 1; // fixed;
 
-class ServerSession : public NetCore::PacketSession
-{
-public:
-	void OnRecvPacket(const _byte* buffer, const int32 len) override
-	{
-		std::cout.write(buffer, len) << std::endl;
-	}
-	virtual void OnDisconnected(const int32 error) override
-	{
-		std::cout << "disconnected: " << error << std::endl;
-	}
-};
+	NetCore::FBAllocator allocator;
+	flatbuffers::FlatBufferBuilder builder(128, &allocator);
+	auto msg_os = builder.CreateString(msg);
+	auto pkt = Test::CreateTestPacket(builder, msg_os, 100);
+	builder.Finish(pkt);
+
+	return { builder.GetBufferPointer(), builder.GetSize() };
+}
 
 constexpr PCSTR IP = "127.0.0.1";
 constexpr ushort PORT = 8900;
 
 int main()
 {
-
-	//SocketUtils::Init(); // temp
+	GPacketManager = new PacketManager();
 
 	SOCKADDR_IN addr = AddrUtils::GetTcpAddress(IP, PORT);
 
@@ -118,7 +95,8 @@ int main()
 			{
 				if (session_ptr != nullptr)
 				{
-					session_ptr->Send(msg.c_str());
+					auto pkt = GetTestPacket(msg);
+					session_ptr->Send_(1, pkt.first, pkt.second);
 				}
 			}
 
@@ -132,8 +110,8 @@ int main()
 
 	client->Stop();
 
-	std::cout << session_ptr.use_count() << std::endl;
-	std::cout << client.use_count() << std::endl;
+	delete GPacketManager;
+
 	return 0;
 }
 

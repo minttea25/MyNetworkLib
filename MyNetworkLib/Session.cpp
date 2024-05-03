@@ -29,38 +29,7 @@ void NetCore::Session::SetConnected(const ServiceSPtr service, Socket connectedS
 	RegisterRecv();
 }
 
-void NetCore::Session::SendRaw(const _byte* buffer)
-{
-	if (_connected == false)
-	{
-		// Stop receiving
-		WARN(Session is already disconnected.);
-	}
-
-	bool sendFlag = false;
-
-	const uint32 size = static_cast<uint32>(strlen(buffer));
-
-	/// TLS
-	auto pos = TLS_SendBuffer->Write(size);
-	std::copy(buffer, buffer + size, pos);
-	// ------------
-	{
-		WRITE_LOCK(send);
-		auto seg = NetCore::make_shared<SendBufferSegment>(TLS_SendBuffer->shared_from_this(), pos, size);
-		_sendQueue.push_back(seg);
-
-		if (_sending.exchange(true) == false)
-		{
-			sendFlag = true;
-		}
-
-	}
-
-	if (sendFlag) RegisterSend();
-}
-
-void NetCore::Session::_send(Vector<std::shared_ptr<SendBufferSegment>>& buffers)
+void NetCore::Session::_send(Vector<WSABUF>& buffers)
 {
 	if (buffers.size() == 0) return;
 
@@ -154,19 +123,21 @@ void NetCore::Session::RegisterSend()
 		_sendQueue.clear();
 	}
 
-	Vector<WSABUF> wsaSendBuffers;
-	wsaSendBuffers.reserve(_sendEvent._segments.size());
-	for (auto buffer : _sendEvent._segments)
+	/*Vector<WSABUF> wsaSendBuffers;
+	for (auto& buffer : _sendEvent._segments)
 	{
-		WSABUF wsaBuf{};
-		wsaBuf.buf = reinterpret_cast<char*>(buffer->GetBufferSegment());
-		wsaBuf.len = static_cast<ULONG>(buffer->GetSize());
-		wsaSendBuffers.push_back(wsaBuf);
+		wsaSendBuffers.push_back(buffer);
 	}
 
 	DWORD numberOfBytesSent = 0;
 	int32 res = ::WSASend(_socket, wsaSendBuffers.data(),
 		static_cast<DWORD>(wsaSendBuffers.size()),
+		OUT & numberOfBytesSent, 0, &_sendEvent, NULL);*/
+
+	// CHECK
+	DWORD numberOfBytesSent = 0;
+	int32 res = ::WSASend(_socket, _sendEvent._segments.data(),
+		static_cast<DWORD>(_sendEvent._segments.size()),
 		OUT & numberOfBytesSent, 0, &_sendEvent, NULL);
 
 	if (ErrorHandler::WSACheckErrorExceptPending(res != SOCKET_ERROR, Errors::WSA_SEND_FAILED) != Errors::NONE)

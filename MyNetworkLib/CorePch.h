@@ -1,5 +1,13 @@
 #pragma once
 
+#ifndef _DEBUG
+#pragma comment(lib, "flatbuffers\\Release\\flatbuffers.lib")
+
+#else
+#pragma comment(lib, "flatbuffers\\Debug\\flatbuffers.lib")
+
+#endif // !_DEBUG
+
 // TEST
 #include "Sample.h"
 
@@ -61,4 +69,10 @@
 #include "TimeJob.h"
 #include "JobSerializerWithTimer.h"
 
+// flatbuffers lib Headers
+#include "flatbuffers/flatbuffers.h"
+#include "flatbuffers/util.h"
 
+// flatbuffers Headers
+#include "FBAllocator.h"
+#include "PacketWrapper.h"
