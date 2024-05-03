@@ -9,7 +9,7 @@ class FBAllocator : public flatbuffers::Allocator
 	// Inherited via Allocator
 	uint8_t* allocate(size_t size) override
 	{
-		SHOW(allocate size, size);
+		PRINT(allocate size, size);
 		uint8_t* ptr = static_cast<uint8_t*>(NetCore::PoolAllocator::Alloc(static_cast<int32>(size)));
 		new(ptr)uint8_t();
 		return ptr;

@@ -79,12 +79,11 @@ bool NetCore::ClientService::Stop()
 	return true;
 }
 
-void NetCore::ClientService::Send_(const ushort id, _ubyte* ptr, const ushort size)
+void NetCore::ClientService::Send_(const uint16 id, _ubyte* ptr, const uint16 size)
 {
 	if (_session != nullptr && _session->IsConnected())
 	{
-		//_session->SendRaw(msg);
-		_session->Send_(id, ptr, size);
+		_session->Send(id, ptr, size);
 	}
 }
 
@@ -181,13 +180,13 @@ bool NetCore::ServerService::Stop()
 	return true;
 }
 
-void NetCore::ServerService::Broadcast(const ushort id, _ubyte* ptr, const ushort size)
+void NetCore::ServerService::Broadcast(const uint16 id, _ubyte* ptr, const uint16 size)
 {
 	for (const auto& session : _sessions)
 	{
 		if (session->IsConnected())
 		{
-			session->Send_(id, ptr, size);
+			session->Send(id, ptr, size);
 		}
 	}
 }

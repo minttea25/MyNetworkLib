@@ -46,7 +46,7 @@ void NetCore::Listener::RegisterAccept(AcceptEvent* acceptEvent)
 	acceptEvent->SetSessionRef(s);
 
 	auto session = acceptEvent->GetSessionRef();
-	NOT_USE DWORD bytesReceived = 0;
+	IGNORED DWORD bytesReceived = 0;
 	BOOL suc = SocketUtils::AcceptEx(_listenSocket, session->GetSocket(),
 		session->GetRecvBuffer(), 0,
 		sizeof(SOCKADDR_IN) + 16,

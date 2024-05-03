@@ -14,13 +14,13 @@ public:
 	PacketSession();
 	virtual ~PacketSession();
 
-	void Send(const _byte* buffer) override sealed;
-	void Send_(const ushort id, _ubyte* ptr, const ushort size) override sealed;
+	void SendRaw(const _byte* buffer) override sealed;
+	void Send(const uint16 id, _ubyte* ptr, const uint16 size) override sealed;
 	void Flush();
 
 protected:
 	uint32 OnRecv(const _byte* buffer, const uint32 len) override sealed;
-	virtual void OnRecvPacket(const _byte* buffer, const ushort id) PURE_VIRTUAL;
+	PURE_VIRTUAL virtual void OnRecvPacket(const _byte* buffer, const uint16 id) = 0;
 private:
 	_USE_LOCK;
 	Vector<WSABUF> _reserved;

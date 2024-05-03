@@ -23,8 +23,8 @@ public:
 	Service& operator=(Service&&) noexcept = delete;
 
 public:
-	virtual bool Start() PURE_VIRTUAL;
-	virtual bool Stop() PURE_VIRTUAL;
+	PURE_VIRTUAL virtual bool Start() = 0;
+	PURE_VIRTUAL virtual bool Stop() = 0;
 
 	
 	inline IOCPCoreSPtr GetIOCPCore() const { return _iocpCore; }
@@ -33,11 +33,11 @@ public:
 	inline uint32 GetMaxSessionCount() const { return MAX_SESSION_COUNT; }
 	inline SOCKADDR_IN GetAddr() const { return _addr; }
 
-	virtual size_t GetCurrentSessionCount() const PURE_VIRTUAL;
-	virtual SessionSPtr AddNewSession() PURE_VIRTUAL;
+	PURE_VIRTUAL virtual size_t GetCurrentSessionCount() const = 0;
+	PURE_VIRTUAL virtual SessionSPtr AddNewSession() = 0;
 protected:
-	virtual bool ReleaseSession(SessionSPtr session_s_ptr) PURE_VIRTUAL;
-	virtual void ReleaseAllSessions() PURE_VIRTUAL;
+	PURE_VIRTUAL virtual bool ReleaseSession(SessionSPtr session_s_ptr) = 0;
+	PURE_VIRTUAL virtual void ReleaseAllSessions() = 0;
 private:
 	const uint32 MAX_SESSION_COUNT;
 
@@ -82,7 +82,7 @@ public:
 	/// Send a message to connected address.
 	/// </summary>
 	/// <param name="msg">Message to send.</param>
-	void Send_(const ushort id, _ubyte* ptr, const ushort size);
+	void Send_(const uint16 id, _ubyte* ptr, const uint16 size);
 	size_t GetCurrentSessionCount() const override;
 	/// <summary>
 	/// Create a new session with session factory and register its handle in iocp core.
@@ -126,7 +126,7 @@ public:
 	/// <param name="id">packet id</param>
 	/// <param name="ptr">pointer of serialized data</param>
 	/// <param name="size">size of serialized data</param>
-	void Broadcast(const ushort id, _ubyte* ptr, const ushort size);
+	void Broadcast(const uint16 id, _ubyte* ptr, const uint16 size);
 	size_t GetCurrentSessionCount() const override { return _sessions.size(); }
 	/// <summary>
 	/// Create a new session with session factory and register its handle in iocp core.

@@ -69,7 +69,7 @@ void NetCore::Session::_set_socket(Socket connectedSocket)
 void NetCore::Session::_disconnect(uint16 errorCode)
 {
 #ifdef TEST
-	SHOW(DisconnectError:, errorCode);
+	PRINT(DisconnectError:, errorCode);
 #endif // TEST
 
 	if (IsConnected() == false) return;
@@ -80,7 +80,7 @@ void NetCore::Session::_disconnect(uint16 errorCode)
 void NetCore::Session::Process(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred)
 {
 	EventType type = overlappedEvent->GetEventType();
-	SHOW(EventType, (int)type);
+	PRINT(EventType, (int)type);
 	switch (type)
 	{
 	case EventType::Recv:

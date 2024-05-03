@@ -20,6 +20,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibTest", "LibTest\LibTest.
 		{3334E63B-E879-405A-A4B1-EE499F16AF98} = {3334E63B-E879-405A-A4B1-EE499F16AF98}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{397F71EC-CCF2-470F-9341-353738BDF87A}"
+	ProjectSection(SolutionItems) = preProject
+		commons\packets\PacketHandler.cpp = commons\packets\PacketHandler.cpp
+		commons\packets\PacketHandler.h = commons\packets\PacketHandler.h
+		commons\packets\PacketManager.cpp = commons\packets\PacketManager.cpp
+		commons\packets\PacketManager.h = commons\packets\PacketManager.h
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

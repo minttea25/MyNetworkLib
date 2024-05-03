@@ -15,15 +15,13 @@ using uint8 = unsigned __int8;
 using uint16 = unsigned __int16;
 using uint32 = unsigned __int32;
 using uint64 = unsigned __int64;
- 
-using ushort = unsigned __int16;
 
 template<typename T>
 using Atomic = std::atomic<T>;
 using Mutex = std::mutex;
 using CondVar = std::condition_variable;
 using UniqueLock = std::unique_lock<std::mutex>;
-using LockGuard = std::lock_guard < std::mutex>;
+using LockGuard = std::lock_guard<std::mutex>;
 
 using Socket = SOCKET;
 
@@ -32,6 +30,7 @@ using count_t = uint32;
 
 #define SHARED_PTR(name) using name##SPtr = std::shared_ptr<class name>;
 #define SHARED_PTR_S(name) using name##SPtr = std::shared_ptr<struct name>;
+
 SHARED_PTR(IOCPCore);
 SHARED_PTR(IOCPObject);
 SHARED_PTR_S(IOCPEvent);

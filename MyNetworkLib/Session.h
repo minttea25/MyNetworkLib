@@ -5,7 +5,7 @@ NAMESPACE_OPEN(NetCore);
 class Session : public IOCPObject
 {
 	// TEMP size
-	constexpr static uint32 MAX_BUFFER_SIZE = 0b1000000;  // 0x10000;
+	constexpr static uint32 MAX_BUFFER_SIZE = 0b1000'0000;  // 0x10000;
 
 	enum DisconnectError
 	{
@@ -28,8 +28,8 @@ public:
 	bool IsConnected() const { return _connected; }
 
 public:
-	virtual void Send(const _byte* buffer) PURE_VIRTUAL;
-	virtual void Send_(const ushort id, _ubyte* ptr, const ushort size) PURE_VIRTUAL;
+	PURE_VIRTUAL virtual void SendRaw(const _byte* buffer) = 0;
+	PURE_VIRTUAL virtual void Send(const uint16 id, _ubyte* ptr, const uint16 size) = 0;
 
 	void _send(Vector<WSABUF>& buffers);
 	bool Disconnect();

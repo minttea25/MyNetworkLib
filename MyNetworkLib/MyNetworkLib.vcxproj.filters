@@ -149,7 +149,7 @@
       <Filter>flatbuffers</Filter>
     </ClInclude>
     <ClInclude Include="PacketWrapper.h">
-      <Filter>Header Files</Filter>
+      <Filter>flatbuffers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -232,7 +232,9 @@
     <ClCompile Include="SendBuffer.cpp">
       <Filter>Network\Buffer</Filter>
     </ClCompile>
-    <ClCompile Include="PacketWrapper.cpp" />
+    <ClCompile Include="PacketWrapper.cpp">
+      <Filter>flatbuffers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

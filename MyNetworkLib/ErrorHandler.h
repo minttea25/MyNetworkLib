@@ -70,31 +70,22 @@ public:
 	{
 		if (!condition)
 		{
-			ERR(errCode);
-
-			if (msg == nullptr)
-			{
-				ASSERT_CRASH(condition);
-			}
-			else ASSERT_CRASH(msg);
+			ERR_CODE_(errCode);
+			ASSERT_CRASH(false);
 		}
 	}
 
 	static inline void AssertCrash(const Errors errCode, const char* msg = nullptr)
 	{
-		ERR(errCode);
-		if (msg == nullptr)
-		{
-			ASSERT_CRASH(errCode);
-		}
-		else ASSERT_CRASH(msg);
+		ERR_CODE_(errCode);
+		ASSERT_CRASH(false);
 	}
 
 	static inline DWORD CheckError(const bool condition, const Errors errCode)
 	{
-		if (! condition)
+		if (!condition)
 		{
-			ERR(errCode);
+			ERR_CODE_(errCode);
 			return errCode;
 		}
 		return Errors::NONE;
@@ -149,7 +140,7 @@ public:
 			else
 			{
 				_app_last_error.store(errorCode);
-				ERR(errorCode);
+				ERR_CODE_(errorCode);
 				return err;
 			}
 		}

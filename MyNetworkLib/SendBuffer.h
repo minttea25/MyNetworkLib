@@ -16,7 +16,7 @@ public:
 		DESTRUCTOR(SendBuffer);
 	}
 
-	_ubyte* Write(const uint32 size)
+	_ubyte* Reserve(const uint32 size)
 	{
 		if (size > MAX_BUFFER_SIZE)
 		{
@@ -40,28 +40,6 @@ private:
 	Array<_ubyte, MAX_BUFFER_SIZE> _buffer = {};
 	uint32 _usedSize = 0;
 };
-
-//class SendBufferSegment : public enable_shared_from_this<SendBufferSegment>
-//{
-//public:
-//	SendBufferSegment(SendBufferSPtr buffer, _ubyte* bufferPos, uint32 size)
-//		: _size(size), _buffer(buffer), _bufferPos(bufferPos)
-//	{
-//	}
-//	~SendBufferSegment()
-//	{
-//		DESTRUCTOR(SendBufferSegment);
-//	}
-//
-//	_ubyte* GetBufferSegment() const { return _bufferPos; }
-//	uint32 GetSize() const { return _size; }
-//private:
-//	const uint32 _size;
-//	SendBufferSPtr _buffer = nullptr;
-//	_ubyte* _bufferPos;
-//};
-
-
 
 NAMESPACE_CLOSE;
 

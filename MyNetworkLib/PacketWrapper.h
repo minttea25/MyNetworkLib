@@ -6,13 +6,13 @@ NAMESPACE_OPEN(NetCore);
 struct PacketHeader
 {
 public:
-	PacketHeader(const ushort id, const ushort size) : _id(id), _size(size) {}
+	PacketHeader(const uint16 id, const uint16 size) : _id(id), _size(size) {}
 
-	ushort size() const { return _size; }
-	ushort id() const { return _id; }
+	uint16 size() const { return _size; }
+	uint16 id() const { return _id; }
 private:
-	ushort _size;
-	ushort _id;
+	uint16 _size;
+	uint16 _id;
 
 	// TODO: Check verifyed values. (after reinterpret_cast)
 };
@@ -23,12 +23,12 @@ private:
 class PacketWrapper
 {
 public:
-	static WSABUF Serialize(const ushort id, _ubyte* dataPtr, const ushort dataSize)
+	static WSABUF Serialize(const uint16 id, _ubyte* dataPtr, const uint16 dataSize)
 	{
 		const uint16 size = sizeof(PacketHeader) + dataSize;
 
 		// Get memory from SendBuffer
-		_ubyte* buffer = TLS_SendBuffer->Write(size);
+		_ubyte* buffer = TLS_SendBuffer->Reserve(size);
 
 		// Allocate PacketHeader at buffer.
 		new(buffer)PacketHeader(id, size);

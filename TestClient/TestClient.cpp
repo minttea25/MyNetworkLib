@@ -96,7 +96,7 @@ int main()
 				if (session_ptr != nullptr)
 				{
 					auto pkt = GetTestPacket(msg);
-					session_ptr->Send_(1, pkt.first, pkt.second);
+					session_ptr->Send(1, pkt.first, pkt.second);
 				}
 			}
 
