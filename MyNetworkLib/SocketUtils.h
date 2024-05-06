@@ -47,7 +47,7 @@ public:
 	{
 		// See: https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsaioctl
 
-		NOT_USE DWORD bytesReturned = 0;
+		IGNORED DWORD bytesReturned = 0;
 		return ::WSAIoctl(socket, ioControlCode, &guid, sizeof(guid),
 			fn, sizeof(fn), OUT & bytesReturned, overlapped, completionRoutine);
 	}

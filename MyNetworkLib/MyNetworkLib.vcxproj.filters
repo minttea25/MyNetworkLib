@@ -29,6 +29,9 @@
     <Filter Include="Network\Buffer">
       <UniqueIdentifier>{528859f2-82c9-45a5-9306-22c0269da8d4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="flatbuffers">
+      <UniqueIdentifier>{1ecd2da9-8af7-4f24-9132-0b8647d7193a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -140,7 +143,13 @@
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="SendBuffer.h">
-      <Filter>Header Files</Filter>
+      <Filter>Network\Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="FBAllocator.h">
+      <Filter>flatbuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketWrapper.h">
+      <Filter>flatbuffers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -220,7 +229,12 @@
     <ClCompile Include="pch.cpp">
       <Filter>pch</Filter>
     </ClCompile>
-    <ClCompile Include="SendBuffer.cpp" />
+    <ClCompile Include="SendBuffer.cpp">
+      <Filter>Network\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketWrapper.cpp">
+      <Filter>flatbuffers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

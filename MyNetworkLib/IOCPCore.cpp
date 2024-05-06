@@ -24,7 +24,7 @@ NetCore::IOCPCore::~IOCPCore()
     if (suc == 0)
     {
         // Failed case
-        WARN(ClosHandle was failed.);
+        WARN(CloseHandle was failed.);
     }
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-
+#define SERVER
 
 
 
@@ -16,3 +16,13 @@ pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
 #endif // !_DEBUG
 
 #include "CorePch.h"
+#include <map>
+
+#include "flatbuffers/flatbuffers.h"
+#include "flatbuffers/util.h"
+#include "fbs/Packet_generated.h"
+
+#include "ClientSession.h"
+
+#include "PacketHandler.h"
+#include "PacketManager.h"

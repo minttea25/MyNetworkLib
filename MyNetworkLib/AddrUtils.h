@@ -5,9 +5,9 @@ NAMESPACE_OPEN(NetCore);
 class AddrUtils
 {
 public:
-	static constexpr ushort ANY_PORT = 0;
+	static constexpr uint16 ANY_PORT = 0;
 	static constexpr auto MAX_PORT = 65535;
-	static inline SOCKADDR_IN GetTcpAddress(const PCSTR ip, const ushort port)
+	static inline SOCKADDR_IN GetTcpAddress(const PCSTR ip, const uint16 port)
 	{
 		SOCKADDR_IN addr{};
 		memset(&addr, 0, sizeof(addr));
@@ -22,7 +22,7 @@ public:
 	/// </summary>
 	/// <param name="port">port number; default: 0 (any port)</param>
 	/// <returns>address</returns>
-	static inline SOCKADDR_IN GetMyAddress(const ushort port = ANY_PORT)
+	static inline SOCKADDR_IN GetMyAddress(const uint16 port = ANY_PORT)
 	{
 		SOCKADDR_IN myAddress{};
 		memset(&myAddress, 0, sizeof(myAddress));

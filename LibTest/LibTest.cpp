@@ -1,6 +1,6 @@
 
 #ifndef _DEBUG
-pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
+#pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
 
 #else
 #pragma comment(lib, "MyNetworkLib\\Debug\\MyNetworkLib.lib")
@@ -12,112 +12,130 @@ pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
 #include <iostream>
 #include <cmath>
 
+#include "flatbuffers/flatbuffers.h"
+#include "flatbuffers/util.h"
+
+#include "fbs/Test_generated.h"
+#include "fbs/Test2_generated.h"
+
+
 using namespace std;
 
-class C : public enable_shared_from_this<C>
-{
-public:
-	C() : _id(-1) {}
-	C(int v) : _id(v) {}
-	void Print() const
-	{
-		cout << "C: " << _id << endl;
-	}
-	int Id() const { return _id; }
-private:
-	const int _id;
-};
+using fbb = flatbuffers::FlatBufferBuilder;
 
-class A : public NetCore::JobSerializer
-{
-public:
-	A(int v) : _a(v) {}
-	~A() { std::cout << "~A" << std::endl; }
-	void Multifly(const int x)
-	{
-		_a *= x;
-		std::cout << "now a:" << _a << std::endl;
-	}
-private:
-	int _a;
-};
 
-class B : public NetCore::JobSerializerWithTimer
+static string ColorToString(Test::Color color)
 {
-public:
-	B(int v) : _b(v) {}
-	~B() { std::cout << "~B" << std::endl; }
-	void Multifly(const int x)
+	switch (color)
 	{
-		_b *= x;
-		std::cout << "now b:" << _b << std::endl;
+	case Test::Color_Red: return "Red";
+	case Test::Color_Green: return "Green";
+	case Test::Color_Blue: return "Blue";
+	default: return "None";
 	}
-private:
-	int _b;
-};
+}
 
 int main()
 {
-	auto num_cores = std::thread::hardware_concurrency();
-
-	cout << num_cores << endl;
-
+	// flat buffer test
 	{
-		NetCore::Thread::TaskManager manager;
-		shared_ptr<A> serializer = NetCore::make_shared<A>(10);
+		NetCore::FBAllocator alloc;
+		fbb builder(1024, &alloc);
 
-		manager.AddTask([&serializer]() {
-			for (int i = 0; i < 5; ++i)
-			{
-				serializer->PushJob(&A::Multifly, 2);
-				this_thread::sleep_for(120ms);
-			}
-			});
-		manager.AddTask([&serializer]() {
-			for (int i = 0; i < 5; ++i)
-			{
-				serializer->PushJob(&A::Multifly, 3);
-				this_thread::sleep_for(200ms);
-			}
-			});
-		manager.AddTask([&serializer]() {
-			auto begin = ::GetTickCount64();
-			while (true)
-			{
-				serializer->Flush();
-				if (::GetTickCount64() - begin >= 10000) break;
-			}
-			});
-		manager.JoinAllTasks();
-	}
-	{
-		NetCore::Thread::TaskManager manager;
-		shared_ptr<B> serializer = NetCore::make_shared<B>(10);
-		manager.AddTask([&serializer]() {
-			for (int i = 0; i < 5; ++i)
-			{
-				auto time = 500 + (i % 2 == 0 ? 1 : -1) * 60;
-				serializer->ReserveJob(time, &B::Multifly, 2);
-			}
-			});
-		manager.AddTask([&serializer]() {
-			for (int i = 0; i < 5; ++i)
-			{
-				auto time = 200 + (i % 2 == 0 ? 1 : -1) * 25;
-				serializer->ReserveJob(time, &B::Multifly, 3);
-			}
-			});
-		manager.AddTask([&serializer]() {
-			auto begin = ::GetTickCount64();
-			while (true)
-			{
-				serializer->Flush();
-				if (::GetTickCount64() - begin >= 10000) break;
-			}
-			});
-		manager.JoinAllTasks();
+		std::string str = "Slime";
+		auto name_offset = builder.CreateString(str);
+
+		Test::Vec3 pos(1.0f, 2.0f, 3.0f);
+		auto drops = builder.CreateVector(std::vector<uint8_t>({ 1, 2, 3 }));
+		auto o_creature = Test::CreateCreature(builder, false, &pos, 1500, name_offset, drops, Test::Color_Blue);
+		builder.Finish(o_creature);
+
+		auto p_monster = builder.GetBufferPointer();
+		auto p_monster_size = builder.GetSize();
+
+		const Test::Creature *monster = Test::GetCreature(p_monster);
+
+		auto _name = monster->name()->c_str();
+		auto _pos = monster->pos();
+		auto _hp = monster->hp();
+		auto _friendly = monster->friendly();
+		auto _color = monster->color();
+		auto _drops = monster->drops();
+
+		cout << "Monster Name: " << _name << endl;
+		cout << "Monster Position: (" << _pos->x() << ", "
+			<< _pos->y() << ", " << _pos->z() << ")" << endl;
+		cout << "Monster Hp: " << monster->hp() << endl;
+		cout << "Friendly? : " << monster->friendly() << endl;
+		cout << "Monster Color: " << ColorToString(monster->color()) << endl;
+		for (uint32_t i = 0; i < _drops->size(); ++i)
+		{
+			cout << (int)(_drops->Get(i)) << endl;
+		}
 	}
 
-	cout << "end" << endl;
+	{
+		{
+			NetCore::FBAllocator alloc;
+			fbb builder(512, &alloc);
+
+			Test::Vec3 pos(1.0f, 10.0f, 20.0f);
+			auto magician_name = builder.CreateString("Magician");
+			auto o_magician = Test::CreateMagician(builder, 10);
+			auto o_player = Test::CreatePlayer(builder, magician_name, &pos, 
+				Test::Jobs_Magician, o_magician.Union());
+			builder.Finish(o_player);
+
+			auto p_magician = builder.GetBufferPointer();
+			auto p_magician_size = builder.GetSize();
+
+			const Test::Player* player = Test::GetPlayer(p_magician);
+			auto magician = player->job_as_Magician();
+
+			auto _name = player->name()->c_str();
+			auto _pos = player->pos();
+			auto _magic = magician->magic();
+
+			cout << "Player name: " << _name << endl;
+			cout << "Player Position: (" << _pos->x() << ", "
+				<< _pos->y() << ", " << _pos->z() << ")" << endl;
+			cout << "Player magic: " << _magic << endl;
+		}
+	}
+
+	{
+		//NetCore::FBAllocator allocator;
+		//fbb builder(512, &allocator);
+		//auto pkt = NetCore::Packet::CreatePacket(builder);
+		//NetCore::Packet::PacketInfo info(101, 0);
+		//auto msg = builder.CreateString("Test Message");
+		//auto tpkt = NetCore::Packet::CreateTestPacket(builder, &info, msg);
+
+		//cout << builder.GetSize() << endl;
+		//
+
+		//builder.Finish(tpkt);
+
+		//auto pkt_ptr = builder.GetBufferPointer();
+		//auto pkt_size = builder.GetSize();
+
+		//cout << pkt_size << endl;
+
+		//{
+		//	// deserialize
+		//	flatbuffers::FlatBufferBuilder builder(0, 0);
+
+		//	auto root = flatbuffers::GetRoot<NetCore::Packet::TestPacket>(pkt_ptr);
+
+		//	auto pkt_id = root->info()->id();
+		//	auto pkt_size = root->info()->size();
+		//	auto pkt_msg = root->msg()->c_str();
+
+		//	cout << "Packet Id: " << pkt_id << endl;
+		//	cout << "Packet Size: " << pkt_size << endl;
+		//	cout << "Packet Message: " << pkt_msg << endl;
+		//}
+	}
+
 	return 0;
 }

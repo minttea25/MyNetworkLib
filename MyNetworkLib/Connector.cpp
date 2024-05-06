@@ -34,7 +34,7 @@ bool NetCore::Connector::Connect()
 	_connectEvent.Clear();
 	_connectEvent.SetIOCPObjectSPtr(shared_from_this());
 
-	NOT_USE DWORD bytesSent = 0;
+	IGNORED DWORD bytesSent = 0;
 	BOOL suc = SocketUtils::ConnectEx(
 		_connectSocket, 
 		reinterpret_cast<PSOCKADDR>(&(_clientService->_addr)), sizeof(SOCKADDR), 

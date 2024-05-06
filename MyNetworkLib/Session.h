@@ -5,7 +5,7 @@ NAMESPACE_OPEN(NetCore);
 class Session : public IOCPObject
 {
 	// TEMP size
-	constexpr static uint32 MAX_BUFFER_SIZE = 0b1000000;  // 0x10000;
+	constexpr static uint32 MAX_BUFFER_SIZE = 0b1000'0000;  // 0x10000;
 
 	enum DisconnectError
 	{
@@ -28,8 +28,10 @@ public:
 	bool IsConnected() const { return _connected; }
 
 public:
-	void SendRaw(const _byte* buffer);
-	void _send(Vector<std::shared_ptr<SendBufferSegment>>& buffers);
+	PURE_VIRTUAL virtual void SendRaw(const _byte* buffer) = 0;
+	PURE_VIRTUAL virtual void Send(const uint16 id, _ubyte* ptr, const uint16 size) = 0;
+
+	void _send(Vector<WSABUF>& buffers);
 	bool Disconnect();
 	SOCKET GetSocket() const { return _socket; }
 
@@ -50,7 +52,7 @@ private:
 	bool RegisterDisconnect();
 	void ProcessDisconnect();
 protected: // virtuals
-	virtual void Send(const _byte* buffer) PURE_VIRTUAL;
+	
 	virtual void OnConnected() { std::cout << "OnConnected at Session." << std::endl; }
 	virtual void OnSend(const int32 len) { std::cout << "Sent: " << len << " bytes" << std::endl; }
 	virtual uint32 OnRecv(const _byte* buffer, const uint32 len) { std::cout << "Received: " << len << " bytes" << std::endl; return len; }
@@ -68,7 +70,7 @@ private:
 
 	_byte _recvBuffer[MAX_BUFFER_SIZE] = { 0, };
 	//_byte _sendBuffer[MAX_BUFFER_SIZE] = { 0, };
-	Vector<std::shared_ptr<SendBufferSegment>> _sendQueue;
+	Vector<WSABUF> _sendQueue;
 	Atomic<bool> _sending = false;
 
 	friend class Connector;

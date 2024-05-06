@@ -1,0 +1,9 @@
+namespace Test;
+
+table TestPacket {
+  msg: string;
+  number: int;
+}
+
+
+root_type TestPacket;
