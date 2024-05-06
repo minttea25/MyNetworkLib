@@ -175,6 +175,7 @@
     <ClInclude Include="LockQueue.h" />
     <ClInclude Include="LockStack.h" />
     <ClInclude Include="PacketWrapper.h" />
+    <ClInclude Include="RecvBuffer.h" />
     <ClInclude Include="RWLock.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="MemoryAllocator.h" />
@@ -205,6 +206,7 @@
     <ClCompile Include="JobSerializerWithTimer.cpp" />
     <ClCompile Include="Listener.cpp" />
     <ClCompile Include="PacketWrapper.cpp" />
+    <ClCompile Include="RecvBuffer.cpp" />
     <ClCompile Include="RWLock.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />

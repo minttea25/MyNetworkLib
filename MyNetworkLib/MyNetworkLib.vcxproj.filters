@@ -151,6 +151,9 @@
     <ClInclude Include="PacketWrapper.h">
       <Filter>flatbuffers</Filter>
     </ClInclude>
+    <ClInclude Include="RecvBuffer.h">
+      <Filter>Network\Buffer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sample.cpp" />
@@ -234,6 +237,9 @@
     </ClCompile>
     <ClCompile Include="PacketWrapper.cpp">
       <Filter>flatbuffers</Filter>
+    </ClCompile>
+    <ClCompile Include="RecvBuffer.cpp">
+      <Filter>Network\Buffer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -52,6 +52,7 @@
 
 // Network Buffers
 #include "SendBuffer.h"
+#include "RecvBuffer.h"
 
 // Network Headers
 #include "IOCPEvent.h"

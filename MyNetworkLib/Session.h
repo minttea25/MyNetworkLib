@@ -4,8 +4,7 @@ NAMESPACE_OPEN(NetCore);
 
 class Session : public IOCPObject
 {
-	// TEMP size
-	constexpr static uint32 MAX_BUFFER_SIZE = 0b1000'0000;  // 0x10000;
+	static constexpr uint32 RECV_BUFFER_SIZE = 65536; // 64 kb
 
 	enum DisconnectError
 	{
@@ -34,12 +33,10 @@ public:
 	void _send(Vector<WSABUF>& buffers);
 	bool Disconnect();
 	SOCKET GetSocket() const { return _socket; }
-
-	_byte* GetRecvBuffer() { return _recvBuffer; }
 private:
 	void SetConnected(const ServiceSPtr service, const Socket connectedSocket = INVALID_SOCKET);
 	void _set_socket(Socket connectedSocket);
-	void _disconnect(uint16 errorCode = DisconnectError::NONE);
+	void _disconnect(const uint16 errorCode = DisconnectError::NONE);
 
 	// Inherited via IOCPObject
 	virtual void Process(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred) override sealed;
@@ -68,8 +65,7 @@ private:
 	RecvEvent _recvEvent{ }; // overlapped event used as receiving
 	DisconnectEvent _disconnectEvent{ }; // overlapped event used as disconnecting
 
-	_byte _recvBuffer[MAX_BUFFER_SIZE] = { 0, };
-	//_byte _sendBuffer[MAX_BUFFER_SIZE] = { 0, };
+	RecvBuffer _recvBuffer;
 	Vector<WSABUF> _sendQueue;
 	Atomic<bool> _sending = false;
 

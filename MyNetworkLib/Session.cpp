@@ -2,7 +2,7 @@
 #include "Session.h"
 
 NetCore::Session::Session()
-	:_connected(false)
+	:_connected(false), _recvBuffer(RECV_BUFFER_SIZE)
 {
 	_socket = SocketUtils::CreateSocket();
 }
@@ -66,7 +66,7 @@ void NetCore::Session::_set_socket(Socket connectedSocket)
 }
 
 
-void NetCore::Session::_disconnect(uint16 errorCode)
+void NetCore::Session::_disconnect(const uint16 errorCode)
 {
 #ifdef TEST
 	PRINT(DisconnectError:, errorCode);
@@ -177,10 +177,11 @@ void NetCore::Session::RegisterRecv()
 	_recvEvent.Clear();
 	_recvEvent.SetIOCPObjectSPtr(shared_from_this());
 
-	// TEMP
-	WSABUF recvBuffer{};
-	recvBuffer.buf = reinterpret_cast<_byte*>(GetRecvBuffer());
-	recvBuffer.len = MAX_BUFFER_SIZE;
+	WSABUF recvBuffer
+	{
+		_recvBuffer.FreeSize(), // len
+		_recvBuffer.WritePos() // buf
+	};
 
 	DWORD numberOfBytesRecvd = 0; // OUT
 	DWORD flags = 0;
@@ -202,7 +203,7 @@ void NetCore::Session::ProcessRecv(const uint32 numberOfBytesRecvd)
 		return;
 	}
 
-	int32 processLen = OnRecv(_recvBuffer, numberOfBytesRecvd);
+	int32 processLen = OnRecv(_recvBuffer.DataPos(), numberOfBytesRecvd);
 
 	if (processLen == 0)
 	{

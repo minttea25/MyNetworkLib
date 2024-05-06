@@ -48,7 +48,7 @@ void NetCore::Listener::RegisterAccept(AcceptEvent* acceptEvent)
 	auto session = acceptEvent->GetSessionRef();
 	IGNORED DWORD bytesReceived = 0;
 	BOOL suc = SocketUtils::AcceptEx(_listenSocket, session->GetSocket(),
-		session->GetRecvBuffer(), 0,
+		session->_recvBuffer.WritePos(), 0,
 		sizeof(SOCKADDR_IN) + 16,
 		sizeof(SOCKADDR_IN) + 16,
 		OUT & bytesReceived, acceptEvent->overlapped());
