@@ -7,6 +7,7 @@ NetCore::SendBuffer::SendBuffer()
 
 NetCore::SendBuffer::~SendBuffer()
 {
+	// NOT CALLED (SendBufferManager reuses all SendBuffer references)
 	DESTRUCTOR(SendBuffer);
 }
 

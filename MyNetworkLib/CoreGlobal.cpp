@@ -15,6 +15,7 @@ class CoreGlobal
 public:
 	CoreGlobal()
 	{
+		// Note : Init GMemory first.
 		// new constructor here
 		GMemory = new Memory();
 		GSendBufferManager = new SendBufferManager();
@@ -24,9 +25,10 @@ public:
 	}
 	~CoreGlobal()
 	{
+		// Note: Delete GMemory last.
 		// delete here
-		delete GMemory;
 		delete GSendBufferManager;
+		delete GMemory;
 
 		// clear method here
 		SocketUtils::Clear();

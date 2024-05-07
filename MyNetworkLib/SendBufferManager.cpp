@@ -8,7 +8,7 @@ NetCore::SendBufferManager::SendBufferManager()
 
 NetCore::SendBufferManager::~SendBufferManager()
 {
-	_buffers.clear();
+	DESTRUCTOR(SendBufferManager);
 }
 
 void NetCore::SendBufferManager::Push(SendBufferSPtr buffer)

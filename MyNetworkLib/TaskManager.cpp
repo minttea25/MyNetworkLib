@@ -19,7 +19,7 @@ NetCore::Thread::TaskManager::~TaskManager()
 	_join_all_tasks();
 
 	// For main thread
-	_task_done();
+	ClearTLS(); // DO NOT CALL _task_done() here. It means end of the application.
 
 	_tasks.clear();
 }
