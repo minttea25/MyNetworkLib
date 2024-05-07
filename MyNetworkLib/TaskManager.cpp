@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "TaskManager.h"
+#include "SendBufferManager.h"
 
 // Note: TLS_Id must not be 0, because of RWLock flag (0 means empty flag).
 // Task Id (=TLS_Id) starts at 1. (Main thread has TLS_Id 1.)
@@ -8,9 +9,7 @@ NetCore::Atomic<NetCore::task_id> NetCore::Thread::TaskManager::_taskId = 1;
 NetCore::Thread::TaskManager::TaskManager()
 {
 	// For main thread.
-	InitTLS();
-
-	TLS_Id = _get_new_task_id();
+	_init_tls(_get_new_task_id());
 }
 
 NetCore::Thread::TaskManager::~TaskManager()
@@ -20,7 +19,7 @@ NetCore::Thread::TaskManager::~TaskManager()
 	_join_all_tasks();
 
 	// For main thread
-	ClearTLS();
+	_task_done();
 
 	_tasks.clear();
 }
@@ -31,17 +30,13 @@ NetCore::task_id NetCore::Thread::TaskManager::AddTask(std::function<void()> tas
 
 	task_id id = _get_new_task_id();
 	auto th = std::thread([=]() {
-		InitTLS();
-
-		TLS_Id = id;
+		_init_tls(id);
 
 		task();
 
-		ClearTLS();
-		_task_done(id);
+		_task_done();
 		});
 	_tasks.insert(make_pair(id, make_pair(std::move(th), false)));
-
 	return id;
 }
 
@@ -61,14 +56,11 @@ pair<NetCore::task_id, NetCore::task_id> NetCore::Thread::TaskManager::AddTask(s
 	{
 		task_id id = _get_new_task_id();
 		auto th = std::thread([=]() {
-			InitTLS();
-
-			TLS_Id = id;
+			_init_tls(id);
 
 			task();
 
-			ClearTLS();
-			_task_done(id);
+			_task_done();
 			});
 		_tasks.insert(make_pair(id, make_pair(std::move(th), false)));
 	}
@@ -105,9 +97,25 @@ bool NetCore::Thread::TaskManager::JoinTask(const task_id id)
 
 void NetCore::Thread::TaskManager::InitTLS()
 {
-	TLS_SendBuffer = NetCore::make_shared<SendBuffer>();
+	
 }
 
 void NetCore::Thread::TaskManager::ClearTLS()
 {
+}
+
+void NetCore::Thread::TaskManager::_init_tls(const task_id& id)
+{
+	TLS_SendBuffer = GSendBufferManager->Pop();
+	TLS_Id = id;
+
+	InitTLS();
+}
+
+void NetCore::Thread::TaskManager::_task_done()
+{
+	// without lock
+	_tasks.at(TLS_Id).second = true;
+
+	ClearTLS();
 }

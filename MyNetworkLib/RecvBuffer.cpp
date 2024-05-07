@@ -13,20 +13,32 @@ NetCore::RecvBuffer::~RecvBuffer()
 
 bool NetCore::RecvBuffer::Read(const uint32 size)
 {
-	if (size > DataSize()) return false;
-
-	// move data pointer after previous data
-	_dataPos += size;
-	return true;
+	if (size > DataSize())
+	{
+		ErrorHandler::SetLastError(Errors::APP_RECVBUFFER_INVALID_DATA);
+		return false;
+	}
+	else
+	{
+		// move data pointer after previous data
+		_dataPos += size;
+		return true;
+	}
 }
 
 bool NetCore::RecvBuffer::Write(const uint32 size)
 {
-	if (size > FreeSize()) return false;
-	
-	// move write pointer to empty buffer
-	_writePos += size;
-	return true;
+	if (size > FreeSize())
+	{
+		ErrorHandler::SetLastError(Errors::APP_RECVBUFFER_OVERFLOW);
+		return false;
+	}
+	else
+	{
+		// move write pointer to empty buffer
+		_writePos += size;
+		return true;
+	}
 }
 
 void NetCore::RecvBuffer::Clear()

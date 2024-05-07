@@ -110,6 +110,11 @@ class Memory
 #endif
 	};
 public:
+	Memory(const Memory&) = delete;
+	Memory(Memory&&) = delete;
+	Memory& operator=(const Memory&) = delete;
+	Memory& operator=(Memory&&) = delete;
+
 	Memory();
 	~Memory();
 

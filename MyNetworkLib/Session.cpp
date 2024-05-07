@@ -80,7 +80,7 @@ void NetCore::Session::_disconnect(const uint16 errorCode)
 void NetCore::Session::Process(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred)
 {
 	EventType type = overlappedEvent->GetEventType();
-	PRINT(EventType, (int)type);
+	// PRINT(EventType, (int)type);
 	switch (type)
 	{
 	case EventType::Recv:

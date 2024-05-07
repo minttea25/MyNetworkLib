@@ -2,11 +2,13 @@
 #include "CoreGlobal.h"
 
 #include "Memory.h"
+#include "SendBufferManager.h"
 
 NAMESPACE_OPEN(NetCore);
 
 // extern instance used as global
 Memory* GMemory = nullptr;
+SendBufferManager* GSendBufferManager = nullptr;
 
 class CoreGlobal
 {
@@ -14,7 +16,8 @@ public:
 	CoreGlobal()
 	{
 		// new constructor here
-		GMemory = new NetCore::Memory();
+		GMemory = new Memory();
+		GSendBufferManager = new SendBufferManager();
 
 		// init method here
 		SocketUtils::Init();
@@ -23,6 +26,7 @@ public:
 	{
 		// delete here
 		delete GMemory;
+		delete GSendBufferManager;
 
 		// clear method here
 		SocketUtils::Clear();

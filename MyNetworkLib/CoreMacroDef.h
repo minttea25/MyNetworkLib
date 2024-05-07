@@ -52,8 +52,15 @@ constexpr auto UNSIGNED_INVALID = 0;
 #define DESTRUCTOR(name)
 #endif // CHECK_DESTRUCTOR
 
+#ifdef CHECK_DESTRUCTOR
+#define DESTRUCTOR_(name, value_name, value) std::cout << '[' << #value_name << ": " << value << "] ~" << #name << std::endl
+#else
+#define DESTRUCTOR_(name, value_name, value)
+#endif // CHECK_DESTRUCTOR
 
 #define PRINT(text, value) std::cout << #text << value << std::endl
+
+#define PRINT_(code) std::cout << code << std::endl
 
 #define WARN(text) std::cout << "WARNING: " << #text << std::endl
 

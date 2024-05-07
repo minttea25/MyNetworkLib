@@ -2,7 +2,7 @@
 
 NAMESPACE_OPEN(NetCore)
 extern class Memory* GMemory;
-
+extern class SendBufferManager* GSendBufferManager;
 
 
 

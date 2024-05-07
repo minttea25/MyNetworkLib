@@ -185,6 +185,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Sample.h" />
     <ClInclude Include="SendBuffer.h" />
+    <ClInclude Include="SendBufferManager.h" />
     <ClInclude Include="Service.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SocketUtils.h" />
@@ -221,6 +222,7 @@
     </ClCompile>
     <ClCompile Include="Sample.cpp" />
     <ClCompile Include="SendBuffer.cpp" />
+    <ClCompile Include="SendBufferManager.cpp" />
     <ClCompile Include="Service.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="SocketUtils.cpp" />
