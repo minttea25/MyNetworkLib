@@ -10,6 +10,8 @@ class IOCPObject;
 /// </summary>
 class IOCPCore : public enable_shared_from_this<IOCPCore>
 {
+	static constexpr uint16 MAX_ENTRY_COUNT = 10;
+	static constexpr BOOL ALERTABLE = FALSE;
 public:
 	/// <summary>
 	/// Constructor contains creating a new IOCP handle.

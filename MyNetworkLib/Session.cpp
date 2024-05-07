@@ -50,7 +50,7 @@ void NetCore::Session::_send(Vector<WSABUF>& buffers)
 
 bool NetCore::Session::Disconnect()
 {
-	if (IsConnected() == false) return false;
+	if (_connected.exchange(false) == false) return false;
 
 	return RegisterDisconnect();
 }
@@ -122,17 +122,6 @@ void NetCore::Session::RegisterSend()
 		std::move(_sendQueue.begin(), _sendQueue.end(), back_inserter(_sendEvent._segments));
 		_sendQueue.clear();
 	}
-
-	/*Vector<WSABUF> wsaSendBuffers;
-	for (auto& buffer : _sendEvent._segments)
-	{
-		wsaSendBuffers.push_back(buffer);
-	}
-
-	DWORD numberOfBytesSent = 0;
-	int32 res = ::WSASend(_socket, wsaSendBuffers.data(),
-		static_cast<DWORD>(wsaSendBuffers.size()),
-		OUT & numberOfBytesSent, 0, &_sendEvent, NULL);*/
 
 	// CHECK
 	DWORD numberOfBytesSent = 0;
@@ -222,7 +211,7 @@ bool NetCore::Session::RegisterDisconnect()
 	_disconnectEvent.SetIOCPObjectSPtr(shared_from_this());
 
 	BOOL suc = SocketUtils::DisconnectEx(_socket, &_disconnectEvent, TF_REUSE_SOCKET, 0);
-	if (ErrorHandler::WSACheckErrorExceptPending(suc, Errors::WSA_DISCONNECTEX_FAILED) == false)
+	if (ErrorHandler::WSACheckErrorExceptPending(suc, Errors::WSA_DISCONNECTEX_FAILED) != Errors::NONE)
 	{
 		return false;
 	}
@@ -232,8 +221,6 @@ bool NetCore::Session::RegisterDisconnect()
 void NetCore::Session::ProcessDisconnect()
 {
 	_disconnectEvent.ReleaseIOCPObjectSPtr();
-
-	_connected.store(false);
 
 	// Note: ReleaseSession will return false if this session is already removed in service.
 	// It can occur when the service is stopped.

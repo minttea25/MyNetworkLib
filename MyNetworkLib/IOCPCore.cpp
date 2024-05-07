@@ -36,15 +36,14 @@ bool NetCore::IOCPCore::RegisterHandle(IOCPObjectSPtr iocpObject)
 
 bool NetCore::IOCPCore::ProcessQueuedCompletionStatus(DWORD dwTimeoutMilliseconds)
 {
-    DWORD numberOfBytesTransferred = 0;
+    /*DWORD numberOfBytesTransferred = 0;
     IOCPEvent* iocpEvent = nullptr;
     ULONG_PTR key = 0;
 
-    // Atode GetQueuedCompletionStatusEx ni kaemasyo
     BOOL suc = ::GetQueuedCompletionStatus(_iocpHandle,
         OUT & numberOfBytesTransferred, OUT & key,
         OUT reinterpret_cast<LPOVERLAPPED*>(&iocpEvent), dwTimeoutMilliseconds);
-
+    
     if (suc == FALSE)
     {
         DWORD errCode = ::GetLastError();
@@ -61,6 +60,40 @@ bool NetCore::IOCPCore::ProcessQueuedCompletionStatus(DWORD dwTimeoutMillisecond
     else
     {
         iocpEvent->GetIOCPObjectWPtr().lock()->Process(iocpEvent, numberOfBytesTransferred);
+    }
+    */
+
+    OVERLAPPED_ENTRY events[MAX_ENTRY_COUNT];
+    DWORD numberOfEntriesTransferred = 0;
+    BOOL alertable = false;
+
+    auto suc = ::GetQueuedCompletionStatusEx(
+        _iocpHandle, 
+        OUT events, MAX_ENTRY_COUNT, OUT &numberOfEntriesTransferred,
+        dwTimeoutMilliseconds, ALERTABLE);
+
+    if (suc == FALSE)
+    {
+        DWORD errCode = ::GetLastError();
+        switch (errCode)
+        {
+        case WAIT_TIMEOUT:
+            return false;
+        default:
+            ERR_CODE(errCode, errcode was not wait_timeout);
+            return false;
+        }
+    }
+    else
+    {
+        for (DWORD i = 0; i < numberOfEntriesTransferred; ++i)
+        {
+            OVERLAPPED_ENTRY* entry = &events[i];
+            LPOVERLAPPED overlapped = entry->lpOverlapped;
+            DWORD numberOfBytesTransferred = entry->dwNumberOfBytesTransferred;
+            IOCPEvent* iocpEvent = reinterpret_cast<IOCPEvent*>(overlapped);
+            iocpEvent->GetIOCPObjectWPtr().lock()->Process(iocpEvent, numberOfBytesTransferred);
+        }
     }
 
     return true;
