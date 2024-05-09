@@ -49,12 +49,16 @@ enum Errors : DWORD
 	APP_SERVICE_IS_ALREADY_STARTED = 2004,
 	APP_CLIENTSERVICE_CONNECT_FAILED = 2005,
 	APP_SERVERSERVICE_LISTEN_FAILED = 2006,
-	
+
 	APP_CONNECTOR_SERVICE_WAS_NOT_CLIENT = 3001,
 
 	APP_LISTENER_SERVICE_WAS_NOT_SERVER = 4001,
 
 	APP_SESSION_SET_SOCKET_ALLOWED_ONLY_IN_CONNECTOR = 5001,
+
+	APP_SENDBUFFER_SIZE_OVERFLOW = 6001,
+	APP_RECVBUFFER_INVALID_DATA = 6002,
+	APP_RECVBUFFER_OVERFLOW = 6003,
 
 };
 
@@ -64,6 +68,11 @@ public:
 	static inline DWORD GetLastError()
 	{
 		return _app_last_error.load();
+	}
+
+	static inline void SetLastError(Errors error)
+	{
+		_app_last_error.store(error);
 	}
 
 	static inline void AssertCrash(const bool condition, const Errors errCode, const char* msg = nullptr)

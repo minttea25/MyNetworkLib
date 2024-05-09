@@ -52,6 +52,8 @@
 
 // Network Buffers
 #include "SendBuffer.h"
+#include "RecvBuffer.h"
+#include "SendBufferManager.h"
 
 // Network Headers
 #include "IOCPEvent.h"
@@ -62,6 +64,9 @@
 #include "Session.h"
 #include "PacketSession.h"
 #include "Service.h"
+
+// Ex
+#include "ClientServiceEx.h"
 
 // Job Headers
 #include "Job.h"

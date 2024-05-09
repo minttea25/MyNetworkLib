@@ -13,7 +13,7 @@ static pair< uint8_t*, ushort> GetTestPacket(const string& msg)
     const ushort id = 1; // fixed;
 
     NetCore::FBAllocator allocator;
-    flatbuffers::FlatBufferBuilder builder(128, &allocator);
+    flatbuffers::FlatBufferBuilder builder(1024, &allocator);
     auto msg_os = builder.CreateString(msg);
     auto pkt = Test::CreateTestPacket(builder, msg_os, 100);
     builder.Finish(pkt);
@@ -53,7 +53,7 @@ int main()
             std::cout << "T id:" << TLS_Id << std::endl;
             while (true)
             {
-                core->ProcessQueuedCompletionStatus(200);
+                core->ProcessQueuedCompletionStatusEx(200);
 
                 if (off) break;
 

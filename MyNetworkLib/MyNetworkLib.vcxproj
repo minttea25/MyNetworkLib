@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="AddrUtils.h" />
     <ClInclude Include="Connector.h" />
+    <ClInclude Include="ClientServiceEx.h" />
     <ClInclude Include="CoreDef.h" />
     <ClInclude Include="CoreMacroDef.h" />
     <ClInclude Include="CorePch.h" />
@@ -175,6 +176,7 @@
     <ClInclude Include="LockQueue.h" />
     <ClInclude Include="LockStack.h" />
     <ClInclude Include="PacketWrapper.h" />
+    <ClInclude Include="RecvBuffer.h" />
     <ClInclude Include="RWLock.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="MemoryAllocator.h" />
@@ -184,6 +186,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Sample.h" />
     <ClInclude Include="SendBuffer.h" />
+    <ClInclude Include="SendBufferManager.h" />
     <ClInclude Include="Service.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SocketUtils.h" />
@@ -193,6 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Connector.cpp" />
+    <ClCompile Include="ClientServiceEx.cpp" />
     <ClCompile Include="CorePch.cpp" />
     <ClCompile Include="CoreGlobal.cpp" />
     <ClCompile Include="CoreTLS.cpp" />
@@ -205,6 +209,7 @@
     <ClCompile Include="JobSerializerWithTimer.cpp" />
     <ClCompile Include="Listener.cpp" />
     <ClCompile Include="PacketWrapper.cpp" />
+    <ClCompile Include="RecvBuffer.cpp" />
     <ClCompile Include="RWLock.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
@@ -219,6 +224,7 @@
     </ClCompile>
     <ClCompile Include="Sample.cpp" />
     <ClCompile Include="SendBuffer.cpp" />
+    <ClCompile Include="SendBufferManager.cpp" />
     <ClCompile Include="Service.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="SocketUtils.cpp" />

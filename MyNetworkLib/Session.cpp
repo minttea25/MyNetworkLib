@@ -2,7 +2,7 @@
 #include "Session.h"
 
 NetCore::Session::Session()
-	:_connected(false)
+	:_connected(false), _recvBuffer(RECV_BUFFER_SIZE)
 {
 	_socket = SocketUtils::CreateSocket();
 }
@@ -50,7 +50,7 @@ void NetCore::Session::_send(Vector<WSABUF>& buffers)
 
 bool NetCore::Session::Disconnect()
 {
-	if (IsConnected() == false) return false;
+	if (_connected.exchange(false) == false) return false;
 
 	return RegisterDisconnect();
 }
@@ -66,7 +66,7 @@ void NetCore::Session::_set_socket(Socket connectedSocket)
 }
 
 
-void NetCore::Session::_disconnect(uint16 errorCode)
+void NetCore::Session::_disconnect(const uint16 errorCode)
 {
 #ifdef TEST
 	PRINT(DisconnectError:, errorCode);
@@ -80,7 +80,7 @@ void NetCore::Session::_disconnect(uint16 errorCode)
 void NetCore::Session::Process(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred)
 {
 	EventType type = overlappedEvent->GetEventType();
-	PRINT(EventType, (int)type);
+	// PRINT(EventType, (int)type);
 	switch (type)
 	{
 	case EventType::Recv:
@@ -122,17 +122,6 @@ void NetCore::Session::RegisterSend()
 		std::move(_sendQueue.begin(), _sendQueue.end(), back_inserter(_sendEvent._segments));
 		_sendQueue.clear();
 	}
-
-	/*Vector<WSABUF> wsaSendBuffers;
-	for (auto& buffer : _sendEvent._segments)
-	{
-		wsaSendBuffers.push_back(buffer);
-	}
-
-	DWORD numberOfBytesSent = 0;
-	int32 res = ::WSASend(_socket, wsaSendBuffers.data(),
-		static_cast<DWORD>(wsaSendBuffers.size()),
-		OUT & numberOfBytesSent, 0, &_sendEvent, NULL);*/
 
 	// CHECK
 	DWORD numberOfBytesSent = 0;
@@ -177,10 +166,11 @@ void NetCore::Session::RegisterRecv()
 	_recvEvent.Clear();
 	_recvEvent.SetIOCPObjectSPtr(shared_from_this());
 
-	// TEMP
-	WSABUF recvBuffer{};
-	recvBuffer.buf = reinterpret_cast<_byte*>(GetRecvBuffer());
-	recvBuffer.len = MAX_BUFFER_SIZE;
+	WSABUF recvBuffer
+	{
+		_recvBuffer.FreeSize(), // len
+		_recvBuffer.WritePos() // buf
+	};
 
 	DWORD numberOfBytesRecvd = 0; // OUT
 	DWORD flags = 0;
@@ -202,7 +192,7 @@ void NetCore::Session::ProcessRecv(const uint32 numberOfBytesRecvd)
 		return;
 	}
 
-	int32 processLen = OnRecv(_recvBuffer, numberOfBytesRecvd);
+	int32 processLen = OnRecv(_recvBuffer.DataPos(), numberOfBytesRecvd);
 
 	if (processLen == 0)
 	{
@@ -221,7 +211,7 @@ bool NetCore::Session::RegisterDisconnect()
 	_disconnectEvent.SetIOCPObjectSPtr(shared_from_this());
 
 	BOOL suc = SocketUtils::DisconnectEx(_socket, &_disconnectEvent, TF_REUSE_SOCKET, 0);
-	if (ErrorHandler::WSACheckErrorExceptPending(suc, Errors::WSA_DISCONNECTEX_FAILED) == false)
+	if (ErrorHandler::WSACheckErrorExceptPending(suc, Errors::WSA_DISCONNECTEX_FAILED) != Errors::NONE)
 	{
 		return false;
 	}
@@ -231,8 +221,6 @@ bool NetCore::Session::RegisterDisconnect()
 void NetCore::Session::ProcessDisconnect()
 {
 	_disconnectEvent.ReleaseIOCPObjectSPtr();
-
-	_connected.store(false);
 
 	// Note: ReleaseSession will return false if this session is already removed in service.
 	// It can occur when the service is stopped.

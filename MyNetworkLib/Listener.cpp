@@ -15,7 +15,7 @@ NetCore::Listener::~Listener()
 
 	SocketUtils::Close(_listenSocket);
 
-	for (AcceptEvent* evt : _accepEvents) xxdelete(evt);
+	for (AcceptEvent* evt : _acceptEvents) xxdelete(evt);
 }
 
 bool NetCore::Listener::StartListen(const int32 backlog)
@@ -31,7 +31,7 @@ bool NetCore::Listener::StartListen(const int32 backlog)
 	{
 		AcceptEvent* evt = xxnew<AcceptEvent>();
 		evt->SetIOCPObjectSPtr(shared_from_this());
-		_accepEvents.push_back(evt);
+		_acceptEvents.push_back(evt);
 		RegisterAccept(evt);
 	}
 
@@ -48,7 +48,7 @@ void NetCore::Listener::RegisterAccept(AcceptEvent* acceptEvent)
 	auto session = acceptEvent->GetSessionRef();
 	IGNORED DWORD bytesReceived = 0;
 	BOOL suc = SocketUtils::AcceptEx(_listenSocket, session->GetSocket(),
-		session->GetRecvBuffer(), 0,
+		session->_recvBuffer.WritePos(), 0,
 		sizeof(SOCKADDR_IN) + 16,
 		sizeof(SOCKADDR_IN) + 16,
 		OUT & bytesReceived, acceptEvent->overlapped());

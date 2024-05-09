@@ -10,6 +10,8 @@ class IOCPObject;
 /// </summary>
 class IOCPCore : public enable_shared_from_this<IOCPCore>
 {
+	static constexpr uint16 MAX_ENTRY_COUNT = 10;
+	static constexpr BOOL ALERTABLE = FALSE;
 public:
 	/// <summary>
 	/// Constructor contains creating a new IOCP handle.
@@ -45,7 +47,10 @@ public:
 	/// </summary>
 	/// <param name="dwTimeoutMilliseconds">Timeout (default is INFINITE)</param>
 	/// <returns></returns>
+	bool ProcessQueuedCompletionStatusEx(DWORD dwTimeoutMilliseconds = INFINITE);
+	
 	bool ProcessQueuedCompletionStatus(DWORD dwTimeoutMilliseconds = INFINITE);
+
 private:
 	HANDLE _iocpHandle = NULL; // Note: HANDLE is void*
 };

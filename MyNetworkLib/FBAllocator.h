@@ -9,7 +9,6 @@ class FBAllocator : public flatbuffers::Allocator
 	// Inherited via Allocator
 	uint8_t* allocate(size_t size) override
 	{
-		PRINT(allocate size, size);
 		uint8_t* ptr = static_cast<uint8_t*>(NetCore::PoolAllocator::Alloc(static_cast<int32>(size)));
 		new(ptr)uint8_t();
 		return ptr;
@@ -18,7 +17,6 @@ class FBAllocator : public flatbuffers::Allocator
 	void deallocate(uint8_t* p, size_t size) override
 	{
 		NetCore::PoolAllocator::Release(p);
-		MESSAGE(deallocate);
 	}
 };
 

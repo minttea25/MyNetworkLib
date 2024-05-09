@@ -28,7 +28,8 @@ public:
 		const uint16 size = sizeof(PacketHeader) + dataSize;
 
 		// Get memory from SendBuffer
-		_ubyte* buffer = TLS_SendBuffer->Reserve(size);
+		// _ubyte* buffer = TLS_SendBuffer->Reserve(size);
+		_ubyte* buffer = SendBufferManager::Reserve(size);
 
 		// Allocate PacketHeader at buffer.
 		new(buffer)PacketHeader(id, size);

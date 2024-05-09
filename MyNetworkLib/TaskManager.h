@@ -60,18 +60,23 @@ public: // virtuals
 	virtual void ClearTLS();
 
 private:
-	inline void _task_done(const task_id id)
-	{
-		_tasks.at(id).second = true;
-	}
+	void _init_tls(const task_id& id);
+	void _task_done();
+	
 	inline task_id _get_new_task_id()
 	{
 		return _taskId.fetch_add(1);
+	}
+	inline task_id _tls_id(const std::thread::id& id) const
+	{
+		if (_ids.find(id) == _ids.end()) return UNSIGNED_INVALID;
+		else return _ids.at(id);
 	}
 	void _join_all_tasks();
 private:
 	_USE_COMMON_LOCK;
 	std::unordered_map<task_id, pair<std::thread, bool>> _tasks;
+	std::unordered_map<std::thread::id, task_id> _ids;
 	static Atomic<task_id> _taskId;
 };
 

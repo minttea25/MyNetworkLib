@@ -47,7 +47,7 @@ void* NetCore::Memory::Allocate(const int32 size) const
 	if (allocSize > MAX_ALLOC_SIZE)
 	{
 		// If the size is bigger than MAX_ALLOC_SIZE, alloc new instead using pool.
-		alloc_big(allocSize);
+		header = alloc_big(allocSize);
 	}
 	else
 	{
