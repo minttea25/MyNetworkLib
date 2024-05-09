@@ -69,7 +69,7 @@ void NetCore::PacketSession::Flush()
 
 NetCore::uint32 NetCore::PacketSession::OnRecv(const _byte* buffer, const uint32 len)
 {
-	PRINT(Received Total Len : , len);
+	//PRINT(Received Total Len : , len);
 
 	int32 n = 0;
 	uint32 processed = 0;
@@ -84,9 +84,9 @@ NetCore::uint32 NetCore::PacketSession::OnRecv(const _byte* buffer, const uint32
 		const uint16 size = header->size(); // total size of packet
 		const uint16 id = header->id();
 
-		PRINT(Received: , n);
-		PRINT(Size: , size);
-		PRINT(Id: , id);
+		//PRINT(Received: , n);
+		//PRINT(Size: , size);
+		//PRINT(Id: , id);
 
 		OnRecvPacket(ptr + sizeof(PacketHeader), id);
 

@@ -157,6 +157,9 @@
     <ClInclude Include="SendBufferManager.h">
       <Filter>Network\Buffer</Filter>
     </ClInclude>
+    <ClInclude Include="ClientServiceEx.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sample.cpp" />
@@ -244,7 +247,12 @@
     <ClCompile Include="RecvBuffer.cpp">
       <Filter>Network\Buffer</Filter>
     </ClCompile>
-    <ClCompile Include="SendBufferManager.cpp" />
+    <ClCompile Include="ClientServiceEx.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="SendBufferManager.cpp">
+      <Filter>Network\Buffer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

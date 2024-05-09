@@ -15,7 +15,7 @@ NetCore::Listener::~Listener()
 
 	SocketUtils::Close(_listenSocket);
 
-	for (AcceptEvent* evt : _accepEvents) xxdelete(evt);
+	for (AcceptEvent* evt : _acceptEvents) xxdelete(evt);
 }
 
 bool NetCore::Listener::StartListen(const int32 backlog)
@@ -31,7 +31,7 @@ bool NetCore::Listener::StartListen(const int32 backlog)
 	{
 		AcceptEvent* evt = xxnew<AcceptEvent>();
 		evt->SetIOCPObjectSPtr(shared_from_this());
-		_accepEvents.push_back(evt);
+		_acceptEvents.push_back(evt);
 		RegisterAccept(evt);
 	}
 

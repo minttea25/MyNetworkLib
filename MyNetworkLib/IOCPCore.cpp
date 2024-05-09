@@ -34,35 +34,8 @@ bool NetCore::IOCPCore::RegisterHandle(IOCPObjectSPtr iocpObject)
     return ErrorHandler::CheckError(res != NULL, Errors::APP_REGISTER_HANDLE_FAILED_IOCP_CORE) == Errors::NONE;
 }
 
-bool NetCore::IOCPCore::ProcessQueuedCompletionStatus(DWORD dwTimeoutMilliseconds)
+bool NetCore::IOCPCore::ProcessQueuedCompletionStatusEx(DWORD dwTimeoutMilliseconds)
 {
-    /*DWORD numberOfBytesTransferred = 0;
-    IOCPEvent* iocpEvent = nullptr;
-    ULONG_PTR key = 0;
-
-    BOOL suc = ::GetQueuedCompletionStatus(_iocpHandle,
-        OUT & numberOfBytesTransferred, OUT & key,
-        OUT reinterpret_cast<LPOVERLAPPED*>(&iocpEvent), dwTimeoutMilliseconds);
-    
-    if (suc == FALSE)
-    {
-        DWORD errCode = ::GetLastError();
-        switch (errCode)
-        {
-        case WAIT_TIMEOUT:
-            return false;
-        default:
-            ERR_CODE(errCode, errcode was not wait_timeout);
-            // iocpEvent->GetIOCPObjectRef().lock()->Process(iocpEvent, numberOfBytesTransferred);
-            return false;
-        }
-    }
-    else
-    {
-        iocpEvent->GetIOCPObjectWPtr().lock()->Process(iocpEvent, numberOfBytesTransferred);
-    }
-    */
-
     OVERLAPPED_ENTRY events[MAX_ENTRY_COUNT];
     DWORD numberOfEntriesTransferred = 0;
     BOOL alertable = false;
@@ -86,6 +59,7 @@ bool NetCore::IOCPCore::ProcessQueuedCompletionStatus(DWORD dwTimeoutMillisecond
     }
     else
     {
+        PRINT(NumberOfEntriesTransferred: , numberOfEntriesTransferred);
         for (DWORD i = 0; i < numberOfEntriesTransferred; ++i)
         {
             OVERLAPPED_ENTRY* entry = &events[i];
@@ -97,4 +71,33 @@ bool NetCore::IOCPCore::ProcessQueuedCompletionStatus(DWORD dwTimeoutMillisecond
     }
 
     return true;
+}
+
+bool NetCore::IOCPCore::ProcessQueuedCompletionStatus(DWORD dwTimeoutMilliseconds)
+{
+    DWORD numberOfBytesTransferred = 0;
+    IOCPEvent* iocpEvent = nullptr;
+    ULONG_PTR key = 0;
+
+    BOOL suc = ::GetQueuedCompletionStatus(_iocpHandle,
+        OUT & numberOfBytesTransferred, OUT & key,
+        OUT reinterpret_cast<LPOVERLAPPED*>(&iocpEvent), dwTimeoutMilliseconds);
+
+    if (suc == FALSE)
+    {
+        DWORD errCode = ::GetLastError();
+        switch (errCode)
+        {
+        case WAIT_TIMEOUT:
+            return false;
+        default:
+            ERR_CODE(errCode, errcode was not wait_timeout);
+            // iocpEvent->GetIOCPObjectRef().lock()->Process(iocpEvent, numberOfBytesTransferred);
+            return false;
+        }
+    }
+    else
+    {
+        iocpEvent->GetIOCPObjectWPtr().lock()->Process(iocpEvent, numberOfBytesTransferred);
+    }
 }

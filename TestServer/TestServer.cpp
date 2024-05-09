@@ -53,7 +53,7 @@ int main()
             std::cout << "T id:" << TLS_Id << std::endl;
             while (true)
             {
-                core->ProcessQueuedCompletionStatus(200);
+                core->ProcessQueuedCompletionStatusEx(200);
 
                 if (off) break;
 

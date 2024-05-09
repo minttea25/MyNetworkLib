@@ -24,24 +24,20 @@ constexpr ushort PORT = 8900;
 int main()
 {
 	GPacketManager = new PacketManager();
+	GSessionManager = new SessionManager();
 
 	SOCKADDR_IN addr = AddrUtils::GetTcpAddress(IP, PORT);
 
 	this_thread::sleep_for(300ms);
 
-
-	auto core = NetCore::make_shared<IOCPCore>();
-	std::shared_ptr<ServerSession> session_ptr = nullptr;
-
-	auto session_factory = [&]() -> SessionSPtr {
-		auto s = NetCore::make_shared<ServerSession>();
-		session_ptr = s;
-		return s;
+	auto session_factory = [&]() -> NetCore::SessionSPtr {
+		return GSessionManager->SessionFactory();
 		};
 
-	auto client = NetCore::make_shared<ClientService>
+	auto core = NetCore::make_shared<IOCPCore>();
+	auto client = NetCore::make_shared<ClientServiceEx>
 		(
-			core, addr, session_factory
+			core, addr, session_factory, 100
 		);
 
 	if (client->Start() == false)
@@ -51,7 +47,7 @@ int main()
 
 	NetCore::Thread::TaskManager manager;
 	manager.AddTask(
-		[=]() {
+		[&]() {
 			std::cout << "IOCP T id:" << TLS_Id << std::endl;
 			this_thread::sleep_for(100ms);
 			while (true)
@@ -69,10 +65,7 @@ int main()
 			this_thread::sleep_for(200ms);
 			while (true)
 			{
-				if (session_ptr != nullptr && session_ptr->IsConnected())
-				{
-					session_ptr->Flush();
-				}
+				GSessionManager->FlushSessions();
 
 				if (off) break;
 
@@ -88,29 +81,25 @@ int main()
 			std::cin >> msg;
 			if (strcmp(msg.c_str(), "stop") == 0)
 			{
-				if (session_ptr != nullptr) session_ptr->Disconnect();
+				client->DisconnectAll();
 				off = true;
 			}
 			else
 			{
-				if (session_ptr != nullptr)
-				{
-					auto pkt = GetTestPacket(msg);
-					session_ptr->Send(1, pkt.first, pkt.second);
-				}
+				auto pkt = GetTestPacket(msg);
+				client->Send(1, pkt.first, pkt.second);
 			}
 
-			this_thread::sleep_for(500ms);
+			this_thread::sleep_for(100ms);
 		}
 	}
 
 	manager.JoinAllTasks();
 
-	session_ptr = nullptr;
-
 	client->Stop();
 
 	delete GPacketManager;
+	delete GSessionManager;
 
 	return 0;
 }

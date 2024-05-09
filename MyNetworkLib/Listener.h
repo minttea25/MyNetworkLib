@@ -7,7 +7,7 @@ NAMESPACE_OPEN(NetCore);
 /// </summary>
 class Listener : public IOCPObject
 {
-	static constexpr auto MAX_ACCEPT_COUNT = 1;
+	static constexpr auto MAX_ACCEPT_COUNT = 100;
 public:
 	Listener(ServiceSPtr serverService);
 	~Listener();
@@ -28,7 +28,7 @@ private:
 private:
 	ServiceSPtr _serverService = nullptr;
 	SOCKET _listenSocket = INVALID_SOCKET;
-	Vector<AcceptEvent*> _accepEvents; // Managed only by Listener
+	Vector<AcceptEvent*> _acceptEvents; // Managed only by Listener
 
 	friend class Session;
 };

@@ -35,12 +35,14 @@ public:
 
 	PURE_VIRTUAL virtual size_t GetCurrentSessionCount() const = 0;
 	PURE_VIRTUAL virtual SessionSPtr AddNewSession() = 0;
+
 protected:
 	PURE_VIRTUAL virtual bool ReleaseSession(SessionSPtr session_s_ptr) = 0;
 	PURE_VIRTUAL virtual void ReleaseAllSessions() = 0;
-private:
-	const uint32 MAX_SESSION_COUNT;
 
+public:
+	const uint32 MAX_SESSION_COUNT;
+private:
 	ServiceType _serviceType = ServiceType::None;
 	IOCPCoreSPtr _iocpCore = nullptr;
 	sockaddr_in _addr;
@@ -53,6 +55,7 @@ private:
 	friend class Connector;
 	friend class ClientService;
 	friend class ServerService;
+	friend class ClientServiceEx;
 };
 
 /// <summary>

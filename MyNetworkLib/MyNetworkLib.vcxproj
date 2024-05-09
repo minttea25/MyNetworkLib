@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="AddrUtils.h" />
     <ClInclude Include="Connector.h" />
+    <ClInclude Include="ClientServiceEx.h" />
     <ClInclude Include="CoreDef.h" />
     <ClInclude Include="CoreMacroDef.h" />
     <ClInclude Include="CorePch.h" />
@@ -195,6 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Connector.cpp" />
+    <ClCompile Include="ClientServiceEx.cpp" />
     <ClCompile Include="CorePch.cpp" />
     <ClCompile Include="CoreGlobal.cpp" />
     <ClCompile Include="CoreTLS.cpp" />

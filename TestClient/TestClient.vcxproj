@@ -23,6 +23,7 @@
     <ClInclude Include="PacketManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ServerSession.h" />
+    <ClInclude Include="SessionManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PacketHandler.cpp" />
@@ -32,6 +33,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ServerSession.cpp" />
+    <ClCompile Include="SessionManager.cpp" />
     <ClCompile Include="TestClient.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -65,6 +65,9 @@
 #include "PacketSession.h"
 #include "Service.h"
 
+// Ex
+#include "ClientServiceEx.h"
+
 // Job Headers
 #include "Job.h"
 #include "JobSerializer.h"

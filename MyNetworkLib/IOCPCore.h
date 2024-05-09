@@ -47,7 +47,10 @@ public:
 	/// </summary>
 	/// <param name="dwTimeoutMilliseconds">Timeout (default is INFINITE)</param>
 	/// <returns></returns>
+	bool ProcessQueuedCompletionStatusEx(DWORD dwTimeoutMilliseconds = INFINITE);
+	
 	bool ProcessQueuedCompletionStatus(DWORD dwTimeoutMilliseconds = INFINITE);
+
 private:
 	HANDLE _iocpHandle = NULL; // Note: HANDLE is void*
 };
