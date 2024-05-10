@@ -26,7 +26,11 @@ public:
 	{
 		_WRITE_LOCK;
 
-		if (_stack.empty()) return T();
+		if (_stack.empty())
+		{
+			if constexpr (std::is_class_v(T)) return nullptr;
+			else return T();
+		}
 
 		T top = _stack.top();
 		_stack.pop();
@@ -60,7 +64,11 @@ public:
 	{
 		_READ_LOCK;
 
-		if (_stack.empty()) return T();
+		if (_stack.empty())
+		{
+			if constexpr (std::is_class_v(T)) return nullptr;
+			else return T();
+		}
 
 		return _stack.top();
 	}

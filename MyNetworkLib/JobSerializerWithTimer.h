@@ -41,11 +41,8 @@ public:
 			uint64 now = ::GetTickCount64();
 
 			TimeJobSPtr job = nullptr;
-			{
-				if (_jobs.TryPeek(OUT job) == false) return;
-				if (job->GetExecTick() >= now) return;
-				DISCARD _jobs.Pop();
-			}
+
+			if (_jobs.TryPop(OUT job, _check_condiion_time_job(now)) == false) return;
 			job->Execute();
 		}
 	}
@@ -53,6 +50,13 @@ private:
 	void _push(TimeJobSPtr job)
 	{
 		_jobs.Push(job);
+	}
+
+	static std::function<bool(const TimeJobSPtr&)> _check_condiion_time_job(const uint64 now)
+	{
+		return [now](const TimeJobSPtr& job) -> bool {
+			return job->GetExecTick() < now;
+			};
 	}
 private:
 	_USE_LOCK;

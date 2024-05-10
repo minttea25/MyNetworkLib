@@ -164,6 +164,7 @@
     <ClInclude Include="FBAllocator.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="CoreGlobal.h" />
+    <ClInclude Include="GlobalJobQueue.h" />
     <ClInclude Include="IOCPCore.h" />
     <ClInclude Include="IOCPEvent.h" />
     <ClInclude Include="IOCPObject.h" />
@@ -191,6 +192,7 @@
     <ClInclude Include="Session.h" />
     <ClInclude Include="SocketUtils.h" />
     <ClInclude Include="TaskManager.h" />
+    <ClInclude Include="TaskManagerEx.h" />
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="TimeJob.h" />
   </ItemGroup>
@@ -229,6 +231,7 @@
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="SocketUtils.cpp" />
     <ClCompile Include="TaskManager.cpp" />
+    <ClCompile Include="TaskManagerEx.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
     <ClCompile Include="TimeJob.cpp" />
   </ItemGroup>

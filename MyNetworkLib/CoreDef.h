@@ -10,6 +10,9 @@
 
 #define USE_BIG_MEMORY_BLOCK
 
+#define USE_GLOBAL_JOBQUEUE
+
+
 #ifdef _DEBUG
 #define TEST
 #define CHECK_DESTRUCTOR

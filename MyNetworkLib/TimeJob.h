@@ -10,7 +10,7 @@ class TimeJob : public enable_shared_from_this<TimeJob>
 public:
 	~TimeJob()
 	{
-		DESTRUCTOR(TimeJob);
+		//DESTRUCTOR(TimeJob);
 	}
 
 	TimeJob(const uint64 tickAfter, std::function<void()>&& func) : _task(std::move(func))

@@ -23,6 +23,7 @@ pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
 #include "fbs/Packet_generated.h"
 
 #include "ClientSession.h"
+#include "SessionManager.h"
 
 #include "PacketHandler.h"
 #include "PacketManager.h"

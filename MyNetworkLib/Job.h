@@ -8,7 +8,10 @@ NAMESPACE_OPEN(NetCore);
 class Job : public enable_shared_from_this<Job>
 {
 public:
-	~Job() { DESTRUCTOR(Job); }
+	~Job()
+	{ 
+		//DESTRUCTOR(Job); 
+	}
 	Job(std::function<void()>&& func) : _task(std::move(func)) {}
 
 	template<typename T, typename Ret, typename... Args>

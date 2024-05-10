@@ -21,39 +21,46 @@ static pair< uint8_t*, ushort> GetTestPacket(const string& msg)
     return { builder.GetBufferPointer(), builder.GetSize() };
 }
 
+static void FlushSessionJob()
+{
+    std::cout << "FlushSessionJob on tid:" << NetCore::TLS_Id << std::endl;
+    GSessionManager->FlushSessions();
+    if (!off) 
+        NetCore::GGlobalJobQueue->PushJob(&FlushSessionJob, 500);
+}
+
 int main()
 {
     GPacketManager = new PacketManager();
-
-    mutex m;
-    vector<shared_ptr<ClientSession>> sessions;
+    GSessionManager = new SessionManager();
 
     SOCKADDR_IN addr = AddrUtils::GetTcpAddress(IP, PORT);
+
+    auto session_factory = [&]() -> NetCore::SessionSPtr {
+        return GSessionManager->SessionFactory();
+        };
 
     auto core = NetCore::make_shared<IOCPCore>();
     auto server = NetCore::make_shared<ServerService>(
         core, addr,
-        [=, &sessions, &m]() {
-            LockGuard lg(m);
-            auto s = NetCore::make_shared<ClientSession>();
-            sessions.push_back(s);
-            return s;
-        },
-        10, 10);
+        session_factory,
+        100, 100);
 
     if (server->Start() == false)
     {
         return -1;
     }
 
-    NetCore::Thread::TaskManager manager;
+    NetCore::TaskManagerEx manager;
 
     manager.AddTask(
-        [=]() {
+        [&]() {
             std::cout << "T id:" << TLS_Id << std::endl;
             while (true)
             {
                 core->ProcessQueuedCompletionStatusEx(200);
+
+                manager.DoWorkFromGlobalJobQueue(50);
 
                 if (off) break;
 
@@ -61,29 +68,7 @@ int main()
             }
         }, 3);
 
-    manager.AddTask(
-        [=, &sessions, &m]() {
-            this_thread::sleep_for(200ms);
-            std::cout << "flush T id:" << TLS_Id << std::endl;
-            while (true)
-            {
-                LockGuard lg(m);
-                for (auto& s : sessions)
-                {
-                    if (s->IsConnected())
-                        s->Flush();
-                }
-
-                if (off)
-                {
-                    sessions.clear();
-                    break;
-                }
-
-                this_thread::yield();
-            }
-        }
-    );
+    FlushSessionJob();
 
     while (!off)
     {
@@ -103,11 +88,12 @@ int main()
             }
         }
     }
-    this_thread::sleep_for(500ms);
+    this_thread::sleep_for(300ms);
 
     manager.JoinAllTasks();
     server->Stop();
 
+    delete GSessionManager;
     delete GPacketManager;
 
     return 0;

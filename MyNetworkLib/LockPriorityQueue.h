@@ -25,7 +25,11 @@ public:
 	{
 		_WRITE_LOCK;
 
-		if (_pq.empty()) return T();
+		if (_pq.empty())
+		{
+			if constexpr (std::is_class_v<T>) return nullptr;
+			else return T();
+		}
 
 		T top = _pq.top();
 		_pq.pop();
@@ -50,6 +54,24 @@ public:
 		}
 	}
 
+	bool TryPop(OUT T& item, std::function<bool(const T&)> condition)
+	{
+		_WRITE_LOCK;
+
+		if (_pq.empty()) return false;
+		
+		const T& top = _pq.top();
+
+		if (condition(top))
+		{
+			item = top;
+			_pq.pop();
+			return true;
+		}
+
+		return false;
+	}
+
 	/// <summary>
 	/// Get top item of queue.
 	/// <para>Note: It returns T() if queue is empty.</para>
@@ -59,7 +81,11 @@ public:
 	{
 		_READ_LOCK;
 
-		if (_pq.empty()) return T();
+		if (_pq.empty())
+		{
+			if constexpr (std::is_class_v<T>) return nullptr;
+			else return T();
+		}
 		else return _pq.front();
 	}
 

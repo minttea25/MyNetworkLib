@@ -37,7 +37,7 @@ int main()
 	auto core = NetCore::make_shared<IOCPCore>();
 	auto client = NetCore::make_shared<ClientServiceEx>
 		(
-			core, addr, session_factory, 100
+			core, addr, session_factory, 10
 		);
 
 	if (client->Start() == false)

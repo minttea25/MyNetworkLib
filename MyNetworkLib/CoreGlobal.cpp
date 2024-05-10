@@ -9,6 +9,7 @@ NAMESPACE_OPEN(NetCore);
 // extern instance used as global
 Memory* GMemory = nullptr;
 SendBufferManager* GSendBufferManager = nullptr;
+GlobalJobQueue* GGlobalJobQueue = nullptr;
 
 class CoreGlobal
 {
@@ -19,6 +20,7 @@ public:
 		// new constructor here
 		GMemory = new Memory();
 		GSendBufferManager = new SendBufferManager();
+		GGlobalJobQueue = new GlobalJobQueue();
 
 		// init method here
 		SocketUtils::Init();
@@ -27,6 +29,7 @@ public:
 	{
 		// Note: Delete GMemory last.
 		// delete here
+		delete GGlobalJobQueue;
 		delete GSendBufferManager;
 		delete GMemory;
 

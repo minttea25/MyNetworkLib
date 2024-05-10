@@ -160,6 +160,12 @@
     <ClInclude Include="ClientServiceEx.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="TaskManagerEx.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalJobQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sample.cpp" />
@@ -252,6 +258,9 @@
     </ClCompile>
     <ClCompile Include="SendBufferManager.cpp">
       <Filter>Network\Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskManagerEx.cpp">
+      <Filter>Thread</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

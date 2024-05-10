@@ -25,7 +25,11 @@ public:
 	{
 		_WRITE_LOCK;
 
-		if (_queue.empty()) return T();
+		if (_queue.empty())
+		{
+			if constexpr (std::is_class_v<T>) return nullptr;
+			else return T();
+		}
 
 		T front = _queue.front();
 		_queue.pop();
@@ -59,7 +63,11 @@ public:
 	{
 		_READ_LOCK;
 
-		if (_queue.empty()) return T();
+		if (_queue.empty())
+		{
+			if constexpr (std::is_class_v<T>) return nullptr;
+			else return T();
+		}
 
 		return _queue.front();
 	}

@@ -100,4 +100,6 @@ bool NetCore::IOCPCore::ProcessQueuedCompletionStatus(DWORD dwTimeoutMillisecond
     {
         iocpEvent->GetIOCPObjectWPtr().lock()->Process(iocpEvent, numberOfBytesTransferred);
     }
+
+    return true;
 }
