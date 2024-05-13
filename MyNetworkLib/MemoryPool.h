@@ -4,8 +4,9 @@ NAMESPACE_OPEN(NetCore)
 
 struct MemoryHeader;
 
-// Note: Memory Pool uses single-linked-list of SLIST.
-
+/// <summary>
+/// Memory Pool uses single-linked-list of SLIST.
+/// </summary>
 class MemoryPool
 {
 public:

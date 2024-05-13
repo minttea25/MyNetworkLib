@@ -2,6 +2,9 @@
 
 NAMESPACE_OPEN(NetCore);
 
+/// <summary>
+/// Each thread has Sendbuffer.
+/// </summary>
 class SendBuffer : public enable_shared_from_this<SendBuffer>
 {
 public:
@@ -11,8 +14,17 @@ public:
 	SendBuffer();
 	~SendBuffer();
 
+	/// <summary>
+	/// Move the pointer by the byte size and get the pointer of the writable buffer.
+	/// </summary>
+	/// <param name="size">byte size to reserve</param>
+	/// <returns>writable pointer of the buffer</returns>
 	_ubyte* Reserve(const uint32 size);
 
+	/// <summary>
+	/// Get free size of the buffer
+	/// </summary>
+	/// <returns>free size</returns>
 	inline uint32 FreeSize() const { return _buffer.size() - _usedSize; }
 
 private:

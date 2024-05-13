@@ -14,7 +14,7 @@ NetCore::Session::~Session()
 	SocketUtils::Close(_socket);
 }
 
-void NetCore::Session::SetConnected(const ServiceSPtr service, Socket connectedSocket)
+void NetCore::Session::_set_connected(const ServiceSPtr service, Socket connectedSocket)
 {
 	_service = service;
 
@@ -26,7 +26,7 @@ void NetCore::Session::SetConnected(const ServiceSPtr service, Socket connectedS
 	OnConnected();
 
 	// Start to recive data
-	RegisterRecv();
+	_register_recv();
 }
 
 void NetCore::Session::_send(Vector<WSABUF>& buffers)
@@ -45,14 +45,14 @@ void NetCore::Session::_send(Vector<WSABUF>& buffers)
 			sendFlag = true;
 		}
 	}
-	if (sendFlag) RegisterSend();
+	if (sendFlag) _register_send();
 }
 
 bool NetCore::Session::Disconnect()
 {
 	if (_connected.exchange(false) == false) return false;
 
-	return RegisterDisconnect();
+	return _register_disconnect();
 }
 
 void NetCore::Session::_set_socket(Socket connectedSocket)
@@ -74,23 +74,23 @@ void NetCore::Session::_disconnect(const uint16 errorCode)
 
 	if (IsConnected() == false) return;
 
-	RegisterDisconnect();
+	_register_disconnect();
 }
 
-void NetCore::Session::Process(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred)
+void NetCore::Session::Dispatch(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred)
 {
 	EventType type = overlappedEvent->GetEventType();
 	// PRINT(EventType, (int)type);
 	switch (type)
 	{
 	case EventType::Recv:
-		ProcessRecv(numberOfBytesTransferred);
+		_process_recv(numberOfBytesTransferred);
 		break;
 	case EventType::Send:
-		ProcessSend(numberOfBytesTransferred);
+		_process_send(numberOfBytesTransferred);
 		break;
 	case EventType::Disconnect:
-		ProcessDisconnect();
+		_process_disconnect();
 		break;
 	default:
 		WARN(Received event type was not recv / send / disconnect.);
@@ -103,7 +103,7 @@ HANDLE NetCore::Session::GetHandle()
 	return reinterpret_cast<HANDLE>(_socket);
 }
 
-void NetCore::Session::RegisterSend()
+void NetCore::Session::_register_send()
 {
 	// Note: Because _connected is atomic variable, reading just _connected is sames as reading _connected.load().
 	if (_connected == false)
@@ -138,7 +138,7 @@ void NetCore::Session::RegisterSend()
 	_sending.store(false);
 }
 
-void NetCore::Session::ProcessSend(const int32 numberOfBytesSent)
+void NetCore::Session::_process_send(const int32 numberOfBytesSent)
 {
 	// clear to reuse event
 	_sendEvent.ReleaseIOCPObjectSPtr();
@@ -153,7 +153,7 @@ void NetCore::Session::ProcessSend(const int32 numberOfBytesSent)
 	OnSend(numberOfBytesSent);
 }
 
-void NetCore::Session::RegisterRecv()
+void NetCore::Session::_register_recv()
 {
 	// Note: Because _connected is atomic variable, reading just _connected is sames as reading _connected.load().
 	if (_connected == false)
@@ -183,7 +183,7 @@ void NetCore::Session::RegisterRecv()
 	}
 }
 
-void NetCore::Session::ProcessRecv(const uint32 numberOfBytesRecvd)
+void NetCore::Session::_process_recv(const uint32 numberOfBytesRecvd)
 {
 	if (numberOfBytesRecvd == 0)
 	{
@@ -202,10 +202,10 @@ void NetCore::Session::ProcessRecv(const uint32 numberOfBytesRecvd)
 	}
 
 	// Reister again.
-	RegisterRecv();
+	_register_recv();
 }
 
-bool NetCore::Session::RegisterDisconnect()
+bool NetCore::Session::_register_disconnect()
 {
 	_disconnectEvent.Clear();
 	_disconnectEvent.SetIOCPObjectSPtr(shared_from_this());
@@ -218,7 +218,7 @@ bool NetCore::Session::RegisterDisconnect()
 	return true;
 }
 
-void NetCore::Session::ProcessDisconnect()
+void NetCore::Session::_process_disconnect()
 {
 	_disconnectEvent.ReleaseIOCPObjectSPtr();
 

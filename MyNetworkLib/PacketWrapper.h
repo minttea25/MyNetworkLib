@@ -3,6 +3,10 @@
 NAMESPACE_OPEN(NetCore);
 
 #pragma pack(push, 2)
+/// <summary>
+/// It contains the size and the id of serialized data.
+/// <para>Alignment is `2 bytes`.</para>
+/// </summary>
 struct PacketHeader
 {
 public:
@@ -13,16 +17,23 @@ public:
 private:
 	uint16 _size;
 	uint16 _id;
-
-	// TODO: Check verifyed values. (after reinterpret_cast)
 };
 #pragma pack(pop)
 
 
-
+/// <summary>
+/// Use for wrapping serialized data.
+/// </summary>
 class PacketWrapper
 {
 public:
+	/// <summary>
+	/// Wrap the serialized data with given packet id, pointer of serialized data and its size.
+	/// </summary>
+	/// <param name="id">packet id</param>
+	/// <param name="dataPtr">pointer of the serialized data</param>
+	/// <param name="dataSize">size of the serialized data</param>
+	/// <returns></returns>
 	static WSABUF Serialize(const uint16 id, _ubyte* dataPtr, const uint16 dataSize)
 	{
 		const uint16 size = sizeof(PacketHeader) + dataSize;

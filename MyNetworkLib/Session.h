@@ -34,26 +34,25 @@ public:
 	bool Disconnect();
 	SOCKET GetSocket() const { return _socket; }
 private:
-	void SetConnected(const ServiceSPtr service, const Socket connectedSocket = INVALID_SOCKET);
+	void _set_connected(const ServiceSPtr service, const Socket connectedSocket = INVALID_SOCKET);
 	void _set_socket(Socket connectedSocket);
 	void _disconnect(const uint16 errorCode = DisconnectError::NONE);
 
 	// Inherited via IOCPObject
-	virtual void Process(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred) override sealed;
+	virtual void Dispatch(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred) override sealed;
 	HANDLE GetHandle() override;
 private:
-	void RegisterSend();
-	void ProcessSend(const int32 numberOfBytesSent);
-	void RegisterRecv();
-	void ProcessRecv(const uint32 numberOfBytesRecvd);
-	bool RegisterDisconnect();
-	void ProcessDisconnect();
+	void _register_send();
+	void _process_send(const int32 numberOfBytesSent);
+	void _register_recv();
+	void _process_recv(const uint32 numberOfBytesRecvd);
+	bool _register_disconnect();
+	void _process_disconnect();
 protected: // virtuals
-	
-	virtual void OnConnected() { std::cout << "OnConnected at Session." << std::endl; }
-	virtual void OnSend(const int32 len) { std::cout << "Sent: " << len << " bytes" << std::endl; }
-	virtual uint32 OnRecv(const _byte* buffer, const uint32 len) { std::cout << "Received: " << len << " bytes" << std::endl; return len; }
-	virtual void OnDisconnected(const int32 error = DisconnectError::NONE) { std::cout << "OnDisconnected: " << error << std::endl; }
+	virtual void OnConnected() { }
+	virtual void OnSend(const int32 len) { }
+	virtual uint32 OnRecv(const _byte* buffer, const uint32 len) { return len; }
+	virtual void OnDisconnected(const int32 error = DisconnectError::NONE) { }
 private:
 	USE_LOCK(send);
 	ServiceSPtr _service = nullptr;
@@ -61,9 +60,18 @@ private:
 	uint32 _sessionId = 0;
 	Atomic<bool> _connected = false;
 
-	SendEvent _sendEvent{ }; // overlapped event used as sending
-	RecvEvent _recvEvent{ }; // overlapped event used as receiving
-	DisconnectEvent _disconnectEvent{ }; // overlapped event used as disconnecting
+	/// <summary>
+	/// overlapped event used as sending
+	/// </summary>
+	SendEvent _sendEvent{ };
+	/// <summary>
+	/// overlapped event used as receiving
+	/// </summary>
+	RecvEvent _recvEvent{ };
+	/// <summary>
+	/// overlapped event used as disconnecting
+	/// </summary>
+	DisconnectEvent _disconnectEvent{ };
 
 	RecvBuffer _recvBuffer;
 	Vector<WSABUF> _sendQueue;

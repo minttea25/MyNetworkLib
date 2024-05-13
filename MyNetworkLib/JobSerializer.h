@@ -10,16 +10,33 @@ NAMESPACE_OPEN(NetCore);
 ABSTRACT class JobSerializer : public enable_shared_from_this<JobSerializer>
 {
 public:
+	JobSerializer()
+	{
+
+	}
+
 	virtual ~JobSerializer()
 	{
 		DESTRUCTOR(JobSerializer);
 	}
 
+	/// <summary>
+	/// Make a job with function and push it to queue.
+	/// </summary>
+	/// <param name="func">function to execute as job</param>
 	void PushJob(std::function<void()>&& func)
 	{
 		_push(NetCore::ObjectPool<Job>::make_shared(std::move(func)));
 	}
 
+	/// <summary>
+	/// Make a job with given parameters and push it to queue.
+	/// </summary>
+	/// <typeparam name="T">the type which has the function</typeparam>
+	/// <typeparam name="Ret">the return type of the function</typeparam>
+	/// <typeparam name="...Args">the types of arugments</typeparam>
+	/// <param name="pfunc">the pointer of the function</param>
+	/// <param name="...args">the arguments of the function</param>
 	template<typename T, typename Ret, typename... Args>
 	void PushJob(Ret(T::*pfunc)(Args...), Args&&... args)
 	{
@@ -29,7 +46,7 @@ public:
 
 	/// <summary>
 	/// Execute all jobs in queue. 
-	/// <para>If there is no more job in queue, returns. </para>
+	/// <para>When there is no more job in queue, returns. </para>
 	/// </summary>
 	void Flush()
 	{

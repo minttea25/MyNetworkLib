@@ -20,7 +20,7 @@ public:
 	/// </summary>
 	/// <param name="overlappedEvent">Overlapped Event (IOCPEvent)</param>
 	/// <param name="numberOfBytesTransferred">Number of bytes transferred.</param>
-	virtual void Process(IOCPEvent * overlappedEvent, DWORD numberOfBytesTransferred) abstract;
+	virtual void Dispatch(IOCPEvent * overlappedEvent, DWORD numberOfBytesTransferred) abstract;
 private:
 
 };

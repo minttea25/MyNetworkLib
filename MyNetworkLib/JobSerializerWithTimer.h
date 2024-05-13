@@ -13,6 +13,12 @@ public:
 		DESTRUCTOR(JobSerializerWithTimer);
 	}
 
+	/// <summary>
+	/// Make a TimeJob with function and tickAfter.
+	/// </summary>
+	/// <param name="func">function to reserve</param>
+	/// <param name="tickAfter">executable tick count from now</param>
+	/// <returns>created TimeJob</returns>
 	TimeJobSPtr ReserveJob(std::function<void()>&& func, const uint64 tickAfter)
 	{
 		TimeJobSPtr jobSPtr = NetCore::ObjectPool<TimeJob>::make_shared(tickAfter, std::move(func));
@@ -20,6 +26,16 @@ public:
 		return static_pointer_cast<TimeJob>(jobSPtr->shared_from_this());
 	}
 
+	/// <summary>
+	/// Make a TimeJob with given parameters.
+	/// </summary>
+	/// <typeparam name="T">the type which has the function</typeparam>
+	/// <typeparam name="Ret">the return type of the function</typeparam>
+	/// <typeparam name="...Args">the types of the arguments</typeparam>
+	/// <param name="tickAfter">executable tick count from now</param>
+	/// <param name="pfunc">the pointer of function</param>
+	/// <param name="...args">the arguments of funtion</param>
+	/// <returns>created TimeJob</returns>
 	template<typename T, typename Ret, typename... Args>
 	TimeJobSPtr ReserveJob(const uint64 tickAfter, Ret(T::* pfunc)(Args...), Args&&... args)
 	{
@@ -32,7 +48,7 @@ public:
 
 	/// <summary>
 	/// Execute jobs if the execution time of job is reached.
-	/// <para>If there is no more job to execute now, returns.</para>
+	/// <para>When there is no more job to execute now, returns.</para>
 	/// </summary>
 	void Flush()
 	{

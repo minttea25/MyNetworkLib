@@ -28,7 +28,7 @@ public:
 
 		if (_stack.empty())
 		{
-			if constexpr (std::is_class_v(T)) return nullptr;
+			if constexpr (std::is_pointer_v(T)) return nullptr;
 			else return T();
 		}
 
@@ -66,7 +66,7 @@ public:
 
 		if (_stack.empty())
 		{
-			if constexpr (std::is_class_v(T)) return nullptr;
+			if constexpr (std::is_pointer_v(T)) return nullptr;
 			else return T();
 		}
 

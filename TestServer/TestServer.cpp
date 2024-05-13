@@ -53,6 +53,26 @@ int main()
 
     NetCore::TaskManagerEx manager;
 
+    /*manager.AddTask(
+        [&]() {
+            std::cout << "T id:" << TLS_Id << std::endl;
+            NetCore::GGlobalJobQueue->PushJob([=]() {
+                std::cout << "300" << std::endl;
+                }, 300);
+            NetCore::GGlobalJobQueue->PushJob([=]() {
+                std::cout << "100" << std::endl;
+                }, 100);
+            NetCore::GGlobalJobQueue->PushJob([=]() {
+                std::cout << "500" << std::endl;
+                }, 500);
+            NetCore::GGlobalJobQueue->PushJob([=]() {
+                std::cout << "200" << std::endl;
+                }, 200);
+            NetCore::GGlobalJobQueue->PushJob([=]() {
+                std::cout << "400" << std::endl;
+                }, 400);
+        });*/
+
     manager.AddTask(
         [&]() {
             std::cout << "T id:" << TLS_Id << std::endl;
@@ -60,7 +80,8 @@ int main()
             {
                 core->ProcessQueuedCompletionStatusEx(200);
 
-                manager.DoWorkFromGlobalJobQueue(50);
+                manager.DoWorkJob(50);
+                manager.DoWorkReservedJob(50);
 
                 if (off) break;
 

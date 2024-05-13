@@ -18,8 +18,8 @@ public:
 	/// <summary>
 	/// Create a new thread to do task.
 	/// </summary>
-	/// <param name="task">Task to do in other thread.</param>
-	/// <returns>Task id. (Note: It is not PID.)</returns>
+	/// <param name="task">Task to do in new thread.</param>
+	/// <returns>Task id. (Note: It is not std::thread::id)</returns>
 	task_id AddTask(std::function<void()> task);
 	/// <summary>
 	/// Create threads and each does task.

@@ -2,6 +2,9 @@
 
 NAMESPACE_OPEN(NetCore);
 
+/// <summary>
+/// Use FAAllocator in FlatBufferBuilder as flatbuffers::Allocator.
+/// </summary>
 class FBAllocator : public flatbuffers::Allocator
 {
 	// Note: uint8_t = _ubyte = unigned char

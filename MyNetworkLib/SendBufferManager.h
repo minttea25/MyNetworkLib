@@ -2,10 +2,14 @@
 
 NAMESPACE_OPEN(NetCore);
 
+/// <summary>
+/// If need, each thread can get new SendBuffer from SendBufferManager(pool).
+/// </summary>
 class SendBufferManager
 {
-	static constexpr uint32 RESERVE_BUFFER_COUNT = 10;
 public:
+	static constexpr uint32 RESERVE_BUFFER_COUNT = 10;
+
 	SendBufferManager(const SendBufferManager&) = delete;
 	SendBufferManager(SendBufferManager&&) noexcept = delete;
 	SendBufferManager& operator=(const SendBufferManager&) = delete;
@@ -14,9 +18,23 @@ public:
 	SendBufferManager();
 	~SendBufferManager();
 
+	/// <summary>
+	/// Returns the SendBuffer that has been used.
+	/// </summary>
+	/// <param name="buffer"></param>
 	void Push(SendBufferSPtr buffer);
+
+	/// <summary>
+	/// Get a new SendBuffer from the pool.
+	/// </summary>
+	/// <returns>new SendBuffer</returns>
 	SendBufferSPtr Pop();
 
+	/// <summary>
+	/// Get writable pointer of SendBuffer.
+	/// </summary>
+	/// <param name="size">the byte size to reserve</param>
+	/// <returns>the pointer of writable position of SendBuffer</returns>
 	static _ubyte* Reserve(const uint32 size)
 	{
 		if (size > TLS_SendBuffer->FreeSize())

@@ -32,7 +32,7 @@ private:
 	void _processConnect();
 
 	// Inherited via IOCPObject
-	void Process(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred) override;
+	void Dispatch(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred) override;
 	/// <summary>
 	/// Get socket handle;
 	/// </summary>

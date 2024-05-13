@@ -80,7 +80,7 @@ void NetCore::Listener::ProcessAccept(AcceptEvent* acceptEvent)
 	}
 
 	
-	session->SetConnected(_serverService);
+	session->_set_connected(_serverService);
 
 	RegisterAccept(acceptEvent);
 }
@@ -90,7 +90,7 @@ HANDLE NetCore::Listener::GetHandle()
 	return reinterpret_cast<HANDLE>(_listenSocket);
 }
 
-void NetCore::Listener::Process(IOCPEvent * overlappedEvent, DWORD numberOfBytesTransferred)
+void NetCore::Listener::Dispatch(IOCPEvent * overlappedEvent, DWORD numberOfBytesTransferred)
 {
 	switch (overlappedEvent->GetEventType())
 	{

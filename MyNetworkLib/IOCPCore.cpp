@@ -66,7 +66,7 @@ bool NetCore::IOCPCore::ProcessQueuedCompletionStatusEx(DWORD dwTimeoutMilliseco
             LPOVERLAPPED overlapped = entry->lpOverlapped;
             DWORD numberOfBytesTransferred = entry->dwNumberOfBytesTransferred;
             IOCPEvent* iocpEvent = reinterpret_cast<IOCPEvent*>(overlapped);
-            iocpEvent->GetIOCPObjectWPtr().lock()->Process(iocpEvent, numberOfBytesTransferred);
+            iocpEvent->GetIOCPObjectWPtr().lock()->Dispatch(iocpEvent, numberOfBytesTransferred);
         }
     }
 
@@ -98,7 +98,7 @@ bool NetCore::IOCPCore::ProcessQueuedCompletionStatus(DWORD dwTimeoutMillisecond
     }
     else
     {
-        iocpEvent->GetIOCPObjectWPtr().lock()->Process(iocpEvent, numberOfBytesTransferred);
+        iocpEvent->GetIOCPObjectWPtr().lock()->Dispatch(iocpEvent, numberOfBytesTransferred);
     }
 
     return true;

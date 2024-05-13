@@ -5,9 +5,6 @@
 // READ
 // https://learn.microsoft.com/en-us/windows/win32/Sync/using-singly-linked-lists
 
-
-
-
 NAMESPACE_OPEN(NetCore)
 
 class MemoryPool;
@@ -20,7 +17,7 @@ class MemoryPool;
 /// <param name="...args">Arguments of constructor of Type.</param>
 /// <returns>The pointer of the allocated object.</returns>
 template<typename Type, typename... Args>
-[[nodiscard]] Type* xxnew(Args&&... args)
+[[nodiscard]]Type* xxnew(Args&&... args)
 {
 	Type* ptr = static_cast<Type*>(PoolAllocator::Alloc(sizeof(Type)));
 	new(ptr)Type(std::forward<Args>(args)...);

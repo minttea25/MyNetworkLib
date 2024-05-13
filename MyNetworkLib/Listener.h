@@ -20,7 +20,7 @@ public:
 	bool StartListen(const int32 backlog);
 private:
 	// Inherited via IOCPObject
-	void Process(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred) override;
+	void Dispatch(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred) override;
 	HANDLE GetHandle() override;
 
 	void RegisterAccept(AcceptEvent* acceptEvent);

@@ -7,17 +7,33 @@ public:
 	TaskManagerEx();
 	~TaskManagerEx();
 
+	/// <summary>
+	/// Create a new thread to do task.
+	/// </summary>
+	/// <param name="task">Task to do in new thread.</param>
 	void AddTask(std::function<void()> task);
-
+	/// <summary>
+	/// Create threads and each does task.
+	/// </summary>
+	/// <param name="task">Task to do in other threads.</param>
+	/// <param name="count">Count of threads.</param>
 	void AddTask(std::function<void()> task, const count_t count);
 
 	void JoinAllTasks();
 
-	void DoWorkFromGlobalJobQueue(const uint64 durationTick);
-	
+#ifdef USE_GLOBAL_JOBQUEUE
+	/// <summary>
+	/// Execute jobs in the GlobalJobQueue for duration.
+	/// </summary>
+	/// <param name="durationTick">execution tick duration</param>
 	void DoWorkJob(const uint64 durationTick);
 
-	void DoWorkReservedJob();
+	/// <summary>
+	/// Execute reserved jobs in GlobalJobQueue for duration.
+	/// </summary>
+	/// <param name="durationTick">execution tick duration</param>
+	void DoWorkReservedJob(const uint64 durationTick);
+#endif // USE_GLOBAL_JOBQUEUE
 
 public: // virtuals
 
@@ -41,8 +57,12 @@ private:
 private:
 	_USE_COMMON_LOCK;
 	Vector<std::thread> _tasks;
-
 	static Atomic<task_id> _taskId;
+
+#ifdef USE_GLOBAL_JOBQUEUE
+	Atomic<bool> _doingJobWorks = false;
+	Atomic<bool> _doingTimeJobWorks = false;
+#endif // USE_GLOBAL_JOBQUEUE
 };
 
 NAMESPACE_CLOSE;

@@ -1,8 +1,10 @@
 #pragma once
 
 NAMESPACE_OPEN(NetCore);
-//NAMESPACE_OPEN(Ex);
 
+/// <summary>
+/// ClinetService extension class for mulitple connections.
+/// </summary>
 class ClientServiceEx : public Service
 {
 public:
@@ -26,6 +28,5 @@ private:
 	bool ReleaseSession(SessionSPtr session_s_ptr) override;
 };
 
-//NAMESPACE_CLOSE;
 NAMESPACE_CLOSE;
 

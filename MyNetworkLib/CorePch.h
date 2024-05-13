@@ -11,6 +11,8 @@
 // TEST
 #include "Sample.h"
 
+#include "framework.h"
+
 // Core 
 #include "CoreDef.h"
 #include "CoreMacroDef.h"

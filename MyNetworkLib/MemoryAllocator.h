@@ -16,6 +16,10 @@ public:
 	static void Release(void* ptr);
 };
 
+/// <summary>
+/// Note: See xmemory -> allocator
+/// </summary>
+/// <typeparam name="_Ty">type name</typeparam>
 template<typename _Ty>
 class STLAllocator
 {
@@ -37,7 +41,7 @@ public:
 public:
 	STLAllocator& operator=(const STLAllocator&) = default;
 public:
-	// Note: See xmemory -> allocator
+	
 
 	_Ty* allocate(const size_t count)
 	{

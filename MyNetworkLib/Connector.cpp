@@ -57,10 +57,10 @@ void NetCore::Connector::_processConnect()
 	// Release pointer
 	_connectEvent.ReleaseIOCPObjectSPtr();
 	_connected.store(true);
-	_session.lock()->SetConnected(_clientService, _connectSocket);
+	_session.lock()->_set_connected(_clientService, _connectSocket);
 }
 
-void NetCore::Connector::Process(IOCPEvent * overlappedEvent, DWORD numberOfBytesTransferred)
+void NetCore::Connector::Dispatch(IOCPEvent * overlappedEvent, DWORD numberOfBytesTransferred)
 {
 	switch (overlappedEvent->GetEventType())
 	{

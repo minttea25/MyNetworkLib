@@ -10,9 +10,10 @@ class IOCPObject;
 /// </summary>
 class IOCPCore : public enable_shared_from_this<IOCPCore>
 {
+public:
 	static constexpr uint16 MAX_ENTRY_COUNT = 10;
 	static constexpr BOOL ALERTABLE = FALSE;
-public:
+
 	/// <summary>
 	/// Constructor contains creating a new IOCP handle.
 	/// </summary>
@@ -43,12 +44,17 @@ public:
 
 	/// <summary>
 	/// Check Completion Status and call IOCPObject::Dispatch() of the object associated with the handle for the poped event.
-	/// <para> It is need to be called repeatedly.</para>
+	/// <para> It uses ::GetQueuedCompletionStatusEx.</para>
 	/// </summary>
 	/// <param name="dwTimeoutMilliseconds">Timeout (default is INFINITE)</param>
-	/// <returns></returns>
+	/// <returns>true if getting queued event is successful, false otherwise</returns>
 	bool ProcessQueuedCompletionStatusEx(DWORD dwTimeoutMilliseconds = INFINITE);
 	
+	/// <summary>
+	/// Check Completion Status and call IOCPObject::Dispatch() of the object associated with the handle for the poped event.
+	/// </summary>
+	/// <param name="dwTimeoutMilliseconds">Timeout (default is INFINITE)</param>
+	/// <returns>true if getting queued events is successful, false otherwise</returns>
 	bool ProcessQueuedCompletionStatus(DWORD dwTimeoutMilliseconds = INFINITE);
 
 private:

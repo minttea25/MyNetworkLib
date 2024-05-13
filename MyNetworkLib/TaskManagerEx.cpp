@@ -48,41 +48,57 @@ void NetCore::TaskManagerEx::JoinAllTasks()
 	_join_all_tasks();
 }
 
-void NetCore::TaskManagerEx::DoWorkFromGlobalJobQueue(const uint64 durationTick)
-{
-	DoWorkJob(durationTick);
-
-	DoWorkReservedJob();
-}
+#ifdef USE_GLOBAL_JOBQUEUE
 
 void NetCore::TaskManagerEx::DoWorkJob(const uint64 durationTick)
 {
-	TLS_DoJobTickLimit = ::GetTickCount64() +  durationTick;
+	if (_doingJobWorks.exchange(true) == true) return;
+
+	// CRITICAL SECTION-----
+
+	uint64 limit = ::GetTickCount64() + durationTick;
 
 	while (true)
 	{
 		const uint64 now = ::GetTickCount64();
-		if (now > TLS_DoJobTickLimit) break;
+		if (now > limit) break;
 
 		JobSPtr job = nullptr;
 		if (GGlobalJobQueue->TryPop(job) == false) break;
 
 		job->Execute();
 	}
+
+	// CRITICAL SECTION-----
+
+	_doingJobWorks.store(false);
 }
 
-void NetCore::TaskManagerEx::DoWorkReservedJob()
+void NetCore::TaskManagerEx::DoWorkReservedJob(const uint64 durationTick)
 {
-	uint64 now = ::GetTickCount64();
+	if (_doingTimeJobWorks.exchange(true) == true) return;
+
+	// CRITICAL SECTION-----
+
+	uint64 limit = ::GetTickCount64() + durationTick;
 
 	while (true)
 	{
+		const uint64 now = ::GetTickCount64();
+		if (now > limit) break;
+
 		TimeJobSPtr job = nullptr;
 		if (GGlobalJobQueue->TryPop(job, now) == false) break;
 
 		job->Execute();
 	}
+
+	// CRITICAL SECTION-----
+
+	_doingTimeJobWorks.store(false);
 }
+#endif // USE_GLOBAL_JOBQUEUE
+
 
 
 void NetCore::TaskManagerEx::_init_tls()

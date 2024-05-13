@@ -2,10 +2,18 @@
 
 NAMESPACE_OPEN(NetCore);
 
-template<typename T>
+template<typename T, typename Less = less<typename Vector<T>::value_type>>
 class LockPriorityQueue
 {
 public:
+	LockPriorityQueue() {}
+	~LockPriorityQueue() {}
+
+	LockPriorityQueue(const LockPriorityQueue&) = delete;
+	LockPriorityQueue(LockPriorityQueue&& other) noexcept = delete;
+	LockPriorityQueue& operator=(const LockPriorityQueue&) = delete;
+	LockPriorityQueue& operator=(LockPriorityQueue&&) noexcept = delete;
+
 	/// <summary>
 	/// Push an item into queue.
 	/// </summary>
@@ -27,7 +35,7 @@ public:
 
 		if (_pq.empty())
 		{
-			if constexpr (std::is_class_v<T>) return nullptr;
+			if constexpr (std::is_pointer_v<T>) return nullptr;
 			else return T();
 		}
 
@@ -83,7 +91,7 @@ public:
 
 		if (_pq.empty())
 		{
-			if constexpr (std::is_class_v<T>) return nullptr;
+			if constexpr (std::is_pointer_v<T>) return nullptr;
 			else return T();
 		}
 		else return _pq.front();
@@ -135,11 +143,11 @@ public:
 	void SetNew()
 	{
 		_WRITE_LOCK;
-		_pq = PriorityQueue<T>();
+		_pq = PriorityQueue<T, Vector<T>, Less>();
 	}
 private:
 	_USE_LOCK;
-	PriorityQueue<T> _pq;
+	PriorityQueue<T, Vector<T>, Less> _pq;
 };
 
 NAMESPACE_CLOSE;
