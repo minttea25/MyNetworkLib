@@ -2,14 +2,14 @@
 
 #ifndef _DEBUG
 #pragma comment(lib, "flatbuffers\\Release\\flatbuffers.lib")
+#pragma comment(lib, "glog\\Release\\glog.lib")
 
 #else
 #pragma comment(lib, "flatbuffers\\Debug\\flatbuffers.lib")
+#pragma comment(lib, "glog\\Debug\\glogd.lib")
 
 #endif // !_DEBUG
 
-// TEST
-#include "Sample.h"
 
 #include "framework.h"
 
@@ -45,6 +45,8 @@
 #include "LockPriorityQueue.h"
 
 // Memory Headers
+#include "MemoryAllocator.h"
+#include "MemoryPool.h"
 #include "Memory.h"
 #include "ObjectPool.h"
 
@@ -86,3 +88,10 @@
 #include "PacketWrapper.h"
 
 #include "TaskManagerEx.h"
+
+
+// glog
+#include <glog/logging.h>
+
+// TEST
+#include "Sample.h"

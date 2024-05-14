@@ -2,6 +2,8 @@
 
 NAMESPACE_OPEN(NetCore)
 
+class MemoryPool;
+
 template<typename Type>
 class ObjectPool
 {

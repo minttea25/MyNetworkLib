@@ -8,11 +8,6 @@ NAMESPACE_OPEN(NetCore);
 class Job : public enable_shared_from_this<Job>
 {
 public:
-	~Job()
-	{
-		//DESTRUCTOR(Job); 
-	}
-
 	/// <summary>
 	/// Make a job with given function.
 	/// </summary>

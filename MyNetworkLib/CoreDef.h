@@ -12,6 +12,9 @@
 
 #define USE_GLOBAL_JOBQUEUE
 
+#define GLOG_USE_GLOG_EXPORT /*Definition for glog*/
+#define GLOG_NO_ABBREVIATED_SEVERITIES /*Definition for glog*/
+
 
 #ifdef _DEBUG
 #define TEST

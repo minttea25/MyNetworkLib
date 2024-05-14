@@ -1,6 +1,14 @@
+<lib-list>
 <lib>
 <name>flatbuffers</name>
 <version>24.3.7</version>
 <url>https://github.com/google/flatbuffers/releases/tag/v24.3.7</url>
-<note>CMAKE BUILD</note>
+<note>CMAKE BUILD Visual Studio 17 2022</note>
 </lib>
+<lib>
+<name>glog</name>
+<version>0.7.0</version>
+<url>https://github.com/google/glog/releases/tag/v0.7.0</url>
+<note>CMAKE BUILD Visual Studio 17 2022</note>
+</lib>
+</lib-list>
