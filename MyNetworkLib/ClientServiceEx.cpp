@@ -55,8 +55,8 @@ bool NetCore::ClientServiceEx::Start()
 bool NetCore::ClientServiceEx::Stop()
 {
 	for (auto& conn : _connectors) conn = nullptr;
-
 	_connectors.clear();
+
 	ReleaseAllSessions();
 
 	Service::_onGoing = false;

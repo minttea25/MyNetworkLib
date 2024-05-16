@@ -7,7 +7,7 @@ LPFN_DISCONNECTEX NetCore::SocketUtils::DisconnectEx = nullptr;
 
 void NetCore::SocketUtils::Init()
 {
-	MESSAGE(SocketUtils::Init());
+	__NETCORE_LOG_INFO(SocketUtils is initialized);
 
 	// See: https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-wsastartup
 

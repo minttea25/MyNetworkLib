@@ -29,8 +29,10 @@ static void FlushSessionJob()
         NetCore::GGlobalJobQueue->PushJob(&FlushSessionJob, 500);
 }
 
-int main()
+int main(int argc, char* argv)
 {
+    NetCore::InitNetCore(argv, "../TestLogs/Server");
+
     GPacketManager = new PacketManager();
     GSessionManager = new SessionManager();
 
@@ -116,6 +118,8 @@ int main()
 
     delete GSessionManager;
     delete GPacketManager;
+
+    NetCore::ClearNetCore();
 
     return 0;
 }

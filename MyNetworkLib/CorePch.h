@@ -13,6 +13,17 @@
 
 #include "framework.h"
 
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <future>
+
+#define GLOG_USE_GLOG_EXPORT /*Definition for glog*/
+#define GLOG_NO_ABBREVIATED_SEVERITIES /*Definition for glog*/
+
+// glog
+#include <glog/logging.h>
+
 // Core 
 #include "CoreDef.h"
 #include "CoreMacroDef.h"
@@ -21,10 +32,9 @@
 #include "CoreTLS.h"
 #include "CoreSTLContainer.h"
 
-#include <iostream>
-#include <vector>
-#include <functional>
-#include <future>
+#include "ErrorHandler.h"
+
+#include "CoreLogger.h"
 
 // Base Headers
 #include <WinSock2.h>
@@ -50,7 +60,7 @@
 #include "Memory.h"
 #include "ObjectPool.h"
 
-#include "ErrorHandler.h"
+
 #include "AddrUtils.h"
 #include "SocketUtils.h"
 
@@ -89,9 +99,6 @@
 
 #include "TaskManagerEx.h"
 
-
-// glog
-#include <glog/logging.h>
 
 // TEST
 #include "Sample.h"

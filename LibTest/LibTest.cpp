@@ -1,6 +1,6 @@
 #ifndef _DEBUG
 
-pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
+#pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
 
 
 
@@ -14,12 +14,16 @@ pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
 
 using namespace std;
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv)
 {
-	Sample smp;
-	smp.PrintGlog(argv);
+	NetCore::InitNetCore(argv, "../TestLogs");
 
-	return 0;
+	LOG(INFO) << "Test Log 1";
+	LOG(WARNING) << "Tes Log 2";
+
+	NetCore::ClearNetCore();
+
+	return 0;	
 }
 
 

@@ -10,16 +10,15 @@
 
 #define USE_BIG_MEMORY_BLOCK
 
-#define USE_GLOBAL_JOBQUEUE
 
-#define GLOG_USE_GLOG_EXPORT /*Definition for glog*/
-#define GLOG_NO_ABBREVIATED_SEVERITIES /*Definition for glog*/
+
+#define USE_GLOBAL_JOBQUEUE
 
 
 #ifdef _DEBUG
 #define TEST
 #define CHECK_DESTRUCTOR
-
+//#define NO_USE_GLOG
 
 #define DEBUG
 #else
