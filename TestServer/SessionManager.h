@@ -12,7 +12,8 @@ public:
 	}
 	~ClientSession()
 	{
-		std::cout << "~ClientSession id=" << _id << '\n';
+		LOG(INFO) << "~ClientSession id=" << _id;
+		//std::cout << "~ClientSession id=" << _id << '\n';
 	}
 
 	void OnConnected() override;
@@ -24,7 +25,8 @@ public:
 
 	void OnDisconnected(const int error) override
 	{
-		std::cout << "disconnected: " << error << std::endl;
+		LOG(INFO) << "Disconnected id=" << _id << ": " << error;
+		//std::cout << "disconnected: " << error << std::endl;
 	}
 public:
 	static atomic<int> id;

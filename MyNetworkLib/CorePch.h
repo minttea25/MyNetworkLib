@@ -2,16 +2,27 @@
 
 #ifndef _DEBUG
 #pragma comment(lib, "flatbuffers\\Release\\flatbuffers.lib")
+#pragma comment(lib, "glog\\Release\\glog.lib")
 
 #else
 #pragma comment(lib, "flatbuffers\\Debug\\flatbuffers.lib")
+#pragma comment(lib, "glog\\Debug\\glogd.lib")
 
 #endif // !_DEBUG
 
-// TEST
-#include "Sample.h"
 
 #include "framework.h"
+
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <future>
+
+#define GLOG_USE_GLOG_EXPORT /*Definition for glog*/
+#define GLOG_NO_ABBREVIATED_SEVERITIES /*Definition for glog*/
+
+// glog
+#include <glog/logging.h>
 
 // Core 
 #include "CoreDef.h"
@@ -21,10 +32,9 @@
 #include "CoreTLS.h"
 #include "CoreSTLContainer.h"
 
-#include <iostream>
-#include <vector>
-#include <functional>
-#include <future>
+#include "ErrorHandler.h"
+
+#include "CoreLogger.h"
 
 // Base Headers
 #include <WinSock2.h>
@@ -45,10 +55,12 @@
 #include "LockPriorityQueue.h"
 
 // Memory Headers
+#include "MemoryAllocator.h"
+#include "MemoryPool.h"
 #include "Memory.h"
 #include "ObjectPool.h"
 
-#include "ErrorHandler.h"
+
 #include "AddrUtils.h"
 #include "SocketUtils.h"
 
@@ -86,3 +98,7 @@
 #include "PacketWrapper.h"
 
 #include "TaskManagerEx.h"
+
+
+// TEST
+#include "Sample.h"

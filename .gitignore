@@ -361,4 +361,10 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# External Libraries Excluded
 /includes/flatbuffers
+/includes/glog
+
+# Test Logs Excluded
+/TestLogs/*

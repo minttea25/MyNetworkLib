@@ -11,7 +11,8 @@ public:
 	}
 	~ServerSession()
 	{
-		std::cout << "~ServerSession id=" << _id << '\n';
+		LOG(INFO) << "~ServerSession id=" << _id;
+		//std::cout << "~ServerSession id=" << _id << '\n';
 	}
 public:
 	void OnConnected() override;
@@ -21,7 +22,8 @@ public:
 	}
 	virtual void OnDisconnected(const int error) override
 	{
-		std::cout << "disconnected: " << error << std::endl;
+		LOG(INFO) << "Disconnected id=" << _id << ": " << error;
+		//std::cout << "disconnected: " << error << std::endl;
 	}
 public:
 	static atomic<int> id;

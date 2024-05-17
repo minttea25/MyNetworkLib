@@ -21,85 +21,91 @@ static pair< uint8_t*, ushort> GetTestPacket(const string& msg)
 constexpr PCSTR IP = "127.0.0.1";
 constexpr ushort PORT = 8900;
 
-int main()
+int main(int argc, char* argv)
 {
-	GPacketManager = new PacketManager();
-	GSessionManager = new SessionManager();
+	NetCore::InitNetCore(argv, "../TestLogs/Client");
 
-	SOCKADDR_IN addr = AddrUtils::GetTcpAddress(IP, PORT);
+	{
+		GPacketManager = new PacketManager();
+		GSessionManager = new SessionManager();
 
-	this_thread::sleep_for(300ms);
+		SOCKADDR_IN addr = AddrUtils::GetTcpAddress(IP, PORT);
 
-	auto session_factory = [&]() -> NetCore::SessionSPtr {
-		return GSessionManager->SessionFactory();
-		};
+		this_thread::sleep_for(300ms);
 
-	auto core = NetCore::make_shared<IOCPCore>();
-	auto client = NetCore::make_shared<ClientServiceEx>
-		(
-			core, addr, session_factory, 10
+		auto session_factory = [&]() -> NetCore::SessionSPtr {
+			return GSessionManager->SessionFactory();
+			};
+
+		auto core = NetCore::make_shared<IOCPCore>();
+		auto client = NetCore::make_shared<ClientServiceEx>
+			(
+				core, addr, session_factory, 10
+			);
+
+		if (client->Start() == false)
+		{
+			return -1;
+		}
+
+		NetCore::Thread::TaskManager manager;
+		manager.AddTask(
+			[&]() {
+				std::cout << "IOCP T id:" << TLS_Id << std::endl;
+				this_thread::sleep_for(100ms);
+				while (true)
+				{
+					core->ProcessQueuedCompletionStatus(200);
+
+					if (off) break;
+
+					this_thread::yield();
+				}
+			});
+		manager.AddTask(
+			[&]() {
+				std::cout << "Session Flush T id:" << TLS_Id << std::endl;
+				this_thread::sleep_for(200ms);
+				while (true)
+				{
+					GSessionManager->FlushSessions();
+
+					if (off) break;
+
+					this_thread::yield();
+				}
+			}
 		);
 
-	if (client->Start() == false)
-	{
-		return -1;
-	}
-
-	NetCore::Thread::TaskManager manager;
-	manager.AddTask(
-		[&]() {
-			std::cout << "IOCP T id:" << TLS_Id << std::endl;
-			this_thread::sleep_for(100ms);
-			while (true)
-			{
-				core->ProcessQueuedCompletionStatus(200);
-
-				if (off) break;
-
-				this_thread::yield();
-			}
-		});
-	manager.AddTask(
-		[&]() {
-			std::cout << "Session Flush T id:" << TLS_Id << std::endl;
-			this_thread::sleep_for(200ms);
-			while (true)
-			{
-				GSessionManager->FlushSessions();
-
-				if (off) break;
-
-				this_thread::yield();
-			}
-		}
-	);
-
-	while (!off)
-	{
+		while (!off)
 		{
-			string msg;
-			std::cin >> msg;
-			if (strcmp(msg.c_str(), "stop") == 0)
 			{
-				client->DisconnectAll();
-				off = true;
-			}
-			else
-			{
-				auto pkt = GetTestPacket(msg);
-				client->Send(1, pkt.first, pkt.second);
-			}
+				string msg;
+				std::cin >> msg;
+				if (strcmp(msg.c_str(), "stop") == 0)
+				{
+					client->DisconnectAll();
+					off = true;
+				}
+				else
+				{
+					auto pkt = GetTestPacket(msg);
+					client->Send(1, pkt.first, pkt.second);
+				}
 
-			this_thread::sleep_for(100ms);
+				this_thread::sleep_for(100ms);
+			}
 		}
+
+		manager.JoinAllTasks();
+
+		client->Stop();
+
+		delete GPacketManager;
+		delete GSessionManager;
 	}
 
-	manager.JoinAllTasks();
-
-	client->Stop();
-
-	delete GPacketManager;
-	delete GSessionManager;
+	NetCore::ClearNetCore();
 
 	return 0;
 }

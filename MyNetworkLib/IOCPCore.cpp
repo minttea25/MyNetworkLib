@@ -10,7 +10,7 @@ NetCore::IOCPCore::IOCPCore()
     if (_iocpHandle == INVALID_HANDLE_VALUE)
     {
         int32 errorCode = ::GetLastError();
-        ERR_CODE(errorCode, Failed to create new IO complete port);
+        __NETCORE_CODE_ERROR_TEXT(errorCode, Failed to create new IO complete port);
         ASSERT_CRASH(_iocpHandle != INVALID_HANDLE_VALUE);
     }
     
@@ -53,7 +53,7 @@ bool NetCore::IOCPCore::ProcessQueuedCompletionStatusEx(DWORD dwTimeoutMilliseco
         case WAIT_TIMEOUT:
             return false;
         default:
-            ERR_CODE(errCode, errcode was not wait_timeout);
+            __NETCORE_CODE_ERROR_TEXT(errCode, errcode was not wait_timeout);
             return false;
         }
     }
@@ -91,8 +91,7 @@ bool NetCore::IOCPCore::ProcessQueuedCompletionStatus(DWORD dwTimeoutMillisecond
         case WAIT_TIMEOUT:
             return false;
         default:
-            ERR_CODE(errCode, errcode was not wait_timeout);
-            // iocpEvent->GetIOCPObjectRef().lock()->Process(iocpEvent, numberOfBytesTransferred);
+            __NETCORE_CODE_ERROR_TEXT(errCode, errcode was not wait_timeout);
             return false;
         }
     }
