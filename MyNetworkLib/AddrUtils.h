@@ -7,14 +7,66 @@ class AddrUtils
 public:
 	static constexpr uint16 ANY_PORT = 0;
 	static constexpr auto MAX_PORT = 65535;
-	static inline SOCKADDR_IN GetTcpAddress(const PCSTR ip, const uint16 port)
+
+	static inline SOCKADDR_IN GetTcpAddress(const wchar_t* ip, const uint16 port)
+	{
+		SOCKADDR_IN addr {};
+		memset(&addr, 0, sizeof(addr));
+		addr.sin_family = AF_INET;
+		::InetPton(AF_INET, ip, &addr.sin_addr);
+		addr.sin_port = ::htons(port);
+		return addr;
+	}
+
+	static inline SOCKADDR_IN GetTcpAddress(const std::wstring ip, const uint16 port)
 	{
 		SOCKADDR_IN addr{};
 		memset(&addr, 0, sizeof(addr));
 		addr.sin_family = AF_INET;
-		::inet_pton(AF_INET, ip, &addr.sin_addr);
+		::InetPton(AF_INET, ip.c_str(), &addr.sin_addr);
 		addr.sin_port = ::htons(port);
 		return addr;
+	}
+
+	static inline bool SetTcpAddress(const PCWSTR ip, const uint16 port, PSOCKADDR_IN paddr)
+	{
+		memset(paddr, 0, sizeof(SOCKADDR_IN));
+		paddr->sin_family = AF_INET;
+		paddr->sin_port = ::htons(port);
+		if (::InetPtonW(AF_INET, ip, &paddr->sin_addr) <= 0) return false;
+		else return true;
+	}
+
+	static inline bool GetSockName(const Socket socket, OUT uint16* port, OUT wchar_t* localAddr, const int32 localAddrLen)
+	{
+		SOCKADDR_IN addr{};
+		int32 addrLen = sizeof(addr);
+		if (::getsockname(socket, (SOCKADDR*)&addr, &addrLen) == 0)
+		{
+			::InetNtopW(AF_INET, &addr.sin_addr, localAddr, localAddrLen);
+			*port = ::ntohs(addr.sin_port);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	static inline bool GetPeerName(const Socket socket, OUT uint16* port, OUT wchar_t* remoteAddr, const int32 remoteAddrLen)
+	{
+		SOCKADDR_IN addr{};
+		int32 addrLen = sizeof(addr);
+		if (::getpeername(socket, (SOCKADDR*)&addr, &addrLen) == 0)
+		{
+			::InetNtopW(AF_INET, &addr.sin_addr, remoteAddr, remoteAddrLen);
+			*port = ntohs(addr.sin_port);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	/// <summary>

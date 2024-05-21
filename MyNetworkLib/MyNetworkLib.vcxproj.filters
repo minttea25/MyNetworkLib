@@ -169,6 +169,9 @@
     <ClInclude Include="GlobalJobQueue.h">
       <Filter>Job</Filter>
     </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sample.cpp" />

@@ -4,12 +4,8 @@ NAMESPACE_OPEN(NetCore);
 
 class PacketSession : public Session
 {
-	enum : uint32
-	{
-		FLUSH_SEND_MIN_INTERVAL_TICK = 1000,
-		FLUSH_SEND_MIN_RESERVED_BYTE_LENGTH = 128,
-
-	};
+	static constexpr uint32 FLUSH_SEND_MIN_INTERVAL_TICK = 1000;
+	static constexpr uint32 FLUSH_SEND_MIN_RESERVED_BYTE_LENGTH = 128;
 public:
 	PacketSession();
 	virtual ~PacketSession();

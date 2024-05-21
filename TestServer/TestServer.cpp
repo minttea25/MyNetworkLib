@@ -2,13 +2,12 @@
 
 using namespace NetCore;
 
-constexpr PCSTR IP = "127.0.0.1";
+std::wstring IP(L"127.0.0.1");
 constexpr ushort PORT = 8900;
 
 static bool off = false;
 
-
-static pair< uint8_t*, ushort> GetTestPacket(const string& msg)
+static pair< uint8_t*, _ubyte> GetTestPacket(const string& msg)
 {
     const ushort id = 1; // fixed;
 
@@ -29,9 +28,20 @@ static void FlushSessionJob()
         NetCore::GGlobalJobQueue->PushJob(&FlushSessionJob, 500);
 }
 
+constexpr int SESSION_COUNT = 100;
+constexpr int BACK_LOG = 100;
+
 int main(int argc, char* argv)
 {
-    NetCore::InitNetCore(argv, "../TestLogs/Server");
+    NetCore::LoggerConfig config;
+    config.DirPath = "../TestLogs/Server";
+    config.ErrorPathPrefix = "ERROR_";
+    config.FatalPathPrefix = "FATAL_";
+    config.InfoPathPrefix = "INFO_";
+    config.WarningPathPrefix = "WARNING_";
+
+    //NetCore::InitNetCore(argv, "../TestLogs/Server");
+    NetCore::InitNetCore(argv, &config);
 
     GPacketManager = new PacketManager();
     GSessionManager = new SessionManager();
@@ -46,7 +56,7 @@ int main(int argc, char* argv)
     auto server = NetCore::make_shared<ServerService>(
         core, addr,
         session_factory,
-        100, 100);
+        SESSION_COUNT, BACK_LOG);
 
     if (server->Start() == false)
     {
@@ -54,26 +64,6 @@ int main(int argc, char* argv)
     }
 
     NetCore::TaskManagerEx manager;
-
-    /*manager.AddTask(
-        [&]() {
-            std::cout << "T id:" << TLS_Id << std::endl;
-            NetCore::GGlobalJobQueue->PushJob([=]() {
-                std::cout << "300" << std::endl;
-                }, 300);
-            NetCore::GGlobalJobQueue->PushJob([=]() {
-                std::cout << "100" << std::endl;
-                }, 100);
-            NetCore::GGlobalJobQueue->PushJob([=]() {
-                std::cout << "500" << std::endl;
-                }, 500);
-            NetCore::GGlobalJobQueue->PushJob([=]() {
-                std::cout << "200" << std::endl;
-                }, 200);
-            NetCore::GGlobalJobQueue->PushJob([=]() {
-                std::cout << "400" << std::endl;
-                }, 400);
-        });*/
 
     manager.AddTask(
         [&]() {
@@ -118,8 +108,6 @@ int main(int argc, char* argv)
 
     delete GSessionManager;
     delete GPacketManager;
-
-    NetCore::ClearNetCore();
 
     return 0;
 }

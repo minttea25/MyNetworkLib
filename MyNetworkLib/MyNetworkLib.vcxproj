@@ -196,6 +196,7 @@
     <ClInclude Include="TaskManagerEx.h" />
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="TimeJob.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Connector.cpp" />

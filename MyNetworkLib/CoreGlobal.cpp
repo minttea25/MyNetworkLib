@@ -22,40 +22,8 @@ class CoreGlobal
 {
 public:
 	CoreGlobal(const CoreGlobal&) = delete;
-	CoreGlobal(const char* argv0)
+	CoreGlobal()
 	{
-		GLogger = new CoreLogger(argv0);
-
-		// Note : Init GMemory first.
-		// new constructor here
-		GMemory = new Memory();
-		GSendBufferManager = new SendBufferManager();
-#ifdef USE_GLOBAL_JOBQUEUE
-		GGlobalJobQueue = new GlobalJobQueue();
-#endif // USE_GLOBAL_JOBQUEUE
-		
-
-		// init method here
-		ErrorHandler::InitErrorMap();
-		SocketUtils::Init();
-	}
-
-	CoreGlobal(const char* argv0, const std::string& logdir)
-	{
-		GLogger = new CoreLogger(argv0, logdir);
-
-		// Note : Init GMemory first.
-		// new constructor here
-		GMemory = new Memory();
-		GSendBufferManager = new SendBufferManager();
-#ifdef USE_GLOBAL_JOBQUEUE
-		GGlobalJobQueue = new GlobalJobQueue();
-#endif // USE_GLOBAL_JOBQUEUE
-
-
-		// init method here
-		ErrorHandler::InitErrorMap();
-		SocketUtils::Init();
 	}
 	~CoreGlobal()
 	{
@@ -72,9 +40,43 @@ public:
 		// clear method here
 		SocketUtils::Clear();
 	}
-};
 
-CoreGlobal* GCoreGlobal = nullptr;
+	void _init(const char* argv0, const std::string& logdir)
+	{
+		GLogger = new CoreLogger(argv0, logdir);
+
+		// Note : Init GMemory first.
+		// new constructor here
+		GMemory = new Memory();
+		GSendBufferManager = new SendBufferManager();
+#ifdef USE_GLOBAL_JOBQUEUE
+		GGlobalJobQueue = new GlobalJobQueue();
+#endif // USE_GLOBAL_JOBQUEUE
+
+
+		// init method here
+		ErrorHandler::InitErrorMap();
+		SocketUtils::Init();
+	}
+
+	void _init(const char* argv0, const LoggerConfig* loggerConfig)
+	{
+		GLogger = new CoreLogger(argv0, loggerConfig);
+
+		// Note : Init GMemory first.
+		// new constructor here
+		GMemory = new Memory();
+		GSendBufferManager = new SendBufferManager();
+#ifdef USE_GLOBAL_JOBQUEUE
+		GGlobalJobQueue = new GlobalJobQueue();
+#endif // USE_GLOBAL_JOBQUEUE
+
+
+		// init method here
+		ErrorHandler::InitErrorMap();
+		SocketUtils::Init();
+	}
+} GCoreGlobal;
 
 /// <summary>
 /// Init NetCore Library with argv0 of main().
@@ -82,22 +84,15 @@ CoreGlobal* GCoreGlobal = nullptr;
 /// <para>NetCore::ClearNetCore should be called when the app is closed.</para>
 /// </summary>
 /// <param name="argv0">program name for glog</param>
-void InitNetCore(const char* argv0)
-{
-	GCoreGlobal = new CoreGlobal(argv0);
-}
-
+/// <param name="logdir"></param>
 void InitNetCore(const char* argv0, const std::string& logdir)
 {
-	GCoreGlobal = new CoreGlobal(argv0, logdir);
+	GCoreGlobal._init(argv0, logdir);
 }
 
-/// <summary>
-/// Clear NetCore memories.
-/// </summary>
-void ClearNetCore()
+void InitNetCore(const char* argv0, const LoggerConfig* loggerConfig)
 {
-	delete GCoreGlobal;
+	GCoreGlobal._init(argv0, loggerConfig);
 }
 
 NAMESPACE_CLOSE;

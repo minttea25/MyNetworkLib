@@ -39,71 +39,41 @@ constexpr auto UNSIGNED_INVALID = 0;
 * Logging
 ********************************************/
 
-#define __make_error_code_stream(code, name) "[" << code << "] " << name
+#define __make_error_code_stream(code, name) "[E" << code << "] " << name
 
-#ifdef _DEBUG
+#ifndef NO_USE_GLOG
+#define __NETCORE_LOG_BASE(severity) LOG(severity)
+#else
+#define __NETCORE_LOG_BASE(severity) std::cerr << #severity << ": "
+#endif // !NO_USE_GLOG
 
-#ifndef  NO_USE_GLOG
-#define __NETCORE_LOG_INFO(log) LOG(INFO) << #log
-#define __NETCORE_LOG_WARNING(log) LOG(WARNING) << #log
-#define __NETCORE_LOG_ERROR(log) LOG(ERROR) << #log
-#define __NETCORE_LOG_FATAL(log) LOG(FATAL) << #log
+#define __NETCORE_LOG_INFO(log) __NETCORE_LOG_BASE(INFO) << #log
+#define __NETCORE_LOG_WARNING(log) __NETCORE_LOG_BASE(WARNING) << #log
+#define __NETCORE_LOG_ERROR(log) __NETCORE_LOG_BASE(ERROR) << #log
+#define __NETCORE_LOG_FATAL(log) __NETCORE_LOG_BASE(FATAL) << #log
+
+#define __NETCORE_LOG_MSG(text) __NETCORE_LOG_BASE(INFO) << #text <<'\n';
+#define __NETCORE_LOG_VALUE(text, value) __NETCORE_LOG_BASE(INFO) << #text << value;
 
 #define __NETCORE_CODE_ERROR(code)  \
 {   \
 const char* name = ErrorHandler::GetErrorName(code);    \
-LOG(ERROR) << __make_error_code_stream(code, name);  \
+__NETCORE_LOG_BASE(ERROR) << __make_error_code_stream(code, name);  \
 }   \
 
 #define __NETCORE_CODE_ERROR_STR(code, str)  \
 {   \
 const char* name = ErrorHandler::GetErrorName(code);    \
-LOG(ERROR) << __make_error_code_stream(code, name) << '\n' << str; \
+__NETCORE_LOG_BASE(ERROR) << __make_error_code_stream(code, name) << '\n' << str; \
 }   \
 
 #define __NETCORE_CODE_ERROR_TEXT(code, text)  \
 {   \
 const char* name = ErrorHandler::GetErrorName(code);    \
-LOG(ERROR) << __make_error_code_stream(code, name) << '\n' << #text; \
+__NETCORE_LOG_BASE(ERROR) << __make_error_code_stream(code, name) << '\n' << #text; \
 }   \
 
-#define __NETCORE_LOG_WSA_ERROR(code) LOG(ERROR) << "WSAGetLastError() was " << code << '\n'
-
-#else
-
-#define __NETCORE_LOG_INFO(log) std::cerr << #log << '\n'
-#define __NETCORE_LOG_WARNING(log) std::cerr << #log << '\n'
-#define __NETCORE_LOG_ERROR(log) std::cerr << #log << '\n'
-#define __NETCORE_LOG_FATAL(log) std::cerr << #log << '\n'
-
-#define __NETCORE_CODE_ERROR(code)  \
-{   \
-const char* name = ErrorHandler::GetErrorName(code);    \
-std::cerr << __make_error_code_stream(code, name) << '\n';  \
-}   \
-
-#define __NETCORE_CODE_ERROR_MSG(code, msg)  \
-{   \
-const char* name = ErrorHandler::GetErrorName(code);    \
-std::cerr << __make_error_code_stream(code, name) << '\n' << #msg; \
-}   \
-
-#define __NETCORE_LOG_WSA_ERROR(code) std::cerr << "WSAGetLastError() was " << code << '\n'
-
-#endif //  NO_USE_GLOG
-
-#else
-
-#define __NETCORE_LOG_INFO(log) LOG(INFO) << #log
-#define __NETCORE_LOG_WARNING(log) LOG(WARNING) << #log
-#define __NETCORE_LOG_ERROR(log) LOG(ERROR) << #log
-#define __NETCORE_LOG_FATAL(log) LOG(FATAL) << #log
-#define __NETCORE_CODE_ERROR(code) LOG(ERROR) << "Error: " << code <<'\n'
-#define __NETCORE_CODE_ERROR_STR(code, str)  LOG(ERROR) << "[E" << code  << "] " << str <<'\n'
-#define __NETCORE_CODE_ERROR_TEXT(code, text)  LOG(ERROR) << "[E" << code  << "] " << #text <<'\n'
-#define __NETCORE_LOG_WSA_ERROR(code) LOG(ERROR) << "WSAGetLastError() was " << code << '\n'
-
-#endif // _DEBUG
+#define __NETCORE_LOG_WSA_ERROR(code) __NETCORE_LOG_BASE(ERROR) << "WSAGetLastError() was " << code << '\n'
 
 
 /*******************************************
@@ -118,9 +88,9 @@ std::cerr << __make_error_code_stream(code, name) << '\n' << #msg; \
 
 #else
 #define MESSAGE(text)
-#define PRINT(text, value) std::cerr << #text << value << std::endl
-#define PRINT_(code) std::cerr << code << std::endl
-#define WARN(text) std::cerr << "WARNING: " << #text << std::endl
+#define PRINT(text, value) 
+#define PRINT_(code) 
+#define WARN(text) 
 
 #endif // TEST
 

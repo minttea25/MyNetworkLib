@@ -8,40 +8,53 @@ class Session : public IOCPObject
 
 	enum DisconnectError
 	{
-		NONE,
+		NONE = 0,
 
-		SERVER_SERVICE_STOPPED,
-		CLIENT_SERVICE_STOPPED,
+		SERVER_SERVICE_STOPPED = 1,
+		CLIENT_SERVICE_STOPPED = 2,
 
-		SENT_0,
+		SENT_0 = 3,
 
-		RECV_0,
-		RECV_BUFFER_WRTIE_OVERFLOW,
-		PROCESS_LEN_0,
-		RECV_BUFFER_READ_OVERFLOW,
+		RECV_0 = 4,
+		RECV_BUFFER_WRTIE_OVERFLOW = 5,
+		PROCESS_LEN_0 = 6,
+		RECV_BUFFER_READ_OVERFLOW = 7,
+
+		ALREADY_DISCONNECTED = 8,
 	};
 public:
 	Session();
 	virtual ~Session();
 
 	bool IsConnected() const { return _connected; }
+	uint32 SessionId() const { return _sessionId; }
 
-public:
-	PURE_VIRTUAL virtual void SendRaw(const _byte* buffer) = 0;
-	PURE_VIRTUAL virtual void Send(const uint16 id, _ubyte* ptr, const uint16 size) = 0;
+	bool GetSockName(OUT uint16* port, OUT wchar_t* localAddr, const int32 localAddrLen) const
+	{
+		return AddrUtils::GetSockName(_socket, port, localAddr, localAddrLen);
+	}
+	bool GetPeerName(OUT uint16* port, OUT wchar_t* remoteAddr, const int32 remoteAddrLen) const
+	{
+		return AddrUtils::GetPeerName(_socket, port, remoteAddr, remoteAddrLen);
+	}
 
 	void _send(Vector<WSABUF>& buffers);
 	bool Disconnect();
 	SOCKET GetSocket() const { return _socket; }
+
+	PURE_VIRTUAL virtual void SendRaw(const _byte* buffer) = 0;
+	PURE_VIRTUAL virtual void Send(const uint16 id, _ubyte* ptr, const uint16 size) = 0;
 private:
 	void _set_connected(const ServiceSPtr service, const Socket connectedSocket = INVALID_SOCKET);
 	void _set_socket(Socket connectedSocket);
 	void _disconnect(const uint16 errorCode = DisconnectError::NONE);
 
+	void _clear();
+
 	// Inherited via IOCPObject
 	virtual void Dispatch(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred) override sealed;
 	HANDLE GetHandle() override;
-private:
+
 	void _register_send();
 	void _process_send(const int32 numberOfBytesSent);
 	void _register_recv();
@@ -80,6 +93,9 @@ private:
 	friend class Connector;
 	friend class Listener;
 	friend class ServerService;
+
+private:
+	static Atomic<uint32> s_sid;
 };
 
 NAMESPACE_CLOSE;

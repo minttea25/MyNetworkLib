@@ -8,12 +8,10 @@ class ClientSession : public NetCore::PacketSession
 public:
 	ClientSession()
 	{
-		_id = id.fetch_add(1);
 	}
 	~ClientSession()
 	{
-		LOG(INFO) << "~ClientSession id=" << _id;
-		//std::cout << "~ClientSession id=" << _id << '\n';
+		LOG(INFO) << "~ClientSession id=" << Session::SessionId();
 	}
 
 	void OnConnected() override;
@@ -25,13 +23,11 @@ public:
 
 	void OnDisconnected(const int error) override
 	{
-		LOG(INFO) << "Disconnected id=" << _id << ": " << error;
-		//std::cout << "disconnected: " << error << std::endl;
+		LOG(INFO) << "Disconnected id=" << Session::SessionId() << " by Error: " << error;
 	}
 public:
 	static atomic<int> id;
-private:
-	int _id;
+	std::string _ip;
 };
 
 class SessionManager

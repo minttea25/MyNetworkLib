@@ -17,6 +17,7 @@ pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
 
 #include "CorePch.h"
 #include <map>
+#include <codecvt>
 
 #include "flatbuffers/flatbuffers.h"
 #include "flatbuffers/util.h"

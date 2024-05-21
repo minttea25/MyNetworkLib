@@ -21,8 +21,6 @@ int main(int argc, char* argv)
 	LOG(INFO) << "Test Log 1";
 	LOG(WARNING) << "Tes Log 2";
 
-	NetCore::ClearNetCore();
-
 	return 0;	
 }
 

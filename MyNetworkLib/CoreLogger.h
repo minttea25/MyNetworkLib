@@ -5,7 +5,7 @@ NAMESPACE_OPEN(NetCore);
 // TODO : It will be included as NetCoreConfig later.
 struct LoggerConfig
 {
-	bool LogToStderr;
+	bool LogToStderr = false;
 	std::string DirPath;
 	std::string InfoPathPrefix;
 	std::string ErrorPathPrefix;
@@ -49,16 +49,16 @@ public:
 		_set_log_path(google::GLOG_FATAL, logdir, FATAL_PATH);
 	}
 
-	CoreLogger(const char* name, const LoggerConfig& config)
+	CoreLogger(const char* name, const LoggerConfig* config)
 	{
 		google::InitGoogleLogging(name);
 
-		FLAGS_logtostderr = config.LogToStderr;
+		FLAGS_logtostderr = config->LogToStderr;
 
-		_set_log_path(google::GLOG_INFO, config.DirPath, config.InfoPathPrefix);
-		_set_log_path(google::GLOG_ERROR, config.DirPath, config.ErrorPathPrefix);
-		_set_log_path(google::GLOG_WARNING, config.DirPath, config.WarningPathPrefix);
-		_set_log_path(google::GLOG_FATAL, config.DirPath, config.FatalPathPrefix);
+		_set_log_path(google::GLOG_INFO, config->DirPath, config->InfoPathPrefix);
+		_set_log_path(google::GLOG_ERROR, config->DirPath, config->ErrorPathPrefix);
+		_set_log_path(google::GLOG_WARNING, config->DirPath, config->WarningPathPrefix);
+		_set_log_path(google::GLOG_FATAL, config->DirPath, config->FatalPathPrefix);
 	}
 
 	~CoreLogger()
@@ -72,9 +72,6 @@ private:
 		std::string fullPath = dirPath + "/" + pathPrefix;
 		google::SetLogDestination(severity, fullPath.c_str());
 	}
-
-private:
-
 };
 
 NAMESPACE_CLOSE;

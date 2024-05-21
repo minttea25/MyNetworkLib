@@ -203,6 +203,16 @@ public:
 		else return true;
 	}
 
+	static inline bool WSACheckErrorExceptPending2(const bool condition, OUT int32& wsaLastError)
+	{
+		if (condition == false)
+		{
+			wsaLastError = ::WSAGetLastError();
+			if (wsaLastError != WSA_IO_PENDING) return false;
+		}
+		return true;
+	}
+
 	static inline int32 WSACheckErrorExceptPending(const bool condition, DWORD errorCode)
 	{
 		if (condition == false)

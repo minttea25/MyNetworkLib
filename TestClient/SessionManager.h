@@ -7,12 +7,10 @@ class ServerSession : public NetCore::PacketSession
 public:
 	ServerSession()
 	{
-		_id = id.fetch_add(1);
 	}
 	~ServerSession()
 	{
-		LOG(INFO) << "~ServerSession id=" << _id;
-		//std::cout << "~ServerSession id=" << _id << '\n';
+		LOG(INFO) << "~ServerSession id=" << Session::SessionId();
 	}
 public:
 	void OnConnected() override;
@@ -22,15 +20,11 @@ public:
 	}
 	virtual void OnDisconnected(const int error) override
 	{
-		LOG(INFO) << "Disconnected id=" << _id << ": " << error;
-		//std::cout << "disconnected: " << error << std::endl;
+		LOG(INFO) << "Disconnected id=" << Session::SessionId() << ": " << error;
 	}
 public:
 	static atomic<int> id;
-	//bool IsConnected() const { return Session::IsConnected(); }
-	//void Flush() { PacketSession::Flush(); }
-private:
-	int _id;
+	std::string _ip;
 };
 
 class SessionManager
@@ -42,8 +36,8 @@ public:
 	}
 	~SessionManager()
 	{
+		__NETCORE_LOG_INFO(~SessionManager);
 		_sessions.clear();
-		std::cout << "~SessionManager" << std::endl;
 	}
 
 	void AddSession(std::shared_ptr<ServerSession> session)
@@ -60,7 +54,7 @@ public:
 	void FlushSessions()
 	{
 		lock_guard lg(mutex);
-		for (std::shared_ptr<ServerSession> s : _sessions)
+		for (std::shared_ptr<ServerSession>& s : _sessions)
 		{
 			if (s != nullptr && s->IsConnected()) s->Flush();
 		}

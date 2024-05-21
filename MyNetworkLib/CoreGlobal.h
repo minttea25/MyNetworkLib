@@ -1,6 +1,9 @@
 #pragma once
 
 NAMESPACE_OPEN(NetCore);
+
+class LoggerConfig;
+
 extern class Memory* GMemory;
 extern class SendBufferManager* GSendBufferManager;
 extern class CoreLogger* GLogger;
@@ -9,10 +12,7 @@ extern class CoreLogger* GLogger;
 extern class GlobalJobQueue* GGlobalJobQueue;
 #endif // USE_GLOBAL_JOBQUEUE
 
-extern class CoreGlobal* GCoreGlobal;
-
-void InitNetCore(const char* argv0);
 void InitNetCore(const char* argv0, const std::string& logdir);
-void ClearNetCore();
+void InitNetCore(const char* argv0, const LoggerConfig* loggerConfig);
 
 NAMESPACE_CLOSE

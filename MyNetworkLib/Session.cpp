@@ -4,6 +4,8 @@
 NetCore::Session::Session()
 	:_connected(false), _recvBuffer(RECV_BUFFER_SIZE)
 {
+	_sessionId = s_sid.fetch_add(1);
+
 	_socket = SocketUtils::CreateSocket();
 }
 
@@ -68,19 +70,34 @@ void NetCore::Session::_set_socket(Socket connectedSocket)
 
 void NetCore::Session::_disconnect(const uint16 errorCode)
 {
-#ifdef TEST
-	PRINT(DisconnectError:, errorCode);
-#endif // TEST
-
 	if (IsConnected() == false) return;
 
+	__NETCORE_LOG_VALUE(Disconnected by Error : , errorCode);
+
 	_register_disconnect();
+}
+
+void NetCore::Session::_clear()
+{
+	// Note: ReleaseSession will return false if this session is already removed in service.
+	// It can occur when the service is stopped.
+	if (_service->ReleaseSession(static_pointer_cast<Session>(shared_from_this())) == false)
+	{
+		__NETCORE_LOG_INFO(ReelaseSession in service is failed.);
+	}
+
+	_service = nullptr;
+	_sendEvent.ReleaseIOCPObjectSPtr();
+	_recvEvent.ReleaseIOCPObjectSPtr();
+	_disconnectEvent.ReleaseIOCPObjectSPtr();
+	_sendQueue.clear();
+	_connected = false;
+	_socket = INVALID_SOCKET;
 }
 
 void NetCore::Session::Dispatch(IOCPEvent* overlappedEvent, DWORD numberOfBytesTransferred)
 {
 	EventType type = overlappedEvent->GetEventType();
-	// PRINT(EventType, (int)type);
 	switch (type)
 	{
 	case EventType::Recv:
@@ -93,7 +110,7 @@ void NetCore::Session::Dispatch(IOCPEvent* overlappedEvent, DWORD numberOfBytesT
 		_process_disconnect();
 		break;
 	default:
-		WARN(Received event type was not recv / send / disconnect.);
+		__NETCORE_LOG_ERROR(Received event type was not recv / send / disconnect at Session.);
 		break;
 	}
 }
@@ -109,7 +126,8 @@ void NetCore::Session::_register_send()
 	if (_connected == false)
 	{
 		// Stop receiving
-		WARN(Session is already disconnected.);
+		__NETCORE_LOG_WARNING(Session is already disconnected.);
+		_disconnect(DisconnectError::ALREADY_DISCONNECTED);
 		return;
 	}
 
@@ -129,11 +147,13 @@ void NetCore::Session::_register_send()
 		static_cast<DWORD>(_sendEvent._segments.size()),
 		OUT & numberOfBytesSent, 0, &_sendEvent, NULL);
 
-	if (ErrorHandler::WSACheckErrorExceptPending(res != SOCKET_ERROR, Errors::WSA_SEND_FAILED) != Errors::NONE)
+	OUT int32 wsaLastError = 0;
+	if (ErrorHandler::WSACheckErrorExceptPending2(res != SOCKET_ERROR, OUT wsaLastError) == false)
 	{
-		// TODO
-		_sendEvent.ReleaseIOCPObjectSPtr(); // ?
+		__NETCORE_CODE_ERROR(Errors::WSA_SEND_FAILED);
+		_sendEvent.ReleaseIOCPObjectSPtr();
 	}
+
 	_sendEvent._segments.clear();
 	_sending.store(false);
 }
@@ -159,7 +179,8 @@ void NetCore::Session::_register_recv()
 	if (_connected == false)
 	{
 		// Stop receiving
-		WARN(Session is already disconnected.);
+		__NETCORE_LOG_WARNING(Session is already disconnected.);
+		_disconnect(DisconnectError::ALREADY_DISCONNECTED);
 		return;
 	}
 
@@ -172,14 +193,28 @@ void NetCore::Session::_register_recv()
 		_recvBuffer.WritePos() // buf
 	};
 
-	DWORD numberOfBytesRecvd = 0; // OUT
-	DWORD flags = 0;
+	OUT DWORD numberOfBytesRecvd = 0; // OUT
+	OUT DWORD flags = 0;
 	int32 res = ::WSARecv(_socket, &recvBuffer, 1,
 		OUT & numberOfBytesRecvd, OUT & flags, &_recvEvent, NULL);
 
-	if (ErrorHandler::WSACheckErrorExceptPending(res != SOCKET_ERROR, WSA_RECV_FAILED) != Errors::NONE)
+	OUT int32 wsaError = 0;
+	if (ErrorHandler::WSACheckErrorExceptPending2(res != SOCKET_ERROR, OUT wsaError) == false)
 	{
-
+		if (wsaError == WSAECONNRESET)
+		{
+			// disconnected
+			__NETCORE_LOG_WSA_ERROR(wsaError);
+		}
+		else
+		{
+			__NETCORE_LOG_WSA_ERROR(wsaError);
+		}
+	}
+	else if (res == 0)
+	{
+		// Connection closed gracefully
+		std::cout << "o" << std::endl;
 	}
 }
 
@@ -211,8 +246,11 @@ bool NetCore::Session::_register_disconnect()
 	_disconnectEvent.SetIOCPObjectSPtr(shared_from_this());
 
 	BOOL suc = SocketUtils::DisconnectEx(_socket, &_disconnectEvent, TF_REUSE_SOCKET, 0);
-	if (ErrorHandler::WSACheckErrorExceptPending(suc, Errors::WSA_DISCONNECTEX_FAILED) != Errors::NONE)
+
+	OUT int32 wsaLastError = 0;
+	if (ErrorHandler::WSACheckErrorExceptPending2(suc, OUT wsaLastError) == false)
 	{
+		__NETCORE_CODE_ERROR(Errors::WSA_DISCONNECTEX_FAILED);
 		return false;
 	}
 	return true;
@@ -220,13 +258,9 @@ bool NetCore::Session::_register_disconnect()
 
 void NetCore::Session::_process_disconnect()
 {
-	_disconnectEvent.ReleaseIOCPObjectSPtr();
-
-	// Note: ReleaseSession will return false if this session is already removed in service.
-	// It can occur when the service is stopped.
-	_service->ReleaseSession(static_pointer_cast<Session>(shared_from_this()));
-
-	_service = nullptr;
+	_clear();
 
 	OnDisconnected();
 }
+
+NetCore::Atomic<NetCore::uint32> NetCore::Session::s_sid = 1;
