@@ -55,6 +55,14 @@ constexpr auto UNSIGNED_INVALID = 0;
 #define __NETCORE_LOG_MSG(text) __NETCORE_LOG_BASE(INFO) << #text <<'\n';
 #define __NETCORE_LOG_VALUE(text, value) __NETCORE_LOG_BASE(INFO) << #text << value;
 
+#ifndef _DEBUG
+
+#define __NETCORE_CODE_ERROR(code)  __NETCORE_LOG_BASE(ERROR) << "Error: " << code;
+#define __NETCORE_CODE_ERROR_STR(code, str)  __NETCORE_LOG_BASE(ERROR) << "Error " << code << ": " << str;
+#define __NETCORE_CODE_ERROR_TEXT(code, text)  __NETCORE_LOG_BASE(ERROR) << "Error " << code << ": " << #text;
+
+#else
+
 #define __NETCORE_CODE_ERROR(code)  \
 {   \
 const char* name = ErrorHandler::GetErrorName(code);    \
@@ -72,6 +80,9 @@ __NETCORE_LOG_BASE(ERROR) << __make_error_code_stream(code, name) << '\n' << str
 const char* name = ErrorHandler::GetErrorName(code);    \
 __NETCORE_LOG_BASE(ERROR) << __make_error_code_stream(code, name) << '\n' << #text; \
 }   \
+
+#endif // !_DEBUG
+
 
 #define __NETCORE_LOG_WSA_ERROR(code) __NETCORE_LOG_BASE(ERROR) << "WSAGetLastError() was " << code << '\n'
 

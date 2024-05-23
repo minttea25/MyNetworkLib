@@ -5,7 +5,7 @@
 
 
 #ifndef _DEBUG
-pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
+#pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
 
 
 
@@ -17,13 +17,11 @@ pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
 
 #include "CorePch.h"
 #include <map>
-#include <codecvt>
 
 #include "flatbuffers/flatbuffers.h"
 #include "flatbuffers/util.h"
 #include "fbs/Packet_generated.h"
 
-#include "ClientSession.h"
 #include "SessionManager.h"
 
 #include "PacketHandler.h"

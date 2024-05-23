@@ -4,7 +4,7 @@
 
 #ifndef _DEBUG
 
-pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
+#pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
 
 
 
@@ -27,6 +27,5 @@ pragma comment(lib, "MyNetworkLib\\Release\\MyNetworkLib.lib")
 #include "PacketManager.h"
 
 #include "SessionManager.h"
-#include "ServerSession.h"
 
 

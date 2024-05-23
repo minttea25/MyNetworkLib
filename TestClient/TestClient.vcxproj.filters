@@ -4,13 +4,11 @@
     <ClInclude Include="PacketHandler.h" />
     <ClInclude Include="PacketManager.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="ServerSession.h" />
     <ClInclude Include="SessionManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="TestClient.cpp" />
-    <ClCompile Include="ServerSession.cpp" />
     <ClCompile Include="PacketHandler.cpp" />
     <ClCompile Include="PacketManager.cpp" />
     <ClCompile Include="SessionManager.cpp" />

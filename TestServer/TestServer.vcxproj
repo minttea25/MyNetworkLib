@@ -143,14 +143,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ClientSession.h" />
     <ClInclude Include="PacketHandler.h" />
     <ClInclude Include="PacketManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SessionManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClientSession.cpp" />
     <ClCompile Include="PacketHandler.cpp" />
     <ClCompile Include="PacketManager.cpp" />
     <ClCompile Include="pch.cpp">
