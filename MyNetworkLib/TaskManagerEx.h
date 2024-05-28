@@ -21,12 +21,11 @@ public:
 
 	void JoinAllTasks();
 
-#ifdef USE_GLOBAL_JOBQUEUE
+#ifdef USE_GLOBAL_JOB_SERIALIZER
 	/// <summary>
 	/// Execute jobs in the GlobalJobQueue for duration.
 	/// </summary>
-	/// <param name="durationTick">execution tick duration</param>
-	void DoWorkJob(const uint64 durationTick);
+	void DoWorkJob();
 
 	/// <summary>
 	/// Execute reserved jobs in GlobalJobQueue for duration.
@@ -59,7 +58,7 @@ private:
 	Vector<std::thread> _tasks;
 	static Atomic<task_id> _taskId;
 
-#ifdef USE_GLOBAL_JOBQUEUE
+#ifdef USE_GLOBAL_JOB_SERIALIZER
 	Atomic<bool> _doingJobWorks = false;
 	Atomic<bool> _doingTimeJobWorks = false;
 #endif // USE_GLOBAL_JOBQUEUE

@@ -80,6 +80,24 @@ public:
 		return false;
 	}
 
+	bool PopAll(OUT Vector<T>& items, std::function<bool(const T&)> condition)
+	{
+		_WRITE_LOCK;
+
+		while (!_pq.empty())
+		{
+			T item = _pq.top();
+			if (condition(item))
+			{
+				items.push_back(item);
+				_pq.pop();
+			}
+			else break;
+		}
+
+		return _pq.empty();
+	}
+
 	/// <summary>
 	/// Get top item of queue.
 	/// <para>Note: It returns T() if queue is empty.</para>
@@ -144,6 +162,12 @@ public:
 	{
 		_WRITE_LOCK;
 		_pq = PriorityQueue<T, Vector<T>, Less>();
+	}
+
+	size_t size()
+	{
+		_READ_LOCK;
+		return _pq.size();
 	}
 private:
 	_USE_LOCK;

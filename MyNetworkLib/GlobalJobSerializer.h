@@ -1,24 +1,34 @@
 #pragma once
-#include "Job.h"
 
 NAMESPACE_OPEN(NetCore);
 
-/// <summary>
-/// JobSerializer is abstract class for executing jobs in order on one thread.
-/// <para>Note: Call Flush() manually.</para>
-/// </summary>
-ABSTRACT class JobSerializer : public enable_shared_from_this<JobSerializer>
+ABSTRACT class GlobalJobSerializer : public enable_shared_from_this<GlobalJobSerializer>
 {
 public:
-	JobSerializer()
+	GlobalJobSerializer() 
 	{
+#ifndef USE_GLOBAL_JOB_SERIALIZER
+		ASSERT_CRASH("USE_GLOBAL_JOB_SERIALIZER is not defined.");
+#endif // !USE_GLOBAL_JOB_SERIALIZER
+	}
+	virtual ~GlobalJobSerializer() {}
 
+	void ExecuteJobs()
+	{
+		Vector<JobSPtr> jobs;
+		_jobs.Clear(jobs);
+
+		_queued.store(false);
+
+		if (jobs.size() == 0) return;
+
+		for (auto& job : jobs)
+		{
+			job->Execute();
+		}
 	}
 
-	virtual ~JobSerializer()
-	{
-		DESTRUCTOR(JobSerializer);
-	}
+
 
 	/// <summary>
 	/// Make a job with function and push it to queue.
@@ -38,33 +48,24 @@ public:
 	/// <param name="pfunc">the pointer of the function</param>
 	/// <param name="...args">the arguments of the function</param>
 	template<typename T, typename Ret, typename... Args>
-	void PushJob(Ret(T::*pfunc)(Args...), Args... args)
+	void PushJob(Ret(T::* pfunc)(Args...), Args... args)
 	{
 		shared_ptr<T> ptr = static_pointer_cast<T>(shared_from_this());
 		_push(NetCore::ObjectPool<Job>::make_shared(ptr, pfunc, std::forward<Args>(args)...));
 	}
 
-	/// <summary>
-	/// Execute all jobs in queue. 
-	/// <para>When there is no more job in queue, returns. </para>
-	/// </summary>
-	void Flush()
-	{
-		while (true)
-		{
-			JobSPtr job = nullptr;
-			if (_jobs.TryPop(OUT job)) job->Execute();
-			else return;
-		}
-	}
 
 private:
-	inline void _push(JobSPtr job)
-	{
-		_jobs.Push(job);
-	}
+	void _push(JobSPtr job);
+
 private:
 	LockQueue<JobSPtr> _jobs;
+
+	Atomic<bool> _queued = false;
 };
 
 NAMESPACE_CLOSE;
+
+
+
+

@@ -7,7 +7,7 @@
 
 #define USE_BIG_MEMORY_BLOCK
 
-#define USE_GLOBAL_JOBQUEUE
+#define USE_GLOBAL_JOB_SERIALIZER
 
 
 #ifdef _DEBUG

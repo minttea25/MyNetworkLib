@@ -1,6 +1,6 @@
 #pragma once
 
-extern class SessionManager* GSessionManager;
+extern std::shared_ptr<class SessionManager> GSessionManager;
 
 
 class ClientSession : public NetCore::PacketSession
@@ -16,10 +16,7 @@ public:
 
 	void OnConnected() override;
 
-	void OnRecvPacket(const char* buffer, const unsigned __int16 id) override
-	{
-		GPacketManager->Dispatch(id, buffer, *this);
-	}
+	void OnRecvPacket(const char* buffer, const unsigned __int16 id) override;
 
 	void OnDisconnected(const int error) override
 	{
@@ -30,7 +27,7 @@ public:
 	std::string _ip;
 };
 
-class SessionManager
+class SessionManager : public NetCore::GlobalTimeJobSerializer
 {
 public:
 	SessionManager()
@@ -56,6 +53,7 @@ public:
 
 	void FlushSessions()
 	{
+		std::cerr << "FlushSessions on tid=" << NetCore::TLS_Id << '\n';
 		lock_guard lg(mutex);
 		for (std::shared_ptr<ClientSession> s : _sessions)
 		{

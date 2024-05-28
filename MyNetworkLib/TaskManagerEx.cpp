@@ -48,25 +48,20 @@ void NetCore::TaskManagerEx::JoinAllTasks()
 	_join_all_tasks();
 }
 
-#ifdef USE_GLOBAL_JOBQUEUE
+#ifdef USE_GLOBAL_JOB_SERIALIZER
 
-void NetCore::TaskManagerEx::DoWorkJob(const uint64 durationTick)
+void NetCore::TaskManagerEx::DoWorkJob()
 {
 	if (_doingJobWorks.exchange(true) == true) return;
 
 	// CRITICAL SECTION-----
 
-	uint64 limit = ::GetTickCount64() + durationTick;
-
 	while (true)
 	{
-		const uint64 now = ::GetTickCount64();
-		if (now > limit) break;
+		GlobalJobSerializerSPtr queue = GGlobalJobWorker->GetOneJobQueue();
+		if (queue == nullptr) break;
 
-		JobSPtr job = nullptr;
-		if (GGlobalJobQueue->TryPop(job) == false) break;
-
-		job->Execute();
+		queue->ExecuteJobs();
 	}
 
 	// CRITICAL SECTION-----
@@ -87,10 +82,10 @@ void NetCore::TaskManagerEx::DoWorkReservedJob(const uint64 durationTick)
 		const uint64 now = ::GetTickCount64();
 		if (now > limit) break;
 
-		TimeJobSPtr job = nullptr;
-		if (GGlobalJobQueue->TryPop(job, now) == false) break;
+		GlobalTimeJobSerializerSPtr queue = GGlobalJobWorker->GetOneJobTimerQueue();
+		if (queue == nullptr) break;
 
-		job->Execute();
+		queue->ExecuteTimeJobs(now);
 	}
 
 	// CRITICAL SECTION-----

@@ -142,6 +142,18 @@ public:
 	}
 
 	/// <summary>
+	/// Set socket option of SO_UPDATE_CONNECT_CONTEXT
+	/// <para>Note: It must be called after established connection.</para>
+	/// </summary>
+	/// <param name="socket">socket of client-side</param>
+	/// <returns>true if setsockopt is successful, false otherwise.</returns>
+	static bool SetUpdateConnectContext(Socket socket)
+	{
+		const int32 res = ::setsockopt(socket, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, nullptr, 0);
+		return ErrorHandler::WSACheckSocketError(res, Errors::WSA_SETSOCKOPT_UPDATE_CONNECT_CONTEXT_FAILED, false);
+	}
+
+	/// <summary>
 	/// Bind socket with socket address.
 	/// </summary>
 	/// <param name="listenSocket">listen socket to bind</param>

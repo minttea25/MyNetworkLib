@@ -20,13 +20,57 @@ static pair< uint8_t*, _ubyte> GetTestPacket(const string& msg)
     return { builder.GetBufferPointer(), builder.GetSize() };
 }
 
-static void FlushSessionJob()
+class _JobQueue : public NetCore::GlobalJobSerializer
 {
-    std::cout << "FlushSessionJob on tid:" << NetCore::TLS_Id << std::endl;
-    GSessionManager->FlushSessions();
-    if (!off) 
-        NetCore::GGlobalJobQueue->PushJob(&FlushSessionJob, 500);
-}
+public:
+    _JobQueue(int n) : _n(n) {}
+
+    void InitPush()
+    {
+        PushJob(&_JobQueue::FlushJobQueue);
+    }
+
+    std::shared_ptr<NetCore::GlobalJobSerializer> SharedFromThis()
+    {
+        return shared_from_this();
+    }
+
+    void FlushJobQueue()
+    {
+        std::cerr <<  '[' << _n << "] _JobQueue on tid:" << NetCore::TLS_Id << '\n';
+    }
+
+public:
+    int _n;
+};
+
+
+class _TimeJobQueue : public NetCore::GlobalTimeJobSerializer
+{
+public:
+    _TimeJobQueue(int n) : _n(n) {}
+
+    void InitReserve()
+    {
+        ReserveJob(500, &_TimeJobQueue::FlushSessionJob);
+    }
+
+    std::shared_ptr<NetCore::GlobalTimeJobSerializer> SharedFromThis()
+    {
+        return shared_from_this();
+    }
+
+    void FlushSessionJob()
+    {
+        std::cerr << '[' << _n << "] _TimeJobQueue on tid:" << NetCore::TLS_Id << '\n';
+        GSessionManager->FlushSessions();
+        if (!off)
+            ReserveJob(_n, &_TimeJobQueue::FlushSessionJob);
+    }
+
+public:
+    int _n;
+};
 
 constexpr int SESSION_COUNT = 100;
 constexpr int BACK_LOG = 100;
@@ -44,7 +88,7 @@ int main(int argc, char* argv)
     NetCore::InitNetCore(argv, &config);
 
     GPacketManager = new PacketManager();
-    GSessionManager = new SessionManager();
+    GSessionManager = NetCore::make_shared<SessionManager>();
 
     SOCKADDR_IN addr = AddrUtils::GetTcpAddress(IP, PORT);
 
@@ -72,8 +116,8 @@ int main(int argc, char* argv)
             {
                 core->ProcessQueuedCompletionStatusEx(200);
 
-                manager.DoWorkJob(50);
-                manager.DoWorkReservedJob(50);
+                manager.DoWorkJob();
+                manager.DoWorkReservedJob(100);
 
                 if (off) break;
 
@@ -81,7 +125,32 @@ int main(int argc, char* argv)
             }
         }, 3);
 
-    FlushSessionJob();
+    std::shared_ptr<_TimeJobQueue> tq1 = NetCore::make_shared<_TimeJobQueue>(150);
+    std::shared_ptr<_TimeJobQueue> tq2 = NetCore::make_shared<_TimeJobQueue>(200);
+    std::shared_ptr<_TimeJobQueue> tq3 = NetCore::make_shared<_TimeJobQueue>(250);
+    tq1->InitReserve();
+    tq2->InitReserve();
+    tq3->InitReserve();
+
+    std::shared_ptr<_JobQueue> q1 = NetCore::make_shared<_JobQueue>(10000);
+    std::shared_ptr<_JobQueue> q2 = NetCore::make_shared<_JobQueue>(20000);
+    std::shared_ptr<_JobQueue> q3 = NetCore::make_shared<_JobQueue>(30000);
+
+    GSessionManager->ReserveJob(100, &SessionManager::FlushSessions);
+
+    manager.AddTask([&]() {
+        while (true)
+        {
+            if (off) return;
+
+            q1->InitPush();
+            q2->InitPush();
+            q3->InitPush();
+
+            this_thread::sleep_for(50ms);
+        }
+
+        });
 
     while (!off)
     {
@@ -106,7 +175,6 @@ int main(int argc, char* argv)
     manager.JoinAllTasks();
     server->Stop();
 
-    delete GSessionManager;
     delete GPacketManager;
 
     return 0;

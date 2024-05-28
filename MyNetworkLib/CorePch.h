@@ -86,8 +86,10 @@
 #include "Job.h"
 #include "JobSerializer.h"
 #include "TimeJob.h"
-#include "JobSerializerWithTimer.h"
-#include "GlobalJobQueue.h"
+#include "TimeJobSerializer.h"
+#include "GlobalJobSerializer.h"
+#include "GlobalTimeJobSerializer.h"
+#include "GlobalJobWorker.h"
 
 // flatbuffers lib Headers
 #include "flatbuffers/flatbuffers.h"

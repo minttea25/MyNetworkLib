@@ -14,8 +14,8 @@ Memory* GMemory = nullptr;
 SendBufferManager* GSendBufferManager = nullptr;
 CoreLogger* GLogger = nullptr;
 
-#ifdef USE_GLOBAL_JOBQUEUE
-GlobalJobQueue* GGlobalJobQueue = nullptr;
+#ifdef USE_GLOBAL_JOB_SERIALIZER
+GlobalJobWorker* GGlobalJobWorker = nullptr;
 #endif // USE_GLOBAL_JOBQUEUE
 
 class CoreGlobal
@@ -29,8 +29,8 @@ public:
 	{
 		// Note: Delete GMemory last.
 		// delete here
-#ifdef USE_GLOBAL_JOBQUEUE
-		delete GGlobalJobQueue;
+#ifdef USE_GLOBAL_JOB_SERIALIZER
+		delete GGlobalJobWorker;
 #endif // USE_GLOBAL_JOBQUEUE
 		
 		delete GSendBufferManager;
@@ -49,8 +49,8 @@ public:
 		// new constructor here
 		GMemory = new Memory();
 		GSendBufferManager = new SendBufferManager();
-#ifdef USE_GLOBAL_JOBQUEUE
-		GGlobalJobQueue = new GlobalJobQueue();
+#ifdef USE_GLOBAL_JOB_SERIALIZER
+		GGlobalJobWorker = new GlobalJobWorker();
 #endif // USE_GLOBAL_JOBQUEUE
 
 
@@ -67,8 +67,8 @@ public:
 		// new constructor here
 		GMemory = new Memory();
 		GSendBufferManager = new SendBufferManager();
-#ifdef USE_GLOBAL_JOBQUEUE
-		GGlobalJobQueue = new GlobalJobQueue();
+#ifdef USE_GLOBAL_JOB_SERIALIZER
+		GGlobalJobWorker = new GlobalJobWorker();
 #endif // USE_GLOBAL_JOBQUEUE
 
 

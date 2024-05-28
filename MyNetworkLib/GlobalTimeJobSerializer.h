@@ -2,16 +2,18 @@
 
 NAMESPACE_OPEN(NetCore);
 
-/// <summary>
-/// JobSerializer which executes job at reserved tick time.
-/// </summary>
-ABSTRACT class JobSerializerWithTimer : public enable_shared_from_this<JobSerializerWithTimer>
+class GlobalTimeJobSerializer : public enable_shared_from_this<GlobalTimeJobSerializer>
 {
 public:
-	virtual ~JobSerializerWithTimer()
+	GlobalTimeJobSerializer()
 	{
-		DESTRUCTOR(JobSerializerWithTimer);
-	}
+#ifndef USE_GLOBAL_JOB_SERIALIZER
+		ASSERT_CRASH("USE_GLOBAL_JOB_SERIALIZER is not defined.");
+#endif // !USE_GLOBAL_JOB_SERIALIZER
+	};
+	virtual ~GlobalTimeJobSerializer() {}
+
+	void ExecuteTimeJobs(const uint64 now);
 
 	/// <summary>
 	/// Make a TimeJob with function and tickAfter.
@@ -37,36 +39,16 @@ public:
 	/// <param name="...args">the arguments of funtion</param>
 	/// <returns>created TimeJob</returns>
 	template<typename T, typename Ret, typename... Args>
-	TimeJobSPtr ReserveJob(const uint64 tickAfter, Ret(T::* pfunc)(Args...), Args&&... args)
+	TimeJobSPtr ReserveJob(const uint64 tickAfter, Ret(T::* pfunc)(Args...), Args... args)
 	{
 		shared_ptr<T> ptr = static_pointer_cast<T>(shared_from_this());
 		TimeJobSPtr jobSPtr = NetCore::ObjectPool<TimeJob>::make_shared(tickAfter, ptr, pfunc, std::forward<Args>(args)...);
-		
+
 		_push(jobSPtr);
 		return static_pointer_cast<TimeJob>(jobSPtr->shared_from_this());
 	}
-
-	/// <summary>
-	/// Execute jobs if the execution time of job is reached.
-	/// <para>When there is no more job to execute now, returns.</para>
-	/// </summary>
-	void Flush()
-	{
-		while (true)
-		{
-			uint64 now = ::GetTickCount64();
-
-			TimeJobSPtr job = nullptr;
-
-			if (_jobs.TryPop(OUT job, _check_condiion_time_job(now)) == false) return;
-			job->Execute();
-		}
-	}
 private:
-	void _push(TimeJobSPtr job)
-	{
-		_jobs.Push(job);
-	}
+	void _push(TimeJobSPtr job);
 
 	static std::function<bool(const TimeJobSPtr&)> _check_condiion_time_job(const uint64 now)
 	{
@@ -75,8 +57,9 @@ private:
 			};
 	}
 private:
-	_USE_LOCK;
-	LockPriorityQueue<TimeJobSPtr> _jobs;
+	LockPriorityQueue<TimeJobSPtr, TimeJob::TimeJobSPtrComp> _timeJobs;
+
+	Atomic<bool> _reserved = false;
 };
 
 NAMESPACE_CLOSE;

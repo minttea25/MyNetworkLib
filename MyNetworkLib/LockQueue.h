@@ -108,7 +108,7 @@ public:
 	void Clear(OUT Vector<T>& popped)
 	{
 		_WRITE_LOCK;
-		while (T& element = Pop()) popped.push_back(element);
+		while (T element = Pop()) popped.push_back(element);
 	}
 
 	/// <summary>
