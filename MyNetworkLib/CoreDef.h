@@ -9,7 +9,6 @@
 
 #define USE_GLOBAL_JOB_SERIALIZER
 
-
 #ifdef _DEBUG
 #define TEST
 #define CHECK_DESTRUCTOR

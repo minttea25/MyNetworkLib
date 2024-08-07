@@ -1,6 +1,9 @@
 #pragma once
 NAMESPACE_OPEN(NetCore);
 
+/// <summary>
+/// TaskManager using GlobalJobWorker
+/// </summary>
 class TaskManagerEx
 {
 public:
@@ -17,8 +20,11 @@ public:
 	/// </summary>
 	/// <param name="task">Task to do in other threads.</param>
 	/// <param name="count">Count of threads.</param>
-	void AddTask(std::function<void()> task, const count_t count);
+	void AddTask(std::function<void()> task, const uint32 count);
 
+	/// <summary>
+	/// Called when main thread and new thread finishes its task.
+	/// </summary>
 	void JoinAllTasks();
 
 #ifdef USE_GLOBAL_JOB_SERIALIZER
@@ -28,21 +34,20 @@ public:
 	void DoWorkJob();
 
 	/// <summary>
-	/// Execute reserved jobs in GlobalJobQueue for duration.
+	/// Push reserved executable jobs to owner(Job Serializer).
 	/// </summary>
-	/// <param name="durationTick">execution tick duration</param>
-	void DoWorkReservedJob(const uint64 durationTick);
+	void CheckReservedJob();
 #endif // USE_GLOBAL_JOBQUEUE
 
 public: // virtuals
 
 	/// <summary>
-	/// Called when main thread and new thread starts.
+	/// Called when this class is created and new thread starts.
 	/// </summary>
 	virtual void InitTLS() {};
 
 	/// <summary>
-	/// Called when main thread and new thread finishes its task.
+	/// Called when this class is expired and new thread finishes its task.
 	/// </summary>
 	virtual void ClearTLS() {};
 private:
@@ -57,11 +62,6 @@ private:
 	_USE_COMMON_LOCK;
 	Vector<std::thread> _tasks;
 	static Atomic<task_id> _taskId;
-
-#ifdef USE_GLOBAL_JOB_SERIALIZER
-	Atomic<bool> _doingJobWorks = false;
-	Atomic<bool> _doingTimeJobWorks = false;
-#endif // USE_GLOBAL_JOBQUEUE
 };
 
 NAMESPACE_CLOSE;

@@ -43,15 +43,6 @@
     <ClInclude Include="Job.h">
       <Filter>Job</Filter>
     </ClInclude>
-    <ClInclude Include="JobSerializer.h">
-      <Filter>Job</Filter>
-    </ClInclude>
-    <ClInclude Include="TimeJobSerializer.h">
-      <Filter>Job</Filter>
-    </ClInclude>
-    <ClInclude Include="TimeJob.h">
-      <Filter>Job</Filter>
-    </ClInclude>
     <ClInclude Include="CoreDef.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -172,10 +163,13 @@
     <ClInclude Include="Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GlobalJobSerializer.h">
+    <ClInclude Include="JobSerializer.h">
       <Filter>Job</Filter>
     </ClInclude>
-    <ClInclude Include="GlobalTimeJobSerializer.h">
+    <ClInclude Include="ReservableJob.h">
+      <Filter>Job</Filter>
+    </ClInclude>
+    <ClInclude Include="JobWorker.h">
       <Filter>Job</Filter>
     </ClInclude>
   </ItemGroup>
@@ -241,15 +235,6 @@
     <ClCompile Include="Job.cpp">
       <Filter>Job</Filter>
     </ClCompile>
-    <ClCompile Include="JobSerializer.cpp">
-      <Filter>Job</Filter>
-    </ClCompile>
-    <ClCompile Include="TimeJobSerializer.cpp">
-      <Filter>Job</Filter>
-    </ClCompile>
-    <ClCompile Include="TimeJob.cpp">
-      <Filter>Job</Filter>
-    </ClCompile>
     <ClCompile Include="TaskManager.cpp">
       <Filter>Thread</Filter>
     </ClCompile>
@@ -277,10 +262,10 @@
     <ClCompile Include="CoreLogger.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="GlobalJobSerializer.cpp">
+    <ClCompile Include="JobSerializer.cpp">
       <Filter>Job</Filter>
     </ClCompile>
-    <ClCompile Include="GlobalTimeJobSerializer.cpp">
+    <ClCompile Include="GlobalJobWorker.cpp">
       <Filter>Job</Filter>
     </ClCompile>
   </ItemGroup>

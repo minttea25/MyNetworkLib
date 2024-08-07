@@ -4,17 +4,32 @@
 #include "ErrorHandler.h"
 #include "Memory.h"
 #include "SendBufferManager.h"
+#include "GlobalJobWorker.h"
 #include "CoreLogger.h"
 
 NAMESPACE_OPEN(NetCore);
 
 // extern instance used as global
 
+/// <summary>
+/// Memory class used in library
+/// </summary>
 Memory* GMemory = nullptr;
+
+/// <summary>
+/// Provider of sendbuffer in IOCPCore
+/// </summary>
 SendBufferManager* GSendBufferManager = nullptr;
+
+/// <summary>
+/// Logger object used in library (glog)
+/// </summary>
 CoreLogger* GLogger = nullptr;
 
 #ifdef USE_GLOBAL_JOB_SERIALIZER
+/// <summary>
+/// JobWorker used as global in library
+/// </summary>
 GlobalJobWorker* GGlobalJobWorker = nullptr;
 #endif // USE_GLOBAL_JOBQUEUE
 
@@ -22,9 +37,11 @@ class CoreGlobal
 {
 public:
 	CoreGlobal(const CoreGlobal&) = delete;
+
 	CoreGlobal()
 	{
 	}
+
 	~CoreGlobal()
 	{
 		// Note: Delete GMemory last.
@@ -40,7 +57,7 @@ public:
 		// clear method here
 		SocketUtils::Clear();
 	}
-
+public:
 	void _init(const char* argv0, const std::string& logdir)
 	{
 		GLogger = new CoreLogger(argv0, logdir);

@@ -35,7 +35,7 @@ void NetCore::TaskManagerEx::AddTask(std::function<void()> task)
 	_tasks.push_back(std::move(th));
 }
 
-void NetCore::TaskManagerEx::AddTask(std::function<void()> task, const count_t count)
+void NetCore::TaskManagerEx::AddTask(std::function<void()> task, const uint32 count)
 {
 	for (uint32 i = 0; i < count; ++i)
 	{
@@ -52,45 +52,12 @@ void NetCore::TaskManagerEx::JoinAllTasks()
 
 void NetCore::TaskManagerEx::DoWorkJob()
 {
-	if (_doingJobWorks.exchange(true) == true) return;
-
-	// CRITICAL SECTION-----
-
-	while (true)
-	{
-		GlobalJobSerializerSPtr queue = GGlobalJobWorker->GetOneJobQueue();
-		if (queue == nullptr) break;
-
-		queue->ExecuteJobs();
-	}
-
-	// CRITICAL SECTION-----
-
-	_doingJobWorks.store(false);
+	GGlobalJobWorker->DoJobs();
 }
 
-void NetCore::TaskManagerEx::DoWorkReservedJob(const uint64 durationTick)
+void NetCore::TaskManagerEx::CheckReservedJob()
 {
-	if (_doingTimeJobWorks.exchange(true) == true) return;
-
-	// CRITICAL SECTION-----
-
-	uint64 limit = ::GetTickCount64() + durationTick;
-
-	while (true)
-	{
-		const uint64 now = ::GetTickCount64();
-		if (now > limit) break;
-
-		GlobalTimeJobSerializerSPtr queue = GGlobalJobWorker->GetOneJobTimerQueue();
-		if (queue == nullptr) break;
-
-		queue->ExecuteTimeJobs(now);
-	}
-
-	// CRITICAL SECTION-----
-
-	_doingTimeJobWorks.store(false);
+	GGlobalJobWorker->CheckReservedJob(::GetTickCount64());
 }
 #endif // USE_GLOBAL_JOBQUEUE
 
@@ -100,6 +67,8 @@ void NetCore::TaskManagerEx::_init_tls()
 {
 	TLS_SendBuffer = GSendBufferManager->Pop();
 	TLS_Id = _get_new_task_id();
+	TLS_CurrentJobSerializer = nullptr;
+	TLS_GlobalJobsExecutionMaxTickCount = JobSerializer::DEFAULT_EXECUTION_TICKCOUNT;
 
 	InitTLS();
 }

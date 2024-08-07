@@ -27,7 +27,7 @@ public:
 	/// <param name="task">Task to do in other threads.</param>
 	/// <param name="count">Count of threads.</param>
 	/// <returns>First value is first-created task id and second value is last-created task id.</returns>
-	pair<task_id, task_id> AddTask(std::function<void()> task, const count_t count);
+	pair<task_id, task_id> AddTask(std::function<void()> task, const uint32 count);
 	/// <summary>
 	/// Checks if the task of the id is running.
 	/// <para>Note: It is not lock-safe funtion.</para>
@@ -42,6 +42,9 @@ public:
 	/// <returns>True if successful, false if the task is not done or not joinable.</returns>
 	bool JoinTask(const task_id id);
 
+	/// <summary>
+	/// Join all tasks. Note that it will block until all tasks are joined.
+	/// </summary>
 	void JoinAllTasks()
 	{
 		_join_all_tasks();

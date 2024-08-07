@@ -5,7 +5,7 @@ NAMESPACE_OPEN(NetCore);
 /// Is has two queues, one is jobs and the other one is reserved jobs.
 /// <para></para>
 /// </summary>
-class GlobalJobWorker
+class GlobalJobWorker final : public JobWorker
 {
 public:
 	GlobalJobWorker()
@@ -20,33 +20,56 @@ public:
 		DESTRUCTOR(GlobalJobWorker);
 	}
 
-	void AddJobQueue(GlobalJobSerializerSPtr jobQueue)
+	void AddJobSerializer(AJobSerializerSPtr jobSerializer) override final
 	{
-		_queues.Push(jobQueue);
+		_jobQueue.Push(jobSerializer);
 	}
 
-	GlobalJobSerializerSPtr GetOneJobQueue()
+	void DoJobs() override final;
+
+	void ClearJobs() override final
 	{
-		GlobalJobSerializerSPtr queue = nullptr;
-		if (_queues.TryPop(queue) == false) return nullptr;
-		else return queue;
+		_jobQueue.Clear();
+	}
+	
+	ReservableJob& AddReservableJob(const uint64 tickAfter, const JobSPtr job, const AJobSerializerWPtr owner) override final
+	{
+		ReservableJob rJob(tickAfter + ::GetTickCount64(), job, owner);
+
+		WRITE_LOCK(reservableJobQueue);
+		_reservableQueue.push(rJob);
+
+		return rJob;
 	}
 
-	void AddTimeJobQueue(GlobalTimeJobSerializerSPtr jobTimerQueue)
+	void CheckReservedJob(const uint64 nowTick) override final;
+
+	void ClearReservedJobs() override final
 	{
-		_timerQueues.Push(jobTimerQueue);
+		WRITE_LOCK(reservableJobQueue);
+
+		// no clear method in pq
+		while (_reservableQueue.empty() == false)
+		{
+			_reservableQueue.pop();
+		}
 	}
 
-	GlobalTimeJobSerializerSPtr GetOneJobTimerQueue()
+
+private:
+	AJobSerializerSPtr PopJobSerializer() override final
 	{
-		GlobalTimeJobSerializerSPtr queue = nullptr;
-		if (_timerQueues.TryPop(queue) == false) return nullptr;
-		else return queue;
+		AJobSerializerSPtr queue = nullptr;
+		DISCARD _jobQueue.TryPop(queue);
+		return queue;
 	}
 
 private:
-	LockQueue<GlobalJobSerializerSPtr> _queues;
-	LockQueue<GlobalTimeJobSerializerSPtr> _timerQueues;
+	USE_LOCK(reservableJobQueue);
+	PriorityQueue<ReservableJob> _reservableQueue;
+	Atomic<bool> _executingReservables;
+
+	LockQueue<AJobSerializerSPtr> _jobQueue;
 };
 
 NAMESPACE_CLOSE;

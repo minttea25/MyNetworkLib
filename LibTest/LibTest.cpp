@@ -14,130 +14,88 @@
 
 using namespace std;
 
+class Room : public NetCore::JobSerializer
+{
+public:
+	~Room() { std::cout << "~Room" << std::endl; }
+	void AddJob()
+	{
+		PushJob([&] {
+			n++;
+			std::cout << NetCore::TLS_Id << " - Job: " << ::GetTickCount64() % 10000 << " n: " << n << std::endl;
+			});
+	}
+
+	void Reserve()
+	{
+		n--;
+		std::cout << NetCore::TLS_Id << " - RJob: " << ::GetTickCount64() % 10000 << " n: " << n << std::endl;
+	}
+
+	void Print(int value)
+	{
+		std::cout << NetCore::TLS_Id << " Print: " << value << std::endl;
+	}
+
+	int n = 0;
+};
+
 int main(int argc, char* argv)
 {
 	NetCore::InitNetCore(argv, "../TestLogs");
 
-	LOG(INFO) << "Test Log 1";
-	LOG(WARNING) << "Tes Log 2";
+	{
+		google::LogToStderr();
+	}
+
+	std::shared_ptr<Room> room = NetCore::make_shared<Room>();
+
+	NetCore::TaskManagerEx manager;
+	manager.AddTask([&] {
+		while (true)
+		{
+			NetCore::TLS_GlobalJobsExecutionMaxTickCount = 100; // (1s)
+
+			manager.DoWorkJob();
+
+			manager.CheckReservedJob();
+		}
+		}, 3);
+
+	// for check priority queue
+	{
+		auto job1 = NetCore::make_shared< NetCore::Job>(room, &Room::Print, 1);
+		auto& rJobRef1 = NetCore::GGlobalJobWorker->AddReservableJob(1000, job1, room);
+
+		auto job2 = NetCore::make_shared< NetCore::Job>(room, &Room::Print, 2);
+		auto& rJobRef2 = NetCore::GGlobalJobWorker->AddReservableJob(500, job2, room);
+
+		auto job3 = NetCore::make_shared< NetCore::Job>(room, &Room::Print, 3);
+		auto& rJobRef3 = NetCore::GGlobalJobWorker->AddReservableJob(1500, job3, room);
+	}
+
+	manager.AddTask([&] {
+		bool bin = 0;
+		while (true)
+		{
+			auto job = NetCore::make_shared< NetCore::Job>(room, &Room::Reserve);
+			auto& rJobRef = NetCore::GGlobalJobWorker->AddReservableJob(100, job, room);
+			
+			if (bin == 0)
+			{
+				rJobRef.Cancel();
+				bin = 1;
+			}
+			else bin = 0;
+
+			this_thread::sleep_for(300ms);
+
+			room->AddJob();
+			room->AddJob();
+		}
+		});
+
+	manager.JoinAllTasks();
 
 	return 0;	
 }
-
-
-
-//using fbb = flatbuffers::FlatBufferBuilder;
-
-//static string ColorToString(Test::Color color)
-//{
-//	switch (color)
-//	{
-//	case Test::Color_Red: return "Red";
-//	case Test::Color_Green: return "Green";
-//	case Test::Color_Blue: return "Blue";
-//	default: return "None";
-//	}
-//}
-
-//void TestFlatBuffers()
-//{
-//	// flat buffer test
-//	{
-//		NetCore::FBAllocator alloc;
-//		fbb builder(1024, &alloc);
-//
-//		std::string str = "Slime";
-//		auto name_offset = builder.CreateString(str);
-//
-//		Test::Vec3 pos(1.0f, 2.0f, 3.0f);
-//		auto drops = builder.CreateVector(std::vector<uint8_t>({ 1, 2, 3 }));
-//		auto o_creature = Test::CreateCreature(builder, false, &pos, 1500, name_offset, drops, Test::Color_Blue);
-//		builder.Finish(o_creature);
-//
-//		auto p_monster = builder.GetBufferPointer();
-//		auto p_monster_size = builder.GetSize();
-//
-//		const Test::Creature* monster = Test::GetCreature(p_monster);
-//
-//		auto _name = monster->name()->c_str();
-//		auto _pos = monster->pos();
-//		auto _hp = monster->hp();
-//		auto _friendly = monster->friendly();
-//		auto _color = monster->color();
-//		auto _drops = monster->drops();
-//
-//		cout << "Monster Name: " << _name << endl;
-//		cout << "Monster Position: (" << _pos->x() << ", "
-//			<< _pos->y() << ", " << _pos->z() << ")" << endl;
-//		cout << "Monster Hp: " << monster->hp() << endl;
-//		cout << "Friendly? : " << monster->friendly() << endl;
-//		cout << "Monster Color: " << ColorToString(monster->color()) << endl;
-//		for (uint32_t i = 0; i < _drops->size(); ++i)
-//		{
-//			cout << (int)(_drops->Get(i)) << endl;
-//		}
-//	}
-//
-//	{
-//		{
-//			NetCore::FBAllocator alloc;
-//			fbb builder(512, &alloc);
-//
-//			Test::Vec3 pos(1.0f, 10.0f, 20.0f);
-//			auto magician_name = builder.CreateString("Magician");
-//			auto o_magician = Test::CreateMagician(builder, 10);
-//			auto o_player = Test::CreatePlayer(builder, magician_name, &pos,
-//				Test::Jobs_Magician, o_magician.Union());
-//			builder.Finish(o_player);
-//
-//			auto p_magician = builder.GetBufferPointer();
-//			auto p_magician_size = builder.GetSize();
-//
-//			const Test::Player* player = Test::GetPlayer(p_magician);
-//			auto magician = player->job_as_Magician();
-//
-//			auto _name = player->name()->c_str();
-//			auto _pos = player->pos();
-//			auto _magic = magician->magic();
-//
-//			cout << "Player name: " << _name << endl;
-//			cout << "Player Position: (" << _pos->x() << ", "
-//				<< _pos->y() << ", " << _pos->z() << ")" << endl;
-//			cout << "Player magic: " << _magic << endl;
-//		}
-//	}
-//
-//	{
-//		//NetCore::FBAllocator allocator;
-//		//fbb builder(512, &allocator);
-//		//auto pkt = NetCore::Packet::CreatePacket(builder);
-//		//NetCore::Packet::PacketInfo info(101, 0);
-//		//auto msg = builder.CreateString("Test Message");
-//		//auto tpkt = NetCore::Packet::CreateTestPacket(builder, &info, msg);
-//
-//		//cout << builder.GetSize() << endl;
-//		//
-//
-//		//builder.Finish(tpkt);
-//
-//		//auto pkt_ptr = builder.GetBufferPointer();
-//		//auto pkt_size = builder.GetSize();
-//
-//		//cout << pkt_size << endl;
-//
-//		//{
-//		//	// deserialize
-//		//	flatbuffers::FlatBufferBuilder builder(0, 0);
-//
-//		//	auto root = flatbuffers::GetRoot<NetCore::Packet::TestPacket>(pkt_ptr);
-//
-//		//	auto pkt_id = root->info()->id();
-//		//	auto pkt_size = root->info()->size();
-//		//	auto pkt_msg = root->msg()->c_str();
-//
-//		//	cout << "Packet Id: " << pkt_id << endl;
-//		//	cout << "Packet Size: " << pkt_size << endl;
-//		//	cout << "Packet Message: " << pkt_msg << endl;
-//		//}
-//	}
-//}

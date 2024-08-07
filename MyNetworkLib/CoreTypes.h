@@ -26,7 +26,6 @@ using LockGuard = std::lock_guard<std::mutex>;
 using Socket = SOCKET;
 
 using task_id = uint32;
-using count_t = uint32;
 
 #define SHARED_PTR(name) using name##SPtr = std::shared_ptr<class name>;
 #define SHARED_PTR_S(name) using name##SPtr = std::shared_ptr<struct name>;
@@ -39,17 +38,14 @@ SHARED_PTR(Connector);
 SHARED_PTR(Listener);
 SHARED_PTR(Service);
 SHARED_PTR(Job);
-SHARED_PTR(TimeJob);
 SHARED_PTR(SendBuffer);
-SHARED_PTR(JobSerializer);
-SHARED_PTR(TimeJobSerializer);
-SHARED_PTR(GlobalJobSerializer);
-SHARED_PTR(GlobalTimeJobSerializer);
+SHARED_PTR(AJobSerializer);
 
 #define WEAK_PTR(name) using name##WPtr = std::weak_ptr<class name>;
 
 WEAK_PTR(Session);
 WEAK_PTR(IOCPObject);
+WEAK_PTR(AJobSerializer);
 
 // Lock type
 using Lock = class RWLock;

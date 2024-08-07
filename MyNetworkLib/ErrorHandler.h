@@ -2,8 +2,6 @@
 
 NAMESPACE_OPEN(NetCore);
 
-// TODO : Change names later
-
 /// <summary>
 /// Application Error Codes
 /// </summary>
@@ -137,20 +135,21 @@ public:
 	static inline void SetLastError(Errors error)
 	{
 		_app_last_error.store(error);
+		__NETCORE_CODE_ERROR(error);
 	}
 
 	static inline void AssertCrash(const bool condition, const Errors errCode, const char* msg = nullptr)
 	{
 		if (!condition)
 		{
-			__NETCORE_CODE_ERROR(errCode);
+			SetLastError(errCode);
 			ASSERT_CRASH(false);
 		}
 	}
 
 	static inline void AssertCrash(const Errors errCode, const char* msg = nullptr)
 	{
-		__NETCORE_CODE_ERROR(errCode);
+		SetLastError(errCode);
 		ASSERT_CRASH(false);
 	}
 
@@ -158,7 +157,7 @@ public:
 	{
 		if (!condition)
 		{
-			__NETCORE_CODE_ERROR(errCode);
+			SetLastError(errCode);
 			return errCode;
 		}
 		return Errors::NONE;
@@ -171,13 +170,10 @@ public:
 			const int32 wsaErr = ::WSAGetLastError();
 			__NETCORE_LOG_WSA_ERROR(wsaErr);
 
-			_app_last_error.store(errCode);
+			SetLastError(errCode);
 
 			if (crash)
 			{
-				// TODO : change later with other function
-				std::string log = "Last error was " + _app_last_error.load();
-				__NETCORE_LOG_ERROR(log);
 				ASSERT_CRASH("WSALastError was SOCKET_ERROR");
 			}
 			return false;
@@ -192,12 +188,10 @@ public:
 			const int32 wsaErr = ::WSAGetLastError();
 			__NETCORE_LOG_WSA_ERROR(wsaErr);
 
-			_app_last_error.store(errCode);
+			SetLastError(errCode);
 
 			if (crash)
 			{
-				// TODO : change later with other function
-				std::cerr << "Last error was " << _app_last_error.load() << std::endl;
 				ASSERT_CRASH("WSALastError was INVALID_SOCKET");
 			}
 			return false;
@@ -223,8 +217,7 @@ public:
 			if (err == WSA_IO_PENDING) return Errors::NONE;
 			else
 			{
-				_app_last_error.store(errorCode);
-				__NETCORE_CODE_ERROR(errorCode);
+				SetLastError((Errors)errorCode);
 				return err;
 			}
 		}

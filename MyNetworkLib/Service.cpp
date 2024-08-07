@@ -71,7 +71,7 @@ bool NetCore::ClientService::Start()
 bool NetCore::ClientService::Stop()
 {
 	_connector = nullptr;
-	// TODO ?
+	
 	ReleaseAllSessions();
 
 	Service::_onGoing = false;

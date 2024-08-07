@@ -40,7 +40,7 @@ NetCore::task_id NetCore::Thread::TaskManager::AddTask(std::function<void()> tas
 	return id;
 }
 
-pair<NetCore::task_id, NetCore::task_id> NetCore::Thread::TaskManager::AddTask(std::function<void()> task, const count_t count)
+pair<NetCore::task_id, NetCore::task_id> NetCore::Thread::TaskManager::AddTask(std::function<void()> task, const uint32 count)
 {
 	if (count == 1)
 	{

@@ -2,7 +2,6 @@
 
 NAMESPACE_OPEN(NetCore);
 
-// TODO : It will be included as NetCoreConfig later.
 struct LoggerConfig
 {
 	bool LogToStderr = false;
@@ -36,7 +35,6 @@ public:
 		google::SetLogDestination(google::GLOG_FATAL, FATAL_PATH);
 	}
 
-	//[[deprecated("It is temp constructor.")]]
 	CoreLogger(const char* name, const std::string& logdir)
 	{
 		google::InitGoogleLogging(name);

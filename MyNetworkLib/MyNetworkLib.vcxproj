@@ -164,15 +164,14 @@
     <ClInclude Include="FBAllocator.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="CoreGlobal.h" />
-    <ClInclude Include="GlobalJobSerializer.h" />
+    <ClInclude Include="JobSerializer.h" />
     <ClInclude Include="GlobalJobWorker.h" />
-    <ClInclude Include="GlobalTimeJobSerializer.h" />
     <ClInclude Include="IOCPCore.h" />
     <ClInclude Include="IOCPEvent.h" />
     <ClInclude Include="IOCPObject.h" />
     <ClInclude Include="Job.h" />
-    <ClInclude Include="JobSerializer.h" />
-    <ClInclude Include="TimeJobSerializer.h" />
+    <ClInclude Include="JobWorker.h" />
+    <ClInclude Include="ReservableJob.h" />
     <ClInclude Include="Listener.h" />
     <ClInclude Include="Lock.h" />
     <ClInclude Include="LockPriorityQueue.h" />
@@ -197,7 +196,6 @@
     <ClInclude Include="TaskManager.h" />
     <ClInclude Include="TaskManagerEx.h" />
     <ClInclude Include="ThreadPool.h" />
-    <ClInclude Include="TimeJob.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
@@ -207,14 +205,12 @@
     <ClCompile Include="CoreGlobal.cpp" />
     <ClCompile Include="CoreTLS.cpp" />
     <ClCompile Include="ErrorHandler.cpp" />
-    <ClCompile Include="GlobalJobSerializer.cpp" />
-    <ClCompile Include="GlobalTimeJobSerializer.cpp" />
+    <ClCompile Include="JobSerializer.cpp" />
+    <ClCompile Include="GlobalJobWorker.cpp" />
     <ClCompile Include="IOCPCore.cpp" />
     <ClCompile Include="IOCPEvent.cpp" />
     <ClCompile Include="IOCPObject.cpp" />
     <ClCompile Include="Job.cpp" />
-    <ClCompile Include="JobSerializer.cpp" />
-    <ClCompile Include="TimeJobSerializer.cpp" />
     <ClCompile Include="Listener.cpp" />
     <ClCompile Include="CoreLogger.cpp" />
     <ClCompile Include="PacketWrapper.cpp" />
@@ -240,7 +236,6 @@
     <ClCompile Include="TaskManager.cpp" />
     <ClCompile Include="TaskManagerEx.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
-    <ClCompile Include="TimeJob.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

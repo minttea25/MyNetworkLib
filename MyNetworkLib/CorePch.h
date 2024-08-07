@@ -28,8 +28,9 @@
 #include "CoreDef.h"
 #include "CoreMacroDef.h"
 #include "CoreTypes.h"
-#include "CoreGlobal.h"
 #include "CoreTLS.h"
+#include "CoreGlobal.h"
+
 #include "CoreSTLContainer.h"
 
 #include "ErrorHandler.h"
@@ -85,10 +86,8 @@
 // Job Headers
 #include "Job.h"
 #include "JobSerializer.h"
-#include "TimeJob.h"
-#include "TimeJobSerializer.h"
-#include "GlobalJobSerializer.h"
-#include "GlobalTimeJobSerializer.h"
+#include "ReservableJob.h"
+#include "JobWorker.h"
 #include "GlobalJobWorker.h"
 
 // flatbuffers lib Headers

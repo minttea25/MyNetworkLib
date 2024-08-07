@@ -8,6 +8,11 @@ NAMESPACE_OPEN(NetCore);
 class Job : public enable_shared_from_this<Job>
 {
 public:
+	virtual ~Job()
+	{
+		//DESTRUCTOR(Job);
+	}
+
 	/// <summary>
 	/// Make a job with given function.
 	/// </summary>
@@ -39,7 +44,7 @@ public:
 	/// </summary>
 	void Execute()
 	{
-		_task();
+		if (_task != nullptr) _task();
 	}
 private:
 	std::function<void()> _task;
