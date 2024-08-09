@@ -165,7 +165,6 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="CoreGlobal.h" />
     <ClInclude Include="JobSerializer.h" />
-    <ClInclude Include="GlobalJobWorker.h" />
     <ClInclude Include="IOCPCore.h" />
     <ClInclude Include="IOCPEvent.h" />
     <ClInclude Include="IOCPObject.h" />
@@ -206,15 +205,16 @@
     <ClCompile Include="CoreTLS.cpp" />
     <ClCompile Include="ErrorHandler.cpp" />
     <ClCompile Include="JobSerializer.cpp" />
-    <ClCompile Include="GlobalJobWorker.cpp" />
     <ClCompile Include="IOCPCore.cpp" />
     <ClCompile Include="IOCPEvent.cpp" />
     <ClCompile Include="IOCPObject.cpp" />
     <ClCompile Include="Job.cpp" />
+    <ClCompile Include="JobWorker.cpp" />
     <ClCompile Include="Listener.cpp" />
     <ClCompile Include="CoreLogger.cpp" />
     <ClCompile Include="PacketWrapper.cpp" />
     <ClCompile Include="RecvBuffer.cpp" />
+    <ClCompile Include="ReservableJob.cpp" />
     <ClCompile Include="RWLock.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />

@@ -88,7 +88,6 @@
 #include "JobSerializer.h"
 #include "ReservableJob.h"
 #include "JobWorker.h"
-#include "GlobalJobWorker.h"
 
 // flatbuffers lib Headers
 #include "flatbuffers/flatbuffers.h"

@@ -29,14 +29,19 @@ public:
 	/// <param name="pfunc">the pointer of the function</param>
 	/// <param name="...args">arguments of the function</param>
 	template<typename T, typename Ret, typename... Args>
-	Job(std::shared_ptr<T> ptr, Ret(T::*pfunc), Args&&... args)
+	Job(std::shared_ptr<T> ptr, Ret(T::*pfunc)(Args...), Args&&... args)
 	{
-		_task = [ptr, pfunc, args = std::make_tuple(std::forward<Args>(args)...)]() mutable 
+		_task = [ptr, pfunc, args = std::make_tuple(std::forward<Args>(args)...)]() mutable {
+			std::apply(
+				[ptr, pfunc](Args&&... _args) { (ptr.get()->*pfunc)(std::forward<Args>(_args)...); },
+				std::move(args));
+			};
+		/*_task = [ptr, pfunc, args = std::make_tuple(std::forward<Args>(args)...)]() mutable 
 			{
 			std::apply(
 				[ptr, pfunc](Args&&... args) { (ptr.get()->*pfunc)(std::forward<Args>(args)...); }, 
 				std::move(args));
-			};
+			};*/
 	}
 
 	/// <summary>

@@ -63,23 +63,17 @@ int main(int argc, char* argv)
 		}, 3);
 
 	// for check priority queue
-	{
-		auto job1 = NetCore::make_shared< NetCore::Job>(room, &Room::Print, 1);
-		auto& rJobRef1 = NetCore::GGlobalJobWorker->AddReservableJob(1000, job1, room);
-
-		auto job2 = NetCore::make_shared< NetCore::Job>(room, &Room::Print, 2);
-		auto& rJobRef2 = NetCore::GGlobalJobWorker->AddReservableJob(500, job2, room);
-
-		auto job3 = NetCore::make_shared< NetCore::Job>(room, &Room::Print, 3);
-		auto& rJobRef3 = NetCore::GGlobalJobWorker->AddReservableJob(1500, job3, room);
-	}
+	/*{
+		auto& rJobRef1 = room->PushReservableJob(1000, &Room::Print, 1);
+		auto& rJobRef2 = room->PushReservableJob(500, &Room::Print, 2);
+		auto& rJobRef3 = room->PushReservableJob(1500, &Room::Print, 3);
+	}*/
 
 	manager.AddTask([&] {
 		bool bin = 0;
 		while (true)
 		{
-			auto job = NetCore::make_shared< NetCore::Job>(room, &Room::Reserve);
-			auto& rJobRef = NetCore::GGlobalJobWorker->AddReservableJob(100, job, room);
+			auto& rJobRef = room->PushReservableJob(100, &Room::Reserve);
 			
 			if (bin == 0)
 			{
@@ -88,7 +82,7 @@ int main(int argc, char* argv)
 			}
 			else bin = 0;
 
-			this_thread::sleep_for(300ms);
+			this_thread::sleep_for(50ms);
 
 			room->AddJob();
 			room->AddJob();

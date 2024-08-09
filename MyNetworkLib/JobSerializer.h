@@ -1,5 +1,10 @@
 #pragma once
 
+#include "Job.h"
+#include "ReservableJob.h"
+#include "JobSerializer.h"
+#include "JobWorker.h"
+
 NAMESPACE_OPEN(NetCore);
 
 /// <summary>
@@ -42,6 +47,9 @@ public:
 		Push(NetCore::ObjectPool<Job>::make_shared(ptr, pfunc, std::forward<Args>(args)...));
 	}
 
+	//template<typename T, typename Ret, typename... Args>
+	//PURE_VIRTUAL virtual ReservableJob& PushReservableJob(const uint64 tickAfter, Ret(T::* pfunc)(Args...), Args... args) = 0;
+
 	/// <summary>
 	/// Push job to queue.
 	/// </summary>
@@ -82,6 +90,17 @@ public:
 	/// </summary>
 	/// <param name="job">job to execute</param>
 	void Push(JobSPtr job) override;
+
+	template<typename T, typename Ret, typename... Args>
+	ReservableJob& PushReservableJob(const uint64 tickAfter, Ret(T::* pfunc)(Args...), Args... args)
+	{
+		std::shared_ptr<T> obj = static_pointer_cast<T>(shared_from_this());
+		JobSPtr job = ObjectPool<Job>::make_shared(obj, pfunc, std::forward<Args>(args)...);
+		ReservableJob rJob(tickAfter + ::GetTickCount64(), job, shared_from_this());
+		GGlobalJobWorker->AddReservableJob(rJob, shared_from_this());
+
+		return rJob;
+	}
 public:
 	static constexpr uint64 DEFAULT_EXECUTION_TICKCOUNT = 64;
 

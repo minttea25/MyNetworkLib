@@ -1,4 +1,8 @@
 #pragma once
+
+#include "Job.h"
+#include "JobSerializer.h"
+
 NAMESPACE_OPEN(NetCore);
 
 struct JobData
@@ -44,20 +48,7 @@ public:
 	/// <summary>
 	/// Call it when the job is executable. 
 	/// </summary>
-	void PushJobToSerializer()
-	{
-		ASSERT_CRASH(_jobData != nullptr);
-
-		if (_canceled == false)
-		{
-			if (auto owner = _jobData->_owner.lock())
-			{
-				owner->Push(_jobData->_job);
-			}
-		}
-
-		ObjectPool<JobData>::Release(_jobData);
-	}
+	void PushJobToSerializer();
 
 	/// <summary>
 	/// Get executable tick value

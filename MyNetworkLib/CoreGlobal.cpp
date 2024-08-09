@@ -4,7 +4,6 @@
 #include "ErrorHandler.h"
 #include "Memory.h"
 #include "SendBufferManager.h"
-#include "GlobalJobWorker.h"
 #include "CoreLogger.h"
 
 NAMESPACE_OPEN(NetCore);
