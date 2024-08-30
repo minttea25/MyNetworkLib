@@ -2,6 +2,9 @@
 
 NAMESPACE_OPEN(NetCore);
 
+/// <summary>
+/// Read-Write lock
+/// </summary>
 class RWLock
 {
 	static constexpr inline uint32 FLAG_SIZE = 16;

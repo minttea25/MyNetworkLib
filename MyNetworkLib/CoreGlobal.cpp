@@ -32,6 +32,9 @@ CoreLogger* GLogger = nullptr;
 GlobalJobWorker* GGlobalJobWorker = nullptr;
 #endif // USE_GLOBAL_JOBQUEUE
 
+/// <summary>
+/// CoreGlobal contains central-managed global variables of NetCore library.
+/// </summary>
 class CoreGlobal
 {
 public:
@@ -100,7 +103,7 @@ public:
 /// <para>NetCore::ClearNetCore should be called when the app is closed.</para>
 /// </summary>
 /// <param name="argv0">program name for glog</param>
-/// <param name="logdir"></param>
+/// <param name="logdir">location to create log files</param>
 void InitNetCore(const char* argv0, const std::string& logdir)
 {
 	GCoreGlobal._init(argv0, logdir);

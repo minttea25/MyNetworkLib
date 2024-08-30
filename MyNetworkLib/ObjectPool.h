@@ -9,6 +9,9 @@ class ObjectPool
 {
 	using PTYPE = Type*;
 public:
+	/// <summary>
+	/// If there is extra object created before, returns it, otherwise returns created new one.
+	/// </summary>
 	template<typename... Args>
 	static Type* Acquire(Args&&... args)
 	{
@@ -18,6 +21,10 @@ public:
 		new(memory)Type(std::forward<Args>(args)...);
 		return memory;
 	}
+
+	/// <summary>
+	/// Release the pooled object (contains calling destructor)
+	/// </summary>
 	static void Release(PTYPE obj)
 	{
 		// Call destructor explicitly
@@ -26,6 +33,9 @@ public:
 		s_pool.Release(MemoryHeader::DetachHeader(obj));
 	}
 
+	/// <summary>
+	/// If there is extra std::shared_ptr based on object created before, return it, otherwise returns created new std::shared_ptr.
+	/// </summary>
 	template<typename... Args>
 	static std::shared_ptr<Type> make_shared(Args... args)
 	{

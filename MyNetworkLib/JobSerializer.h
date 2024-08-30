@@ -8,7 +8,7 @@
 NAMESPACE_OPEN(NetCore);
 
 /// <summary>
-/// Abstract class for JobSerializer
+/// AJobSerializer is an abstract class providing to serialize jobs.
 /// </summary>
 ABSTRACT class AJobSerializer : public enable_shared_from_this<AJobSerializer>
 {
@@ -64,7 +64,7 @@ public:
 };
 
 /// <summary>
-/// Classes to serialize jobs should be inherited this.
+/// JobSerializer is a base class using GlobalJobWorker in library as reserve jobs.
 /// </summary>
 class JobSerializer : public AJobSerializer
 {
@@ -91,17 +91,23 @@ public:
 	/// <param name="job">job to execute</param>
 	void Push(JobSPtr job) override;
 
+	/// <summary>
+	/// Creates a reservable job and pushes it to GGlobalJobWorker of library.
+	/// </summary>
 	template<typename T, typename Ret, typename... Args>
-	ReservableJob& PushReservableJob(const uint64 tickAfter, Ret(T::* pfunc)(Args...), Args... args)
+	ReservableJobSPtr PushReservableJob(const uint64 tickAfter, Ret(T::* pfunc)(Args...), Args... args)
 	{
 		std::shared_ptr<T> obj = static_pointer_cast<T>(shared_from_this());
 		JobSPtr job = ObjectPool<Job>::make_shared(obj, pfunc, std::forward<Args>(args)...);
-		ReservableJob rJob(tickAfter + ::GetTickCount64(), job, shared_from_this());
+		ReservableJobSPtr rJob = ObjectPool<ReservableJob>::make_shared(tickAfter + ::GetTickCount64(), job, shared_from_this());
 		GGlobalJobWorker->AddReservableJob(rJob, shared_from_this());
 
 		return rJob;
 	}
 public:
+	/// <summary>
+	/// The default value that decides duration a thread check reserved jobs.
+	/// </summary>
 	static constexpr uint64 DEFAULT_EXECUTION_TICKCOUNT = 64;
 
 private:

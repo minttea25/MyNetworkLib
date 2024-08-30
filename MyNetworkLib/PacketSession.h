@@ -2,7 +2,10 @@
 
 NAMESPACE_OPEN(NetCore);
 
-class PacketSession : public Session
+/// <summary>
+/// Session for packet (packet which may be controlled by Google::FlatBuffers)
+/// </summary>
+class PacketSession abstract : public Session
 {
 	static constexpr uint32 FLUSH_SEND_MIN_INTERVAL_TICK = 1000;
 	static constexpr uint32 FLUSH_SEND_MIN_RESERVED_BYTE_LENGTH = 128;

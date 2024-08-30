@@ -27,7 +27,7 @@ public:
 	std::string _ip;
 };
 
-class SessionManager : public NetCore::GlobalTimeJobSerializer
+class SessionManager : public NetCore::JobSerializer
 {
 public:
 	SessionManager()

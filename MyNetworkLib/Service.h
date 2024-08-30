@@ -11,7 +11,7 @@ enum ServiceType : uint8
 
 using SessionFactory = std::function<SessionSPtr()>;
 
-ABSTRACT class Service : public std::enable_shared_from_this<Service>
+ABSTRACT class Service abstract : public std::enable_shared_from_this<Service>
 {
 public:
 	Service(ServiceType serviceType, IOCPCoreSPtr iocpCore, SOCKADDR_IN sockAddr, SessionFactory sessionFactory, const uint32 sessionCount);
@@ -143,8 +143,6 @@ protected:
 private:
 	Set<SessionSPtr> _sessions;
 	ListenerSPtr _listener = nullptr;
-
-	
 
 	friend class Listener;
 };

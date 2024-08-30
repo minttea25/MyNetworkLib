@@ -8,10 +8,7 @@ NAMESPACE_OPEN(NetCore);
 class Job : public enable_shared_from_this<Job>
 {
 public:
-	virtual ~Job()
-	{
-		//DESTRUCTOR(Job);
-	}
+	virtual ~Job() {}
 
 	/// <summary>
 	/// Make a job with given function.
@@ -29,31 +26,25 @@ public:
 	/// <param name="pfunc">the pointer of the function</param>
 	/// <param name="...args">arguments of the function</param>
 	template<typename T, typename Ret, typename... Args>
-	Job(std::shared_ptr<T> ptr, Ret(T::*pfunc)(Args...), Args&&... args)
-	{
-		_task = [ptr, pfunc, args = std::make_tuple(std::forward<Args>(args)...)]() mutable {
-			std::apply(
-				[ptr, pfunc](Args&&... _args) { (ptr.get()->*pfunc)(std::forward<Args>(_args)...); },
-				std::move(args));
-			};
-		/*_task = [ptr, pfunc, args = std::make_tuple(std::forward<Args>(args)...)]() mutable 
-			{
-			std::apply(
-				[ptr, pfunc](Args&&... args) { (ptr.get()->*pfunc)(std::forward<Args>(args)...); }, 
-				std::move(args));
-			};*/
-	}
-
+	Job(std::shared_ptr<T> ptr, Ret(T::* pfunc)(Args...), Args&&... args);
+	
 	/// <summary>
 	/// Execute the job.
 	/// </summary>
-	void Execute()
-	{
-		if (_task != nullptr) _task();
-	}
+	void Execute() { if (_task != nullptr) _task(); }
 private:
 	std::function<void()> _task;
 };
 
 
+
+template<typename T, typename Ret, typename ...Args>
+inline Job::Job(std::shared_ptr<T> ptr, Ret(T::* pfunc)(Args...), Args && ...args)
+{
+	_task = [ptr, pfunc, args = std::make_tuple(std::forward<Args>(args)...)]() mutable {
+		std::apply(
+			[ptr, pfunc](Args&&... _args) { (ptr.get()->*pfunc)(std::forward<Args>(_args)...); },
+			std::move(args));
+		};
+}
 NAMESPACE_CLOSE;

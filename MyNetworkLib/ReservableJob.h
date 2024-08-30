@@ -8,7 +8,6 @@ NAMESPACE_OPEN(NetCore);
 struct JobData
 {
 public:
-
 	JobData(const JobSPtr _job, const AJobSerializerWPtr _owner)
 		: _job(_job), _owner(_owner)
 	{
@@ -16,16 +15,13 @@ public:
 
 	~JobData()
 	{
-		// For releasing shared pointer of job when returning to pool
-		//_job = nullptr;
-		DESTRUCTOR(JobData);
 	}
 
 private:
 	JobSPtr _job;
 	AJobSerializerWPtr _owner;
 
-	friend class ReservableJob;
+	friend struct ReservableJob;
 };
 
 /// <summary>
@@ -39,11 +35,9 @@ public:
 	{
 	}
 
-	/*~ReservableJob()
+	~ReservableJob()
 	{
-		if(_jobData) ObjectPool<JobData>::Release(_jobData);
-		DESTRUCTOR(ReservableJob);
-	}*/
+	}
 
 	/// <summary>
 	/// Call it when the job is executable. 
@@ -61,6 +55,11 @@ public:
 	/// </summary>
 	void Cancel() { _canceled = true; }
 
+	/// <summary>
+	/// Return if this job is canceled
+	/// </summary>
+	/// <returns>true if this job is canceled, false otherwise</returns>
+	bool IsCanceled() const { return _canceled; }
 	
 	bool operator<(const ReservableJob& other) const
 	{
@@ -72,6 +71,18 @@ private:
 	uint64 _executionTick;
 	bool _canceled;
 
+	friend struct ReservableJobCompare;
+};
+
+/// <summary>
+/// Reservable Job Comparator for priority queue.
+/// </summary>
+struct ReservableJobCompare
+{
+	bool operator()(const ReservableJobSPtr& lhs, const ReservableJobSPtr& rhs) const
+	{
+		return lhs->_executionTick > rhs->_executionTick;
+	}
 };
 
 NAMESPACE_CLOSE;

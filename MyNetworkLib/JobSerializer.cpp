@@ -18,6 +18,7 @@ void NetCore::JobSerializer::ExecuteJobs()
 			job->Execute();
 		}
 
+#pragma warning(disable: 4267)
 		// If there is no more added job during executing the previous jobs,
 		if (_queuedCount.fetch_sub(currentCount) == currentCount)
 		{
@@ -27,7 +28,7 @@ void NetCore::JobSerializer::ExecuteJobs()
 			TLS_CurrentJobSerializer = nullptr;
 			break;
 		}
-
+#pragma warning(default: 4267)
 		const uint64 nowTick = ::GetTickCount64();
 		// If execution time is passed than more executioTickCount
 		if (nowTick - startTick >= TLS_GlobalJobsExecutionMaxTickCount)

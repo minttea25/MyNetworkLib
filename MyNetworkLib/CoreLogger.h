@@ -22,55 +22,62 @@ class CoreLogger
 
 public:
 	CoreLogger(const CoreLogger&) = delete;
+	CoreLogger(const char* name);
+	CoreLogger(const char* name, const std::string& logdir);
+	CoreLogger(const char* name, const LoggerConfig* config);
 
-	CoreLogger(const char* name)
-	{
-		google::InitGoogleLogging(name);
-
-		FLAGS_logtostderr = LOG_TO_STDERR;
-
-		google::SetLogDestination(google::GLOG_INFO, INFO_PATH);
-		google::SetLogDestination(google::GLOG_ERROR, ERROR_PATH);
-		google::SetLogDestination(google::GLOG_WARNING, WARNING_PATH);
-		google::SetLogDestination(google::GLOG_FATAL, FATAL_PATH);
-	}
-
-	CoreLogger(const char* name, const std::string& logdir)
-	{
-		google::InitGoogleLogging(name);
-
-		FLAGS_logtostderr = LOG_TO_STDERR;
-
-		_set_log_path(google::GLOG_INFO, logdir, INFO_PATH);
-		_set_log_path(google::GLOG_ERROR, logdir, ERROR_PATH);
-		_set_log_path(google::GLOG_WARNING, logdir, WARNING_PATH);
-		_set_log_path(google::GLOG_FATAL, logdir, FATAL_PATH);
-	}
-
-	CoreLogger(const char* name, const LoggerConfig* config)
-	{
-		google::InitGoogleLogging(name);
-
-		FLAGS_logtostderr = config->LogToStderr;
-
-		_set_log_path(google::GLOG_INFO, config->DirPath, config->InfoPathPrefix);
-		_set_log_path(google::GLOG_ERROR, config->DirPath, config->ErrorPathPrefix);
-		_set_log_path(google::GLOG_WARNING, config->DirPath, config->WarningPathPrefix);
-		_set_log_path(google::GLOG_FATAL, config->DirPath, config->FatalPathPrefix);
-	}
-
-	~CoreLogger()
-	{
-		google::ShutdownGoogleLogging();
-	}
+	~CoreLogger();
 
 private:
-	void _set_log_path(google::LogSeverity severity, const std::string& dirPath, const std::string& pathPrefix)
-	{
-		std::string fullPath = dirPath + "/" + pathPrefix;
-		google::SetLogDestination(severity, fullPath.c_str());
-	}
+	void _set_log_path(google::LogSeverity severity, const std::string& dirPath, const std::string& pathPrefix);
 };
+
+inline NetCore::CoreLogger::CoreLogger(const char* name)
+{
+	google::InitGoogleLogging(name);
+
+	FLAGS_logtostderr = LOG_TO_STDERR;
+
+	google::SetLogDestination(google::GLOG_INFO, INFO_PATH);
+	google::SetLogDestination(google::GLOG_ERROR, ERROR_PATH);
+	google::SetLogDestination(google::GLOG_WARNING, WARNING_PATH);
+	google::SetLogDestination(google::GLOG_FATAL, FATAL_PATH);
+}
+
+inline CoreLogger::CoreLogger(const char* name, const std::string& logdir)
+{
+	google::InitGoogleLogging(name);
+
+	FLAGS_logtostderr = LOG_TO_STDERR;
+
+	_set_log_path(google::GLOG_INFO, logdir, INFO_PATH);
+	_set_log_path(google::GLOG_ERROR, logdir, ERROR_PATH);
+	_set_log_path(google::GLOG_WARNING, logdir, WARNING_PATH);
+	_set_log_path(google::GLOG_FATAL, logdir, FATAL_PATH);
+}
+
+inline CoreLogger::CoreLogger(const char* name, const LoggerConfig* config)
+{
+	google::InitGoogleLogging(name);
+
+	FLAGS_logtostderr = config->LogToStderr;
+
+	_set_log_path(google::GLOG_INFO, config->DirPath, config->InfoPathPrefix);
+	_set_log_path(google::GLOG_ERROR, config->DirPath, config->ErrorPathPrefix);
+	_set_log_path(google::GLOG_WARNING, config->DirPath, config->WarningPathPrefix);
+	_set_log_path(google::GLOG_FATAL, config->DirPath, config->FatalPathPrefix);
+}
+
+inline CoreLogger::~CoreLogger()
+{
+	google::ShutdownGoogleLogging();
+}
+
+inline void CoreLogger::_set_log_path(google::LogSeverity severity, const std::string& dirPath, const std::string& pathPrefix)
+{
+	std::string fullPath = dirPath + "/" + pathPrefix;
+	google::SetLogDestination(severity, fullPath.c_str());
+}
 
 NAMESPACE_CLOSE;
 

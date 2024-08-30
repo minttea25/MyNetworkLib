@@ -5,14 +5,27 @@ NAMESPACE_OPEN(NetCore)
 class Allocator
 {
 public:
+	/// <summary>
+	/// allocation
+	/// </summary>
 	static void* Alloc(int32 size);
+
+	/// <summary>
+	/// free memory
+	/// </summary>
 	static void Release(void* ptr);
 };
 
 class PoolAllocator
 {
 public:
+	/// <summary>
+	/// allocation
+	/// </summary>
 	static void* Alloc(int32 size);
+	/// <summary>
+	/// free memory
+	/// </summary>
 	static void Release(void* ptr);
 };
 

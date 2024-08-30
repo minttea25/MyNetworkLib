@@ -4,7 +4,10 @@
 
 NAMESPACE_OPEN(NetCore);
 
-ABSTRACT class JobWorker
+/// <summary>
+/// JobWorker provides templates to implement methods of processing serialized-jobs.
+/// </summary>
+ABSTRACT class JobWorker abstract
 {
 public:
 	JobWorker() {}
@@ -14,7 +17,7 @@ public:
 	PURE_VIRTUAL virtual void DoJobs() = 0;
 	PURE_VIRTUAL virtual void ClearJobs() = 0;
 
-	PURE_VIRTUAL virtual void AddReservableJob(const ReservableJob job, const AJobSerializerWPtr owner) = 0;
+	PURE_VIRTUAL virtual void AddReservableJob(const ReservableJobSPtr job, const AJobSerializerWPtr owner) = 0;
 	PURE_VIRTUAL virtual void CheckReservedJob(const uint64 nowTick) = 0;
 	PURE_VIRTUAL virtual void ClearReservedJobs() = 0;
 private:
@@ -23,7 +26,7 @@ private:
 
 
 /// <summary>
-/// Is has two queues, one is jobs and the other one is reserved jobs.
+/// GlobalJobWorker can be used with adding jobs or reservedJobs in global of library.
 /// <para></para>
 /// </summary>
 class GlobalJobWorker final : public JobWorker
@@ -38,29 +41,51 @@ public:
 
 	~GlobalJobWorker()
 	{
-		DESTRUCTOR(GlobalJobWorker);
 	}
 
+	/// <summary>
+	/// Add a job in queue.
+	/// </summary>
+	/// <param name="jobSerializer"></param>
 	void AddJobSerializer(AJobSerializerSPtr jobSerializer) override final
 	{
 		_jobQueue.Push(jobSerializer);
 	}
 
+	/// <summary>
+	/// Do jobs in queue.
+	/// </summary>
 	void DoJobs() override final;
 
+	/// <summary>
+	/// Clear all jobs in queue.
+	/// </summary>
 	void ClearJobs() override final
 	{
 		_jobQueue.Clear();
 	}
 
-	void AddReservableJob(const ReservableJob job, const AJobSerializerWPtr owner) override final
+	/// <summary>
+	/// Add reservable job in reservable job queue. (with lock)
+	/// </summary>
+	/// <param name="job">reservable job to add.</param>
+	/// <param name="owner">the owner of the job</param>
+	void AddReservableJob(const ReservableJobSPtr job, const AJobSerializerWPtr owner) override final
 	{
 		WRITE_LOCK(reservableJobQueue);
+		//_reservableQueue.push(job);
 		_reservableQueue.push(job);
 	}
 
+	/// <summary>
+	/// Checks the reserved jobs and pushes them into queue.
+	/// </summary>
+	/// <param name="nowTick">current tick</param>
 	void CheckReservedJob(const uint64 nowTick) override final;
 
+	/// <summary>
+	/// Clear all reserved jobs (with lock)
+	/// </summary>
 	void ClearReservedJobs() override final
 	{
 		WRITE_LOCK(reservableJobQueue);
@@ -83,7 +108,7 @@ private:
 
 private:
 	USE_LOCK(reservableJobQueue);
-	PriorityQueue<ReservableJob> _reservableQueue;
+	PriorityQueue< ReservableJobSPtr, Vector<ReservableJobSPtr>, ReservableJobCompare> _reservableQueue;
 	Atomic<bool> _executingReservables;
 
 	LockQueue<AJobSerializerSPtr> _jobQueue;

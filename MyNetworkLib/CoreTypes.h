@@ -41,6 +41,9 @@ SHARED_PTR(Job);
 SHARED_PTR(SendBuffer);
 SHARED_PTR(AJobSerializer);
 
+SHARED_PTR_S(ReservableJob);
+
+
 #define WEAK_PTR(name) using name##WPtr = std::weak_ptr<class name>;
 
 WEAK_PTR(Session);

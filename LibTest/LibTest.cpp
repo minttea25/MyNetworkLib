@@ -21,7 +21,6 @@ public:
 	void AddJob()
 	{
 		PushJob([&] {
-			n++;
 			std::cout << NetCore::TLS_Id << " - Job: " << ::GetTickCount64() % 10000 << " n: " << n << std::endl;
 			});
 	}
@@ -63,28 +62,23 @@ int main(int argc, char* argv)
 		}, 3);
 
 	// for check priority queue
-	/*{
-		auto& rJobRef1 = room->PushReservableJob(1000, &Room::Print, 1);
-		auto& rJobRef2 = room->PushReservableJob(500, &Room::Print, 2);
-		auto& rJobRef3 = room->PushReservableJob(1500, &Room::Print, 3);
-	}*/
+	{
+		auto rJobRef1 = room->PushReservableJob(1000, &Room::Print, 1);
+		auto rJobRef2 = room->PushReservableJob(500, &Room::Print, 2);
+		auto rJobRef3 = room->PushReservableJob(1500, &Room::Print, 3);
+	}
 
 	manager.AddTask([&] {
 		bool bin = 0;
 		while (true)
 		{
-			auto& rJobRef = room->PushReservableJob(100, &Room::Reserve);
-			
-			if (bin == 0)
-			{
-				rJobRef.Cancel();
-				bin = 1;
-			}
-			else bin = 0;
+			auto rJobRef = room->PushReservableJob(100, &Room::Reserve);
+			auto rJobRef2 = room->PushReservableJob(150, &Room::Print, rand() % 1000);
+
+			rJobRef->Cancel();
 
 			this_thread::sleep_for(50ms);
 
-			room->AddJob();
 			room->AddJob();
 		}
 		});
