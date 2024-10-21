@@ -37,7 +37,7 @@ public:
 	/// If there is extra std::shared_ptr based on object created before, return it, otherwise returns created new std::shared_ptr.
 	/// </summary>
 	template<typename... Args>
-	static std::shared_ptr<Type> make_shared(Args... args)
+	static std::shared_ptr<Type> make_shared(Args&&... args)
 	{
 		return std::shared_ptr<Type> { Acquire(std::forward<Args>(args)...), Release };
 	}

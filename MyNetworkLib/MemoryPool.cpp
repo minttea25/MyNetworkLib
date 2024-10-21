@@ -69,7 +69,9 @@ void* NetCore::MemoryHeader::AttachHeader(MemoryHeader* header, const int32 size
 {
     new(header)MemoryHeader(size); // placement new
     // Jumps the size of memory header (with ++)
-    // Returns the pointer of starting position of next memory header
+    // Returns the pointer of starting position of data section.
+    //[header*][data]...[header*][data]...
+    //         *return point
     return reinterpret_cast<void*>(++header);
 }
 
